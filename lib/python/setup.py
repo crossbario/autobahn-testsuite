@@ -20,7 +20,7 @@ from setuptools import setup, find_packages
 
 setup (
    name = 'autobahn',
-   version = '0.3.1',
+   version = '0.3.2',
    description = 'Autobahn WebSockets',
    author = 'Tavendo GmbH',
    author_email = 'autobahnws@googlegroups.com',
