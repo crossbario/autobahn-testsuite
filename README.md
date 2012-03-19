@@ -39,15 +39,30 @@ also includes a number of other handy modes:
  * WAMP server and client, for developing WAMP implementations
 
 
+Prerequisites
+-------------
+
+AutobahnTestSuite is implemented in Python. It should run anywhere where
+Python is available.
+
+You will need:
+
+  * Python - http://www.python.org
+  * Python Setuptools - http://pypi.python.org/pypi/setuptools
+
+Recommended is using the latest Python 2.7 release.
+
+
 Installation
 ------------
 
-Install from Python package index:
+Open a command shell, and install from Python package index:
 
-    pip autobahntestsuite
+    easy_install autobahntestsuite
 
 
-Most easy, installs everything including any dependencies.
+Doing so automatically downloads and installs everything needed
+including any dependencies.
 
 
 Install from Source:
@@ -57,7 +72,7 @@ Install from Source:
     python setup.py install
 
 
-*Caution: You should not what you are doing if you use HEAD on master.
+*Caution: You should know what you are doing if you use HEAD on master.
 Releases are usually tagged. Probably use those.*
 
 
