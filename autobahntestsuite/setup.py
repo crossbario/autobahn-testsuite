@@ -19,37 +19,48 @@
 from setuptools import setup, find_packages
 
 LONGSDESC = """
-Twisted-based WebSockets client and server framework.
+Autobahn WebSocket Test Suite:
 
-Autobahn provides a WebSockets (RFC6455 + Hybi-10 to -17) Twisted-based
-framework for creating WebSockets clients and servers.
+Provides a fully automated test suite to verify client and server
+implementations of the WebSocket protocol.
 
-Autobahn also includes an implementation of WAMP (WebSockets Application
-Message Protocol), a light-weight, asynchronous RPC/PubSub over
-JSON/WebSockets protocol.
+The test suite will check an implementation by doing basic WebSockets
+conversations, extensive protocol compliance verification and performance
+and limits testing.
 
-Autobahn (source package) further provides a fuzzing test framework which can
-test WebSockets client and server implementations.
+Contains about 300 test cases covering
+
+   * Framing
+   * Pings/Pongs
+   * Reserved Bits
+   * Opcodes
+   * Fragmentation
+   * UTF-8 Handling
+   * Limits/Performance
+   * Closing Handshake
+   * Opening Handshake (under development)
+
+For more information please visit http://autobahn.ws/testsuite
 """
 
 setup (
-   name = 'autobahn',
+   name = 'autobahntestsuite',
    version = '0.5.0',
-   description = 'Autobahn WebSockets for Python',
+   description = 'Autobahn WebSocket Test Suite',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
    author = 'Tavendo GmbH',
    author_email = 'autobahnws@googlegroups.com',
-   url = 'http://autobahn.ws',
+   url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
-   install_requires = ['setuptools', 'Twisted>=11.1'],
+   install_requires = ['setuptools', 'Autobahn>=0.5', 'Twisted>=11.1'],
    packages = find_packages(),
-   #packages = ['autobahn', 'wstest'],
+   #packages = ['autobahntestsuite'],
    include_package_data = True,
    zip_safe = False,
    entry_points = {
       'console_scripts': [
-         'wstest = wstest.wstest:run'
+         'wstest = autobahntestsuite.wstest:run'
       ]},
    ## http://pypi.python.org/pypi?%3Aaction=list_classifiers
    ##
@@ -61,7 +72,6 @@ setup (
                   "Operating System :: OS Independent",
                   "Programming Language :: Python",
                   "Topic :: Internet",
-                  "Topic :: Software Development :: Libraries",
                   "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn autobahn.ws websocket realtime test testsuite rfc6455 rpc pubsub'
+   keywords = 'autobahn autobahn.ws websocket realtime test testsuite rfc6455'
 )

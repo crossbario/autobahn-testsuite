@@ -21,16 +21,16 @@ import sys, os, re, json, binascii, datetime, time, random, textwrap
 from twisted.python import log
 from twisted.internet import reactor
 
-import autobahn
+import autobahntestsuite
 
-from websocket import WebSocketProtocol, \
-                      WebSocketServerFactory, \
-                      WebSocketServerProtocol, \
-                      WebSocketClientFactory, \
-                      WebSocketClientProtocol, \
-                      HttpException, \
-                      connectWS, \
-                      listenWS
+from autobahn.websocket import WebSocketProtocol, \
+                               WebSocketServerFactory, \
+                               WebSocketServerProtocol, \
+                               WebSocketClientFactory, \
+                               WebSocketClientProtocol, \
+                               HttpException, \
+                               connectWS, \
+                               listenWS
 
 from case import Case, \
                  Cases, \
@@ -43,7 +43,7 @@ from case import Case, \
                  caseIdtoIdTuple, \
                  caseIdTupletoId
 
-from util import utcnow
+from autobahn.util import utcnow
 
 from report import CSS_COMMON, \
                    CSS_DETAIL_REPORT, \
@@ -523,7 +523,7 @@ class FuzzingFactory:
       ## write report header
       ##
       f.write('      <div id="master_report_header" class="block">\n')
-      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSockets Testsuite</a> v%s.</p>\n' % (utcnow(), "http://autobahn.ws/testsuite", str(autobahn.version)))
+      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSockets Testsuite</a> v%s.</p>\n' % (utcnow(), "http://autobahn.ws/testsuite", str(autobahntestsuite.version)))
       f.write("""
       <table id="case_outcome_desc">
          <tr>
@@ -1030,7 +1030,7 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
       ##
       self.setSessionParameters(url = spec["url"],
                                 protocols = spec.get("protocols", []),
-                                server = "AutobahnWebSocketsTestSuite/%s" % autobahn.version)
+                                server = "AutobahnWebSocketsTestSuite/%s" % autobahntestsuite.version)
 
       ## WebSocket protocol options
       ##
@@ -1039,7 +1039,7 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
       self.spec = spec
       self.specCases = parseSpecCases(self.spec)
       self.specExcludeAgentCases = parseExcludeAgentCases(self.spec)
-      print "Autobahn WebSockets %s Fuzzing Server (Port %d%s)" % (autobahn.version, self.port, ' TLS' if self.isSecure else '')
+      print "Autobahn WebSockets %s Fuzzing Server (Port %d%s)" % (autobahntestsuite.version, self.port, ' TLS' if self.isSecure else '')
       print "Ok, will run %d test cases for any clients connecting" % len(self.specCases)
       print "Cases = %s" % str(self.specCases)
 
@@ -1079,7 +1079,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       self.spec = spec
       self.specCases = parseSpecCases(self.spec)
       self.specExcludeAgentCases = parseExcludeAgentCases(self.spec)
-      print "Autobahn WebSockets %s Fuzzing Client" % autobahn.version
+      print "Autobahn WebSockets %s Fuzzing Client" % autobahntestsuite.version
       print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
       print "Servers = %s" % str([x["url"] + "@" + x["agent"] for x in spec["servers"]])
@@ -1102,14 +1102,14 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          ##
          self.agent = server.get("agent", "UnknownServer")
          if self.agent == "AutobahnServer":
-            self.agent = "AutobahnServer/%s" % autobahn.version
+            self.agent = "AutobahnServer/%s" % autobahntestsuite.version
 
          ## WebSocket session parameters
          ##
          self.setSessionParameters(url = server["url"],
                                    origin = server.get("origin", None),
                                    protocols = server.get("protocols", []),
-                                   useragent = "AutobahnWebSocketsTestSuite/%s" % autobahn.version)
+                                   useragent = "AutobahnWebSocketsTestSuite/%s" % autobahntestsuite.version)
 
          ## WebSocket protocol options
          ##

@@ -4,7 +4,7 @@ install:
 	python setup.py install
 
 clean:
-	rm -rf ./autobahn.egg-info
+	rm -rf ./autobahntestsuite.egg-info
 	rm -rf ./build
 	rm -rf ./dist
 	find . -name "*.pyc" -exec rm -f {} \;

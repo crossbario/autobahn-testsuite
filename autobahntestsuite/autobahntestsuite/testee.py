@@ -26,9 +26,9 @@ from autobahn.websocket import WebSocketClientFactory, \
 from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol
 
-from autobahn.case import Cases, \
-                          CaseCategories, \
-                          caseClasstoId
+from case import Cases, \
+                 CaseCategories, \
+                 caseClasstoId
 
 
 class TesteeServerProtocol(WebSocketServerProtocol):

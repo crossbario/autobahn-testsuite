@@ -16,6 +16,13 @@
 ##
 ###############################################################################
 
+try:
+   import pkg_resources
+   version = pkg_resources.require("AutobahnTestSuite")[0].version
+except:
+   ## i.e. no setuptools or no package installed ..
+   version = "?.?.?"
+
 import choosereactor # This MUST BE the FIRST file imported here! Do NOT touch.
 import wstest
 import echo
@@ -23,3 +30,6 @@ import broadcast
 import testee
 import wsperfcontrol
 import wsperfmaster
+import case
+import report
+import fuzzing

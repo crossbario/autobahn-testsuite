@@ -24,8 +24,8 @@ from twisted.web.server import Site
 from twisted.web.static import File
 
 from autobahn.websocket import connectWS, listenWS
-from autobahn.fuzzing import FuzzingClientFactory, FuzzingServerFactory
 
+from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from echo import EchoClientFactory, EchoServerFactory
 from broadcast import BroadcastClientFactory, BroadcastServerFactory
 from testee import TesteeClientFactory, TesteeServerFactory
@@ -145,7 +145,7 @@ def run():
 
       if mode == 'fuzzingserver':
 
-         webdir = File(pkg_resources.resource_filename("wstest", "web/fuzzingserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/fuzzingserver"))
          web = Site(webdir)
          reactor.listenTCP(spec.get("webport", 8080), web)
 
@@ -189,7 +189,7 @@ def run():
 
       if mode == 'echoserver':
 
-         webdir = File(pkg_resources.resource_filename("wstest", "web/echoserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/echoserver"))
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
@@ -209,7 +209,7 @@ def run():
 
       if mode == 'broadcastserver':
 
-         webdir = File(pkg_resources.resource_filename("wstest", "web/broadcastserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/broadcastserver"))
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
@@ -250,7 +250,7 @@ def run():
 
       ## Web Server for UI static files
       ##
-      webdir = File(pkg_resources.resource_filename("wstest", "web/wsperfmaster"))
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wsperfmaster"))
       web = Site(webdir)
       reactor.listenTCP(8080, web)
 
