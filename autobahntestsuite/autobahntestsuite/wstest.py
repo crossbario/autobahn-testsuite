@@ -22,6 +22,7 @@ from twisted.python import log, usage
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.static import File
+from twisted.web.resource import Resource
 
 from autobahn.websocket import connectWS, listenWS
 
@@ -168,6 +169,8 @@ def run():
       if mode == 'fuzzingserver':
 
          webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/fuzzingserver"))
+         curdir = File('.')
+         webdir.putChild('cwd', curdir)
          web = Site(webdir)
          reactor.listenTCP(spec.get("webport", 8080), web)
 
