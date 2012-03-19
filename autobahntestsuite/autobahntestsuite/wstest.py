@@ -32,6 +32,10 @@ from testee import TesteeClientFactory, TesteeServerFactory
 from wsperfcontrol import WsPerfControlFactory
 from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
 
+from spectemplate import SPEC_FUZZINGSERVER, \
+                         SPEC_FUZZINGCLIENT, \
+                         SPEC_WSPERFCONTROL
+
 
 class WsTestOptions(usage.Options):
    MODES = ['echoserver',
@@ -71,7 +75,25 @@ class WsTestOptions(usage.Options):
                           'fuzzingserver',
                           'wsperfcontrol']:
          if not self['spec']:
-            raise usage.UsageError, "mode needs a spec file!"
+
+            #raise usage.UsageError, "mode needs a spec file!"
+
+            dsf = {
+                     'fuzzingclient': ['fuzzingclient.json', SPEC_FUZZINGCLIENT],
+                     'fuzzingserver': ['fuzzingserver.json', SPEC_FUZZINGSERVER],
+                     'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL]
+                  }
+
+            self['spec'] = dsf[self['mode']][0]
+
+            if not os.path.isfile(self['spec']):
+               print "Auto-generating spec file %s" % self['spec']
+               f = open(self['spec'], 'w')
+               f.write(dsf[self['mode']][1])
+               f.close()
+            else:
+               print "Using implicit spec file %s" % self['spec']
+
 
       if self['mode'] in ['echoclient',
                           'echoserver',

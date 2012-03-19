@@ -32,4 +32,5 @@ import wsperfcontrol
 import wsperfmaster
 import case
 import report
+import spectemplate
 import fuzzing
