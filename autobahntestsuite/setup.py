@@ -19,14 +19,14 @@
 from setuptools import setup, find_packages
 
 LONGSDESC = """
-Autobahn WebSocket Test Suite:
+Twisted-based WebSocket/WAMP protocol implementation test suite.
 
-Provides a fully automated test suite to verify client and server
-implementations of the WebSocket protocol.
+AutobahnTestSuite provides a fully automated test suite to verify client and
+server implementations of the WebSocket protocol.
 
-The test suite will check an implementation by doing basic WebSockets
-conversations, extensive protocol compliance verification and performance
-and limits testing.
+The test suite will check an implementation by doing basic WebSocket
+conversations, extensive protocol compliance verification and
+performance and limits testing.
 
 Contains about 300 test cases covering
 
@@ -40,13 +40,17 @@ Contains about 300 test cases covering
    * Closing Handshake
    * Opening Handshake (under development)
 
-For more information please visit http://autobahn.ws/testsuite
+More information:
+
+   * http://autobahn.ws/testsuite
+   * http://tools.ietf.org/html/rfc6455
+   * http://wamp.ws
 """
 
 setup (
    name = 'autobahntestsuite',
    version = '0.5.0',
-   description = 'Autobahn WebSocket Test Suite',
+   description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
    author = 'Tavendo GmbH',
@@ -73,5 +77,5 @@ setup (
                   "Programming Language :: Python",
                   "Topic :: Internet",
                   "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn autobahn.ws websocket realtime test testsuite rfc6455'
+   keywords = 'autobahn autobahn.ws websocket wamp realtime test testsuite rfc6455'
 )
