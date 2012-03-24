@@ -1137,7 +1137,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       else:
          if self.nextServer():
             if self.nextCase():
-               connectWS(self, contextFactory = self.contextFactory)
+               connectWS(self)
          else:
             self.createReports()
             reactor.stop()

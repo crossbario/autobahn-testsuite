@@ -223,7 +223,7 @@ def run():
 
       elif mode == 'echoclient':
          factory = EchoClientFactory(wsuri)
-         connectWS(factory, createWssContext(o, factory))
+         connectWS(factory)
 
       else:
          raise Exception("logic error")
@@ -243,7 +243,7 @@ def run():
 
       elif mode == 'broadcastclient':
          factory = BroadcastClientFactory(wsuri)
-         connectWS(factory, createWssContext(o, factory))
+         connectWS(factory)
 
       else:
          raise Exception("logic error")
@@ -262,7 +262,7 @@ def run():
       factory.sep = spec['options']['sep']
       factory.digits = spec['options']['digits']
 
-      connectWS(factory, createWssContext(o, factory))
+      connectWS(factory)
 
    elif mode == 'wsperfmaster':
 
@@ -291,7 +291,7 @@ def run():
       wsperf.uiFactory = wsperfUi
       wsperfUi.slaveFactory = wsperf
 
-   elif mode in ['testeeclient', 'testeeserver']:
+   elif mode in ['wampclient', 'wampserver']:
 
       raise Exception("not yet implemented")
 
