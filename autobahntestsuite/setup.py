@@ -49,7 +49,7 @@ More information:
 
 setup (
    name = 'autobahntestsuite',
-   version = '0.5.0',
+   version = '0.5.1',
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
