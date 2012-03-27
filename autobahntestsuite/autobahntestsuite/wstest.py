@@ -24,6 +24,9 @@ from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.web.resource import Resource
 
+import autobahn
+import autobahntestsuite
+
 from autobahn.websocket import connectWS, listenWS
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
@@ -61,10 +64,16 @@ class WsTestOptions(usage.Options):
    ]
 
    optFlags = [
-      ['debug', 'd', 'Debug output [default: off].']
+      ['debug', 'd', 'Debug output [default: off].'],
+      ['autobahnversion', 'a', 'Print version information for Autobahn and AutobahnTestSuite.']
    ]
 
    def postOptions(self):
+
+      if self['autobahnversion']:
+         print "Autobahn %s" % autobahn.version
+         print "AutobahnTestSuite %s" % autobahntestsuite.version
+         sys.exit(0)
 
       if not self['mode']:
          raise usage.UsageError, "a mode must be specified to run!"
