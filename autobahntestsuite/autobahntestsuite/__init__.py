@@ -34,3 +34,4 @@ import case
 import report
 import spectemplate
 import fuzzing
+import wamptestserver

@@ -35,6 +35,7 @@ from broadcast import BroadcastClientFactory, BroadcastServerFactory
 from testee import TesteeClientFactory, TesteeServerFactory
 from wsperfcontrol import WsPerfControlFactory
 from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
+from wamptestserver import WampTestServerFactory
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -303,7 +304,22 @@ def run():
 
    elif mode in ['wampclient', 'wampserver']:
 
-      raise Exception("not yet implemented")
+      wsuri = str(o.opts['wsuri'])
+
+      if mode == 'wampserver':
+
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wamp"))
+         web = Site(webdir)
+         reactor.listenTCP(8080, web)
+
+         factory = WampTestServerFactory(wsuri, debug)
+         listenWS(factory, createWssContext(o, factory))
+
+      elif mode == 'wampclient':
+         raise Exception("not yet implemented")
+
+      else:
+         raise Exception("logic error")
 
    else:
 

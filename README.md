@@ -199,6 +199,7 @@ This mode is used to control wsperf (running in master mode).
 
 wsperf is a WebSocket performance probe developed as part of WebSocket++
 
+  http://www.zaphoyd.com/wsperf
   https://github.com/zaphoyd/websocketpp
 
 
@@ -210,12 +211,13 @@ This mode is used to control distributed sets of wsperf (running in slave mode).
 
 wsperf is a WebSocket performance probe developed as part of WebSocket++
 
+  http://www.zaphoyd.com/wsperf
   https://github.com/zaphoyd/websocketpp
 
 
 ### Mode wampserver/wampclient
 
-Not yet implemented. Will provide test WAMP client and server to aid in
+Provides test WAMP client and server to aid in both learning WAMP and
 developing WAMP conforming implementations.
 
 

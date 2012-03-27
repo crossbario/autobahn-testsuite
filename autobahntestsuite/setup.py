@@ -40,6 +40,15 @@ Contains about 300 test cases covering
    * Closing Handshake
    * Opening Handshake (under development)
 
+Besides the automated test suite, wstest also includes a number
+of other handy developer tools:
+
+   * WebSocket echo server and client
+   * WebSocket broadcast server (and client driver)
+   * Testee modes to test Autobahn itself against the test suite
+   * wsperf controller and master (see http://www.zaphoyd.com/wsperf)
+   * WAMP server and client, for developing WAMP implementations
+
 More information:
 
    * http://autobahn.ws/testsuite
@@ -57,7 +66,7 @@ setup (
    author_email = 'autobahnws@googlegroups.com',
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
-   install_requires = ['setuptools', 'Autobahn>=0.5', 'Twisted>=11.1'],
+   install_requires = ['setuptools', 'Autobahn>=0.5.1', 'Twisted>=11.1'],
    packages = find_packages(),
    #packages = ['autobahntestsuite'],
    include_package_data = True,
@@ -77,5 +86,5 @@ setup (
                   "Programming Language :: Python",
                   "Topic :: Internet",
                   "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn autobahn.ws websocket wamp realtime test testsuite rfc6455'
+   keywords = 'autobahn autobahn.ws websocket wamp realtime test testsuite rfc6455 wstest wsperf'
 )
