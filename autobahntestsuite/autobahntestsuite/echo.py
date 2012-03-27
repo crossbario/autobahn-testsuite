@@ -29,6 +29,9 @@ class EchoServerFactory(WebSocketServerFactory):
 
    protocol = EchoServerProtocol
 
+   def __init__(self, url, debug = False):
+      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+
 
 class EchoClientProtocol(WebSocketClientProtocol):
 
@@ -38,3 +41,6 @@ class EchoClientProtocol(WebSocketClientProtocol):
 class EchoClientFactory(WebSocketClientFactory):
 
    protocol = EchoClientProtocol
+
+   def __init__(self, url, debug = False):
+      WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)

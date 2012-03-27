@@ -40,6 +40,10 @@ class TesteeServerFactory(WebSocketServerFactory):
 
    protocol = TesteeServerProtocol
 
+   def __init__(self, url, debug = False):
+      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+      self.setProtocolOptions(failByDrop = False) # spec conformance
+
 
 
 class TesteeClientProtocol(WebSocketClientProtocol):
@@ -62,10 +66,9 @@ class TesteeClientFactory(WebSocketClientFactory):
 
    protocol = TesteeClientProtocol
 
-   def __init__(self, url, debug = False, debugCodePaths = False):
-      WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debugCodePaths)
-
-      self.setProtocolOptions(failByDrop = False)
+   def __init__(self, url, debug = False):
+      WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+      self.setProtocolOptions(failByDrop = False) # spec conformance
 
       self.endCaseId = None
       self.currentCaseId = 0

@@ -40,6 +40,9 @@ class BroadcastServerFactory(WebSocketServerFactory):
 
    protocol = BroadcastServerProtocol
 
+   def __init__(self, url, debug = False):
+      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+
    def startFactory(self):
       self.clients = set()
       self.tickcount = 0
@@ -82,6 +85,9 @@ class BroadcastClientProtocol(WebSocketClientProtocol):
 class BroadcastClientFactory(WebSocketClientFactory):
 
    protocol = BroadcastClientProtocol
+
+   def __init__(self, url, debug = False):
+      WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
 
 #   def clientConnectionLost(self, connector, reason):
 #      reactor.stop()

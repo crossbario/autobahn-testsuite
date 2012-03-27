@@ -166,6 +166,10 @@ def run():
       print 'Try %s --help for usage details\n' % sys.argv[0]
       sys.exit(1)
 
+   debug = o.opts['debug']
+   if debug:
+      log.startLogging(sys.stdout)
+
    print "Using Twisted reactor class %s" % str(reactor.__class__)
 
    mode = str(o.opts['mode'])
@@ -189,11 +193,11 @@ def run():
          if not o.opts['cert']:
             o.opts['cert'] = spec.get('cert', None)
 
-         factory = FuzzingServerFactory(spec)
+         factory = FuzzingServerFactory(spec, debug)
          listenWS(factory, createWssContext(o, factory))
 
       elif mode == 'fuzzingclient':
-         factory = FuzzingClientFactory(spec)
+         factory = FuzzingClientFactory(spec, debug)
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
 
@@ -205,13 +209,11 @@ def run():
       wsuri = str(o.opts['wsuri'])
 
       if mode == 'testeeserver':
-         factory = TesteeServerFactory(wsuri)
-         factory.setProtocolOptions(failByDrop = False) # spec conformance
+         factory = TesteeServerFactory(wsuri, debug)
          listenWS(factory, createWssContext(o, factory))
 
       elif mode == 'testeeclient':
-         factory = TesteeClientFactory(wsuri)
-         factory.setProtocolOptions(failByDrop = False) # spec conformance
+         factory = TesteeClientFactory(wsuri, debug)
          connectWS(factory)
 
       else:
@@ -227,11 +229,11 @@ def run():
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
-         factory = EchoServerFactory(wsuri)
+         factory = EchoServerFactory(wsuri, debug)
          listenWS(factory, createWssContext(o, factory))
 
       elif mode == 'echoclient':
-         factory = EchoClientFactory(wsuri)
+         factory = EchoClientFactory(wsuri, debug)
          connectWS(factory)
 
       else:
@@ -247,11 +249,11 @@ def run():
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
-         factory = BroadcastServerFactory(wsuri)
+         factory = BroadcastServerFactory(wsuri, debug)
          listenWS(factory, createWssContext(o, factory))
 
       elif mode == 'broadcastclient':
-         factory = BroadcastClientFactory(wsuri)
+         factory = BroadcastClientFactory(wsuri, debug)
          connectWS(factory)
 
       else:
@@ -278,7 +280,6 @@ def run():
       ## WAMP Server for wsperf slaves
       ##
       wsperf = WsPerfMasterFactory("ws://localhost:9090")
-      wsperf.debug = False
       wsperf.debugWsPerf = False
       listenWS(wsperf)
 

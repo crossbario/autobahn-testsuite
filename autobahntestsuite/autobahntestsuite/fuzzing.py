@@ -1019,9 +1019,9 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
    protocol = FuzzingServerProtocol
 
-   def __init__(self, spec):
+   def __init__(self, spec, debug = False):
 
-      WebSocketServerFactory.__init__(self)
+      WebSocketServerFactory.__init__(self, debug = debug, debugCodePaths = debug)
       FuzzingFactory.__init__(self, spec.get("outdir", "./reports/clients/"))
 
       # needed for wire log / stats
@@ -1069,9 +1069,9 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
    protocol = FuzzingClientProtocol
 
-   def __init__(self, spec):
+   def __init__(self, spec, debug = False):
 
-      WebSocketClientFactory.__init__(self)
+      WebSocketClientFactory.__init__(self, debug = debug, debugCodePaths = debug)
       FuzzingFactory.__init__(self, spec.get("outdir", "./reports/servers/"))
 
       # needed for wire log / stats
