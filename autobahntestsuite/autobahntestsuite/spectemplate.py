@@ -33,7 +33,7 @@ SPEC_FUZZINGSERVER = """
 SPEC_FUZZINGCLIENT = """
 {
    "options": {"failByDrop": false},
-   "outdir": "./reports/clients",
+   "outdir": "./reports/servers",
 
    "servers": [{"agent": "AutobahnServer", "url": "ws://localhost:9001", "options": {"version": 18}}],
 
