@@ -28,6 +28,18 @@ from autobahn.util import newid
 
 
 class WsPerfControlProtocol(WebSocketClientProtocol):
+   """
+
+
+      stress_test:
+         token
+         uri
+         handshake_delay:     Delay in ms between opening new WS connections.
+         connection_count:    How many WS connections to open.
+         con_duration:        How long the WS sits idle before closing the WS.
+         msg_count:           Number of messages per WS connection.
+         msg_size:            Size of each message.
+   """
 
    WSPERF_CMD = """message_test:uri=%(uri)s;token=%(token)s;size=%(size)d;count=%(count)d;quantile_count=%(quantile_count)d;timeout=%(timeout)d;binary=%(binary)s;sync=%(sync)s;rtts=%(rtts)s;correctness=%(correctness)s;"""
 
