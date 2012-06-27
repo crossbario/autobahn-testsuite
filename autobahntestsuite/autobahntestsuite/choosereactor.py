@@ -45,7 +45,10 @@ Will let Twisted choose a default reactor (potential performance degradation).
 """ % str(e)
       pass
 
-if sys.platform in ['win32']:
+
+## temporarily disable IOCP, causing problems with chopped up tests
+##
+if False and sys.platform in ['win32']:
    try:
       from twisted.application.reactors import installReactor
       installReactor("iocp")
