@@ -102,6 +102,7 @@ To get help and a list of options:
  * wsperfmaster
  * wampserver
  * wampclient
+ * massconnect
 
 
 Server and client modes support TLS (that is WSS). For servers you will
@@ -235,6 +236,38 @@ developing WAMP conforming implementations.
 
 	wstest -d -m wampserver -w ws://localhost:9000
 	wstest -d -m wampclient -w <Your Server IP:Port>
+
+### Mode massconnect
+
+Mass connect mode can be used to test the maximum number of WebSocket connections a server can sustain and how many WebSocket opening handshakes a server can do per second.
+
+The mode is controlled via a spec file. When no spec file is provided, a template is generated:
+
+    wstest -m massconnect
+
+Edit the file for your needs, and restart
+
+    wstest -m massconnect -s massconnect.json
+
+You can provide a list of servers.
+
+The ramp up of WebSocket connections is controlled via 3 parameters:
+
+    batchsize
+    batchdelay
+    retrydelay
+
+`wstest` will start `batchsize` connections in a fast loop, then wait `batchdelay` ms, and go on until `connections` is reached.
+
+Depending on network settings and server, this can quickly overwhelm a server, and the server will deny/fail connections. Those are retried after `retrydelay` ms. Thus, `wstest` will not give up until `connections` is reached.
+
+The number of connections `wstest` can open on a server is limited by the number of epheremal ports on the machine on the outgoing interface / IP. Something like 64k at most. If you need to test the server with more connections, currently you will need to run multiple instances of `wstest` (on different machines).
+
+On Windows, you will need to tune some settings for large numbers of outgoing TCP connections. Edit the registry entry
+
+    Computer/HKEY_LOCAL_MACHINE\SYSTEM\CurrenControlSet\Services\Tcpip\Parameters
+
+and create or set the key `MaxUserPort` to `DWORD` with value `65534`. I forgot if you need to reboot .. probably.
 
 
 More Information
