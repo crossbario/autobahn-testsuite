@@ -35,7 +35,13 @@ SPEC_FUZZINGCLIENT = """
    "options": {"failByDrop": false},
    "outdir": "./reports/servers",
 
-   "servers": [{"agent": "AutobahnServer", "url": "ws://localhost:9001", "options": {"version": 18}}],
+   "servers": [
+                  {
+                     "agent": "AutobahnPython",
+                     "url": "ws://localhost:9001",
+                     "options": {"version": 18}
+                  }
+               ],
 
    "cases": ["*"],
    "exclude-cases": [],
@@ -55,13 +61,31 @@ SPEC_WSPERFCONTROL = """
    },
    "servers":  [
                   {
-                     "name": "AutobahnServer",
+                     "name": "AutobahnPython",
                      "uri": "ws://localhost:9000",
-                     "desc": "Autobahn Server on Localhost."
+                     "desc": "Autobahn WebSocket Python on localhost"
                   }
                ],
    "sizes": [
                [100, 128, 100000, true, true, false]
             ]
+}
+"""
+
+SPEC_MASSCONNECT = """
+{
+   "options": {
+      "connections": 10000,
+      "batchsize": 100,
+      "batchdelay": 10,
+      "retrydelay": 10
+   },
+   "servers":  [
+                  {
+                     "name": "AutobahnPython",
+                     "uri": "ws://localhost:9000",
+                     "desc": "Autobahn WebSocket Python on localhost"
+                  }
+               ]
 }
 """

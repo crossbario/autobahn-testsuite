@@ -36,10 +36,13 @@ from testee import TesteeClientFactory, TesteeServerFactory
 from wsperfcontrol import WsPerfControlFactory
 from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
 from wamptestserver import WampTestServerFactory
+from massconnect import MassConnectTest
+
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
-                         SPEC_WSPERFCONTROL
+                         SPEC_WSPERFCONTROL, \
+                         SPEC_MASSCONNECT
 
 
 class WsTestOptions(usage.Options):
@@ -54,7 +57,8 @@ class WsTestOptions(usage.Options):
             'wsperfcontrol',
             'wsperfmaster',
             'wampserver',
-            'wampclient']
+            'wampclient',
+            'massconnect']
 
    optParameters = [
       ['mode', 'm', None, 'Test mode, one of: %s [required]' % ', '.join(MODES)],
@@ -84,7 +88,8 @@ class WsTestOptions(usage.Options):
 
       if self['mode'] in ['fuzzingclient',
                           'fuzzingserver',
-                          'wsperfcontrol']:
+                          'wsperfcontrol',
+                          'massconnect']:
          if not self['spec']:
 
             #raise usage.UsageError, "mode needs a spec file!"
@@ -92,7 +97,8 @@ class WsTestOptions(usage.Options):
             dsf = {
                      'fuzzingclient': ['fuzzingclient.json', SPEC_FUZZINGCLIENT],
                      'fuzzingserver': ['fuzzingserver.json', SPEC_FUZZINGSERVER],
-                     'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL]
+                     'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL],
+                     'massconnect': ['massconnect.json', SPEC_MASSCONNECT]
                   }
 
             self['spec'] = dsf[self['mode']][0]
@@ -104,7 +110,6 @@ class WsTestOptions(usage.Options):
                f.close()
             else:
                print "Using implicit spec file %s" % self['spec']
-
 
       if self['mode'] in ['echoclient',
                           'echoserver',
@@ -320,6 +325,18 @@ def run():
 
       else:
          raise Exception("logic error")
+
+   elif mode == 'massconnect':
+
+      spec = str(o.opts['spec'])
+      spec = json.loads(open(spec).read())
+
+      test = MassConnectTest(spec)
+      d = test.run()
+      def onTestEnd(res):
+         print res
+         reactor.stop()
+      d.addCallback(onTestEnd)
 
    else:
 
