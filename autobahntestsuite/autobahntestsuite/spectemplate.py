@@ -73,14 +73,15 @@ SPEC_WSPERFCONTROL = """
 
             "count": 1000,
             "timeout": 100000,
-            "binary": true,
+            "binary": false,
             "sync": true,
             "verify": false
          },
          "cases": [
                      {"size": 0},
                      {"size": 64},
-                     {"size": 1024}
+                     {"size": 1024},
+                     {"count": 100, "size": 524288}
                   ]
       }
    ]
