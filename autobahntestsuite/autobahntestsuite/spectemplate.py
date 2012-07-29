@@ -52,11 +52,6 @@ SPEC_FUZZINGCLIENT = """
 SPEC_WSPERFCONTROL = """
 {
    "options": {
-      "rtts": false,
-      "quantile_count": 10,
-      "digits": 0,
-      "sep": "\t",
-      "outfile": "report.txt",
       "debug": false
    },
    "servers":  [
@@ -66,9 +61,29 @@ SPEC_WSPERFCONTROL = """
                      "desc": "Autobahn WebSocket Python on localhost"
                   }
                ],
-   "sizes": [
-               [100, 128, 100000, true, true, false]
-            ]
+   "testsets": [
+      {
+         "mode": "echo",
+         "options": {
+            "outfile": "report_echo.txt",
+            "digits": 0,
+            "sep": "\\t",
+            "rtts": false,
+            "quantile_count": 10,
+
+            "count": 1000,
+            "timeout": 100000,
+            "binary": true,
+            "sync": true,
+            "verify": false
+         },
+         "cases": [
+                     {"size": 0},
+                     {"size": 64},
+                     {"size": 1024}
+                  ]
+      }
+   ]
 }
 """
 

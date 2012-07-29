@@ -1,0 +1,60 @@
+{
+   "options": {
+      "debug": false
+   },
+   "servers":  [
+                  {
+                     "name": "TavendoWebMQ/Remote",
+                     "uri": "ws://192.168.1.142:7000",
+                     "desc": ""
+                  },
+                  {
+                     "name": "WebSocket++/HEAD/Remote",
+                     "uri": "ws://192.168.1.141:9002",
+                     "desc": ""
+                  }
+               ],
+   "testsets": [
+      {
+         "mode": "echo",
+         "options": {
+            "outfile": "report_echo.txt",
+            "digits": 0,
+            "sep": "\t",
+            "rtts": false,
+            "quantile_count": 10,
+
+            "count": 1000,
+            "timeout": 100000,
+            "binary": true,
+            "sync": true,
+            "verify": false
+         },
+         "cases": [
+                     {"size": 0},
+                     {"size": 1},
+                     {"size": 2},
+                     {"size": 4},
+                     {"size": 8},
+                     {"size": 16},
+                     {"size": 32},
+                     {"size": 64},
+                     {"size": 128},
+                     {"size": 256},
+                     {"size": 512},
+                     {"size": 1024},
+                     {"size": 2048},
+                     {"size": 4096},
+                     {"size": 8192},
+                     {"size": 16384},
+                     {"size": 32768},
+                     {"size": 65536},
+                     {"count": 100, "size": 131072},
+                     {"count": 100, "size": 262144},
+                     {"count": 100, "size": 524288},
+                     {"count": 100, "size": 1048576},
+                     {"count": 100, "size": 2097152}
+                  ]
+      }
+   ]
+}

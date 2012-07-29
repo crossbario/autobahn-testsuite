@@ -275,9 +275,6 @@ def run():
       factory = WsPerfControlFactory(wsuri)
       factory.spec = spec
       factory.debugWsPerf = spec['options']['debug']
-      factory.outfile = spec['options']['outfile']
-      factory.sep = spec['options']['sep']
-      factory.digits = spec['options']['digits']
 
       connectWS(factory)
 
