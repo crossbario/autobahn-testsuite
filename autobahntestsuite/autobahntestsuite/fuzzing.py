@@ -40,6 +40,7 @@ from case import Case, \
                  CaseSubCategories, \
                  caseClasstoId, \
                  caseClasstoIdTuple, \
+                 caseClassToPrettyDescription, \
                  CasesIndices, \
                  CasesById, \
                  caseIdtoIdTuple, \
@@ -326,6 +327,22 @@ class FuzzingProtocol:
          self.sendMessage(json.dumps(len(self.factory.specCases)))
          self.sendClose()
 
+      elif self.path == "/getCaseStatus":
+         def sendResults(results):
+            self.sendMessage(json.dumps({
+               'behavior':results['behavior']
+            }))
+            self.sendClose()
+
+         self.factory.addResultListener(self.caseAgent, caseClasstoId(self.Case), sendResults)
+
+      elif self.path == "/getCaseInfo":
+         self.sendMessage(json.dumps({
+            'id':caseClasstoId(self.Case),
+            'description':caseClassToPrettyDescription(self.Case),
+         }))
+         self.sendClose()
+
       else:
          pass
 
@@ -419,7 +436,7 @@ class FuzzingFactory:
       self.outdir = outdir
       self.agents = {}
       self.cases = {}
-
+      self.resultListeners = {}
 
    def logCase(self, caseResults):
       """
@@ -441,6 +458,15 @@ class FuzzingFactory:
          self.cases[case] = {}
       self.cases[case][agent] = caseResults
 
+      if (agent, case) in self.resultListeners:
+         callback = self.resultListeners.pop((agent, case))
+         callback(caseResults)
+
+   def addResultListener(self, agent, caseId, resultsCallback):
+      if agent in self.agents and caseId in self.agents[agent]:
+         resultsCallback(self.agents[agent][caseId])
+      else:
+         self.resultListeners[(agent,caseId)] = resultsCallback
 
    def createReports(self):
       """
@@ -987,7 +1013,8 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
       if self.case:
          if self.case >= 1 and self.case <= len(self.factory.specCases):
             self.Case = CasesById[self.factory.specCases[self.case - 1]]
-            self.runCase = self.Case(self)
+            if connectionRequest.path == "/runCase":
+               self.runCase = self.Case(self)
          else:
             raise Exception("case %s not found" % self.case)
 
@@ -1003,6 +1030,16 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
          if not self.caseAgent:
             raise Exception("need agent to update reports for")
          print "Updating reports, requested by peer %s" % connectionRequest.peerstr
+
+      elif connectionRequest.path == "/getCaseInfo":
+         if not self.Case:
+            raise Exception("need case to get info")
+
+      elif connectionRequest.path == "/getCaseStatus":
+         if not self.Case:
+            raise Exception("need case to get status")
+         if not self.caseAgent:
+            raise Exception("need agent to get status")
 
       elif connectionRequest.path == "/getCaseCount":
          pass
