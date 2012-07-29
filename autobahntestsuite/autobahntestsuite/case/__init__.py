@@ -301,6 +301,11 @@ def caseIdtoIdTuple(id):
 def caseIdTupletoId(idt):
    return '.'.join([str(x) for x in list(idt)])
 
+## Truncates the rest of the description after the first HTML tag
+## and coalesces whitespace
+##
+def caseClassToPrettyDescription(klass):
+   return ' '.join(klass.DESCRIPTION.split('<')[0].split())
 
 ## Index:
 ## "1.2.3" => Index (1-based) of Case1_2_3 in Cases
