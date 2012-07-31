@@ -187,12 +187,6 @@ def run():
 
       if mode == 'fuzzingserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/fuzzingserver"))
-         curdir = File('.')
-         webdir.putChild('cwd', curdir)
-         web = Site(webdir)
-         reactor.listenTCP(spec.get("webport", 8080), web)
-
          ## use TLS server key/cert from spec, but allow overriding from cmd line
          if not o.opts['key']:
             o.opts['key'] = spec.get('key', None)
@@ -200,7 +194,17 @@ def run():
             o.opts['cert'] = spec.get('cert', None)
 
          factory = FuzzingServerFactory(spec, debug)
-         listenWS(factory, createWssContext(o, factory))
+         context = createWssContext(o, factory)
+         listenWS(factory, context)
+
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/fuzzingserver"))
+         curdir = File('.')
+         webdir.putChild('cwd', curdir)
+         web = Site(webdir)
+         if factory.isSecure:
+            reactor.listenSSL(spec.get("webport", 8080), web, context)
+         else:
+            reactor.listenTCP(spec.get("webport", 8080), web)
 
       elif mode == 'fuzzingclient':
          factory = FuzzingClientFactory(spec, debug)

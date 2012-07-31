@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
    <head>
+      <meta charset="UTF-8">
 
       <style lang="css">
          body
@@ -12,8 +13,7 @@
 
       <script type="text/javascript">
 
-         var hostname = null;
-         var port = null;
+         var wsuri = null;
          var agent = null;
          var ua = null;
          var webSocket = null;
@@ -23,23 +23,25 @@
          window.onload =
             function()
             {
-               setHostname();
-               setPort();
+               setWsUri();
                setAgent();
             }
 
-         function setHostname()
+         function setWsUri()
          {
-            var hn = window.location.hostname;
-            if (hn == null || hn == "") {
-               hn = "127.0.0.1";
-            }
-
-            hostname = document.getElementById('hostname').value;
-            if (hostname == null || hostname == "")
+            wsuri = document.getElementById('wsuri').value;
+            if (wsuri == null || wsuri == "")
             {
-               hostname = hn;
-               document.getElementById('hostname').value = hn;
+               var hn = window.location.hostname;
+               if (hn == null || hn == "") {
+                  hn = "127.0.0.1";
+               }
+               if (window.location.protocol == "https:") {
+                  wsuri = "wss://" + hn + ":9001";
+               } else {
+                  wsuri = "ws://" + hn + ":9001";
+               }
+               document.getElementById('wsuri').value = wsuri;
             }
          }
 
@@ -115,8 +117,7 @@
 
          function startTestRun()
          {
-            setHostname();
-            setPort();
+            setWsUri();
             setAgent();
             updateStatus("Running test suite ..");
             document.getElementById('resultlink').innerHTML = '';
@@ -146,7 +147,7 @@
 
          function getCaseCount(cont)
          {
-            var ws_uri = "ws://" + hostname + ":" + port + "/getCaseCount";
+            var ws_uri = wsuri + "/getCaseCount";
 
             webSocket = openWebSocket(ws_uri);
 
@@ -166,7 +167,7 @@
 
          function updateReports()
          {
-            var ws_uri = "ws://" + hostname + ":" + port + "/updateReports?agent=" + agent;
+            var ws_uri = wsuri + "/updateReports?agent=" + agent;
 
             webSocket = openWebSocket(ws_uri);
 
@@ -189,7 +190,7 @@
 
          function runNextCase()
          {
-            var ws_uri = "ws://" + hostname + ":" + port + "/runCase?case=" + currentCaseId + "&agent=" + agent;
+            var ws_uri = wsuri + "/runCase?case=" + currentCaseId + "&agent=" + agent;
 
             webSocket = openWebSocket(ws_uri);
             webSocket.binaryType = "arraybuffer";
@@ -230,11 +231,10 @@
    </head>
 
    <body>
-      <h1>Autobahn WebSockets Test Suite : Run Browser Test</h1>
+      <h1>Autobahn WebSocket Test Suite : Run Browser Test</h1>
       <p>Provided by <a href="http://autobahn.ws/testsuite">Autobahn</a>.</p><br/>
       <form>
-         <p>Fuzzing Server Hostname<br/><input id="hostname" type="text" size="20" maxlength="40"></p>
-         <p>Fuzzing Server Port<br/><input id="port" type="text" size="5" maxlength="5"></p>
+         <p>Fuzzing Server URI<br/><input id="wsuri" type="text" size="20" maxlength="40"></p>
          <p>User Agent Identifier<br/><input id="agent" type="text" size="30" maxlength="30"><br/>
          <span style="font-size: 0.7em;" id="ua-detected"></span></p>
       </form>
