@@ -3,11 +3,11 @@
    "key": "wss/server.key",
    "cert": "wss/server.crt",
 
-   "options": {"failByDrop": false},
+   "options": {"failByDrop": false, "openHandshakeTimeout": 0},
    "outdir": "./reports/clients",
    "webport": 8080,
 
-   "cases": ["*"],
-   "exclude-cases": ["9.1.5", "9.1.6", "9.2.5", "9.2.6", "9.5.1", "9.5.2", "9.5.5", "9.5.6", "9.6.1", "9.6.2", "9.6.5", "9.6.6"],
+   "cases": ["1.1.1", "1.1.2", "1.1.3", "1.1.4", "1.1.5"],
+   "exclude-cases": ["7.*", "9.1.5", "9.1.6", "9.2.5", "9.2.6", "9.5.1", "9.5.2", "9.5.5", "9.5.6", "9.6.1", "9.6.2", "9.6.5", "9.6.6"],
    "exclude-agent-cases": {}
 }
