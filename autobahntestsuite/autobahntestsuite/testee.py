@@ -40,8 +40,12 @@ class TesteeServerFactory(WebSocketServerFactory):
 
    protocol = TesteeServerProtocol
 
-   def __init__(self, url, debug = False):
-      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+   def __init__(self, url, debug = False, ident = None):
+      if ident is not None:
+         server = ident
+      else:
+         server = "AutobahnPython/%s" % autobahn.version
+      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
       self.setProtocolOptions(failByDrop = False) # spec conformance
 
 
@@ -66,7 +70,7 @@ class TesteeClientFactory(WebSocketClientFactory):
 
    protocol = TesteeClientProtocol
 
-   def __init__(self, url, debug = False):
+   def __init__(self, url, debug = False, ident = None):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
       self.setProtocolOptions(failByDrop = False) # spec conformance
 
@@ -74,7 +78,10 @@ class TesteeClientFactory(WebSocketClientFactory):
       self.currentCaseId = 0
 
       self.updateReports = True
-      self.agent = "AutobahnClient/%s" % autobahn.version
+      if ident is not None:
+         self.agent = ident
+      else:
+         self.agent = "AutobahnPython/%s" % autobahn.version
       self.resource = "/getCaseCount"
 
    def clientConnectionLost(self, connector, reason):

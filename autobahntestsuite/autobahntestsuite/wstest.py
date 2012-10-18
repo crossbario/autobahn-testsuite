@@ -66,6 +66,7 @@ class WsTestOptions(usage.Options):
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
       ['key', 'k', None, 'Server private key file for secure WebSocket (WSS) [required in server modes for WSS].'],
       ['cert', 'c', None, 'Server certificate file for secure WebSocket (WSS) [required in server modes for WSS].'],
+      ['ident', 'i', None, 'Override client or server identifier for testee modes.']
    ]
 
    optFlags = [
@@ -219,11 +220,11 @@ def run():
       wsuri = str(o.opts['wsuri'])
 
       if mode == 'testeeserver':
-         factory = TesteeServerFactory(wsuri, debug)
+         factory = TesteeServerFactory(wsuri, debug, ident = o.opts['ident'])
          listenWS(factory, createWssContext(o, factory))
 
       elif mode == 'testeeclient':
-         factory = TesteeClientFactory(wsuri, debug)
+         factory = TesteeClientFactory(wsuri, debug, ident = o.opts['ident'])
          connectWS(factory)
 
       else:
