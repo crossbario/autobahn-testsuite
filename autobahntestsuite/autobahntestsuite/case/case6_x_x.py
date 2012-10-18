@@ -199,9 +199,16 @@ def createUtf8TestSequences():
                   vs[1].append((True, zz))
    UTF8_TEST_SEQUENCES.append(vs)
 
-   # Unicode replacement character
-   vs = ["Unicode replacement character", []]
-   vs[1].append((True, '\xef\xbf\xbd'))
+   # Unicode "specials", such as replacement char etc
+   # http://en.wikipedia.org/wiki/Specials_%28Unicode_block%29
+   vs = ["Unicode specials (i.e. replacement char)", []]
+   vs[1].append((True, '\xef\xbf\xb9'))
+   vs[1].append((True, '\xef\xbf\xba'))
+   vs[1].append((True, '\xef\xbf\xbb'))
+   vs[1].append((True, '\xef\xbf\xbc'))
+   vs[1].append((True, '\xef\xbf\xbd')) # replacement char
+   vs[1].append((True, '\xef\xbf\xbe'))
+   vs[1].append((True, '\xef\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    return UTF8_TEST_SEQUENCES
