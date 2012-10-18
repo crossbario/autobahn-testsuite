@@ -325,11 +325,67 @@ for t in createUtf8TestSequences():
    i += 1
 
 
+import binascii
+import array
+
+def encode(c):
+   """
+   Encode Unicode code point into UTF-8 byte string.
+   """
+   if c <= 0x7F:
+      b1 = c>>0  & 0x7F | 0x00
+      return array.array('B', [b1]).tostring()
+   elif c <= 0x07FF:
+      b1 = c>>6  & 0x1F | 0xC0
+      b2 = c>>0  & 0x3F | 0x80
+      return array.array('B', [b1, b2]).tostring()
+   elif c <= 0xFFFF:
+      b1 = c>>12 & 0x0F | 0xE0
+      b2 = c>>6  & 0x3F | 0x80
+      b3 = c>>0  & 0x3F | 0x80
+      return array.array('B', [b1, b2, b3]).tostring()
+   elif c <= 0x1FFFFF:
+      b1 = c>>18 & 0x07 | 0xF0
+      b2 = c>>12 & 0x3F | 0x80
+      b3 = c>>6  & 0x3F | 0x80
+      b4 = c>>0  & 0x3F | 0x80
+      return array.array('B', [b1, b2, b3, b4]).tostring()
+   elif c <= 0x3FFFFFF:
+      b1 = c>>24 & 0x03 | 0xF8
+      b2 = c>>18 & 0x3F | 0x80
+      b3 = c>>12 & 0x3F | 0x80
+      b4 = c>>6  & 0x3F | 0x80
+      b5 = c>>0  & 0x3F | 0x80
+      return array.array('B', [b1, b2, b3, b4, b5]).tostring()
+   elif c <= 0x7FFFFFFF:
+      b1 = c>>30 & 0x01 | 0xFC
+      b2 = c>>24 & 0x3F | 0x80
+      b3 = c>>18 & 0x3F | 0x80
+      b4 = c>>12 & 0x3F | 0x80
+      b5 = c>>6  & 0x3F | 0x80
+      b6 = c>>0  & 0x3F | 0x80
+      return array.array('B', [b1, b2, b3, b4, b5, b6]).tostring()
+   else:
+      raise Exception("invalid unicode codepoint")
+
+
+def test_encode(testpoints):
+   """
+   Compare Python UTF-8 encoding with adhoc implementation.
+   """
+   for tp in testpoints:
+      print binascii.b2a_hex(encode(tp[0])), binascii.b2a_hex(tp[1].encode("utf8"))
+
+
 if __name__ == '__main__':
    """
    Run unit tests.
    """
-   test_utf8_incremental()
+   #test_utf8_incremental()
 
-   UTF8_TEST_SEQUENCES = createUtf8TestSequences()
-   test_utf8()
+   #UTF8_TEST_SEQUENCES = createUtf8TestSequences()
+   #test_utf8(UTF8_TEST_SEQUENCES)
+
+   TESTPOINTS = [(0xfffb, u'\ufffb'),
+                 (0xd807, u'\ud807')]
+   test_encode(TESTPOINTS)
