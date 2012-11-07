@@ -33,7 +33,7 @@ class Case6_4_1(Case):
 
    DESCRIPTION = """Send invalid UTF-8 text message in 3 fragments (frames).
 First frame payload is valid, then wait, then 2nd frame which contains the payload making the sequence invalid, then wait, then 3rd frame with rest.
-Note that PART1 and PART3 are valid UTF-8 in themselves, PART2 is a 0x11000 encoded as in the UTF-8 integer encoding scheme, but the codepoint is invalid (out of range).
+Note that PART1 and PART3 are valid UTF-8 in themselves, PART2 is a 0x110000 encoded as in the UTF-8 integer encoding scheme, but the codepoint is invalid (out of range).
 <br><br>MESSAGE PARTS:<br>
 PART1 = %s (%s)<br>
 PART2 = %s (%s)<br>

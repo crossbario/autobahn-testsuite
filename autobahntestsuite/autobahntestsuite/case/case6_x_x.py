@@ -374,7 +374,14 @@ def test_encode(testpoints):
    Compare Python UTF-8 encoding with adhoc implementation.
    """
    for tp in testpoints:
-      print binascii.b2a_hex(encode(tp[0])), binascii.b2a_hex(tp[1].encode("utf8"))
+      if tp[0]:
+         print binascii.b2a_hex(encode(tp[0]))
+      else:
+         print tp[0]
+      if tp[1]:
+         print binascii.b2a_hex(tp[1].encode("utf8"))
+      else:
+         print tp[1]
 
 
 if __name__ == '__main__':
@@ -387,5 +394,7 @@ if __name__ == '__main__':
    #test_utf8(UTF8_TEST_SEQUENCES)
 
    TESTPOINTS = [(0xfffb, u'\ufffb'),
-                 (0xd807, u'\ud807')]
+                 (0xd807, u'\ud807'),
+                 (0x11000, None),
+                 (0x110000, None)]
    test_encode(TESTPOINTS)
