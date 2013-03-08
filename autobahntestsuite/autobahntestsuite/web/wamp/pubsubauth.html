@@ -4,7 +4,7 @@
       <title>Autobahn: PubSub with Authorization</title>
 
       <!-- include AutobahnJS .. that's all you need -->
-      <script src="http://autobahn.ws/public/autobahn.min.js"></script>
+      <script src="http://autobahn.s3.amazonaws.com/js/autobahn.min.js"></script>
 
       <script>
          // WAMP session object
@@ -56,7 +56,7 @@
             sess.publish("event:simple-foobar", {name: "foo",
                                                  value: "bar",
                                                  num: 333});
-            
+
             sess.publish("event:foobar1", {count: 42});
             sess.publish("event:foobar1", {count: -1});
             sess.publish("event:foobar2", {count: 666});
