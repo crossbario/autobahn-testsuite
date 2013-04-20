@@ -35,10 +35,10 @@ class Case6_4_1(Case):
 First frame payload is valid, then wait, then 2nd frame which contains the payload making the sequence invalid, then wait, then 3rd frame with rest.
 Note that PART1 and PART3 are valid UTF-8 in themselves, PART2 is a 0x110000 encoded as in the UTF-8 integer encoding scheme, but the codepoint is invalid (out of range).
 <br><br>MESSAGE PARTS:<br>
-PART1 = %s (%s)<br>
-PART2 = %s (%s)<br>
-PART3 = %s (%s)<br>
-""" % (PAYLOAD1, binascii.b2a_hex(PAYLOAD1), PAYLOAD2, binascii.b2a_hex(PAYLOAD2), PAYLOAD3, binascii.b2a_hex(PAYLOAD3))
+PART1 = %s<br>
+PART2 = %s<br>
+PART3 = %s<br>
+""" % (binascii.b2a_hex(PAYLOAD1), binascii.b2a_hex(PAYLOAD2), binascii.b2a_hex(PAYLOAD3))
 
    EXPECTATION = """The first frame is accepted, we expect to timeout on the first wait. The 2nd frame should be rejected immediately (fail fast on UTF-8). If we timeout, we expect the connection is failed at least then, since the complete message payload is not valid UTF-8."""
 

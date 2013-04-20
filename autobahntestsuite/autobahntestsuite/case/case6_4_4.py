@@ -28,10 +28,10 @@ class Case6_4_4(Case6_4_1):
 
    DESCRIPTION = """Same as Case 6.4.2, but we send message not in 3 frames, but in 3 chops of the same message frame.
 <br><br>MESSAGE PARTS:<br>
-PART1 = %s (%s)<br>
-PART2 = %s (%s)<br>
-PART3 = %s (%s)<br>
-""" % (Case6_4_1.PAYLOAD[:12], binascii.b2a_hex(Case6_4_1.PAYLOAD[:12]), Case6_4_1.PAYLOAD[12], binascii.b2a_hex(Case6_4_1.PAYLOAD[12]), Case6_4_1.PAYLOAD3[13:], binascii.b2a_hex(Case6_4_1.PAYLOAD3[13:]))
+PART1 = %s<br>
+PART2 = %s<br>
+PART3 = %s<br>
+""" % (binascii.b2a_hex(Case6_4_1.PAYLOAD[:12]), binascii.b2a_hex(Case6_4_1.PAYLOAD[12]), binascii.b2a_hex(Case6_4_1.PAYLOAD3[13:]))
 
    EXPECTATION = """The first chop is accepted, we expect to timeout on the first wait. The 2nd chop should be rejected immediately (fail fast on UTF-8). If we timeout, we expect the connection is failed at least then, since the complete message payload is not valid UTF-8."""
 

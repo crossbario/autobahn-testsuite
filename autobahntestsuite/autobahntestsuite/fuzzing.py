@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -122,6 +122,27 @@ def checkAgentCaseExclude(patterns, agent, case):
    return False
 
 
+def binLogData(data, maxlen = 64):
+   ellipses = " ..."
+   if len(data) > maxlen - len(ellipses):
+      dd = binascii.b2a_hex(data[:maxlen]) + ellipses
+   else:
+      dd = binascii.b2a_hex(data)
+   return dd
+
+
+def asciiLogData(data, maxlen = 64, replace = False):
+   try:
+      if len(data) > maxlen - len(ellipses):
+         dd = data[:maxlen] + ellipses
+      else:
+         dd = data
+      return dd.decode('utf8', errors = 'replace' if replace else 'strict')
+   except:
+      return '0x' + binLogData(data, maxlen)
+
+
+
 class FuzzingProtocol:
    """
    Common mixin-base class for fuzzing server and client protocols.
@@ -195,25 +216,33 @@ class FuzzingProtocol:
                        "txFrameStats": self.txFrameStats,
                        "httpRequest": self.http_request_data,
                        "httpResponse": self.http_response_data}
+
+         def cleanBin(e_old):
+            e_new = []
+            for t in e_old:
+               if t[0] == 'message':
+                  e_new.append((t[0], asciiLogData(t[1]), t[2]))
+               elif t[0] in ['ping', 'pong']:
+                  e_new.append((t[0], asciiLogData(t[1])))
+               elif t[0] == 'timeout':
+                  e_new.append(t)
+               else:
+                  print t
+                  raise Exception("unknown part type %s" % t[0])
+            return e_new
+
+         for k in caseResult['expected']:
+            e_old = caseResult['expected'][k]
+            caseResult['expected'][k] = cleanBin(e_old)
+
+         caseResult['received'] = cleanBin(caseResult['received'])
+
+         ## now log the case results
+         ##
          self.factory.logCase(caseResult)
+
       # parent's connectionLost does useful things
       WebSocketProtocol.connectionLost(self,reason)
-
-
-   def binLogData(self, data):
-      if len(data) > FuzzingProtocol.MAX_WIRE_LOG_DATA:
-         dd = binascii.b2a_hex(data[:FuzzingProtocol.MAX_WIRE_LOG_DATA]) + " ..."
-      else:
-         dd = binascii.b2a_hex(data)
-      return dd
-
-
-   def asciiLogData(self, data):
-      if len(data) > FuzzingProtocol.MAX_WIRE_LOG_DATA:
-         dd = data[:FuzzingProtocol.MAX_WIRE_LOG_DATA] + " ..."
-      else:
-         dd = data
-      return dd
 
 
    def enableWirelog(self, enable):
@@ -227,7 +256,7 @@ class FuzzingProtocol:
          l = len(data)
          self.rxOctetStats[l] = self.rxOctetStats.get(l, 0) + 1
       if self.createWirelog:
-         self.wirelog.append(("RO", self.binLogData(data)))
+         self.wirelog.append(("RO", (len(data), binLogData(data))))
 
 
    def logTxOctets(self, data, sync):
@@ -235,15 +264,16 @@ class FuzzingProtocol:
          l = len(data)
          self.txOctetStats[l] = self.txOctetStats.get(l, 0) + 1
       if self.createWirelog:
-         self.wirelog.append(("TO", self.binLogData(data), sync))
+         self.wirelog.append(("TO", (len(data), binLogData(data)), sync))
 
 
    def logRxFrame(self, frameHeader, payload):
       if self.createStats:
          self.rxFrameStats[frameHeader.opcode] = self.rxFrameStats.get(frameHeader.opcode, 0) + 1
       if self.createWirelog:
+         p = ''.join(payload)
          self.wirelog.append(("RF",
-                              self.asciiLogData(''.join(payload)),
+                              (len(p), asciiLogData(p)),
                               frameHeader.opcode,
                               frameHeader.fin,
                               frameHeader.rsv,
@@ -256,7 +286,7 @@ class FuzzingProtocol:
          self.txFrameStats[frameHeader.opcode] = self.txFrameStats.get(frameHeader.opcode, 0) + 1
       if self.createWirelog:
          self.wirelog.append(("TF",
-                              self.asciiLogData(payload),
+                              (len(payload), asciiLogData(payload)),
                               frameHeader.opcode,
                               frameHeader.fin,
                               frameHeader.rsv,
@@ -468,7 +498,8 @@ class FuzzingFactory:
       else:
          self.resultListeners[(agent,caseId)] = resultsCallback
 
-   def createReports(self):
+
+   def createReports(self, produceHtml = True, produceJson = True):
       """
       Create reports from all data stored for test cases which have been executed.
       """
@@ -480,13 +511,19 @@ class FuzzingFactory:
 
       ## create master report
       ##
-      self.createMasterReport(self.outdir)
+      if produceHtml:
+         self.createMasterReportHTML(self.outdir)
+      if produceJson:
+         self.createMasterReportJSON(self.outdir)
 
       ## create case detail reports
       ##
       for agentId in self.agents:
          for caseId in self.agents[agentId]:
-            self.createAgentCaseReport(agentId, caseId, self.outdir)
+            if produceHtml:
+               self.createAgentCaseReportHTML(agentId, caseId, self.outdir)
+            if produceJson:
+               self.createAgentCaseReportJSON(agentId, caseId, self.outdir)
 
 
    def cleanForFilename(self, str):
@@ -499,12 +536,12 @@ class FuzzingFactory:
       return s2
 
 
-   def makeAgentCaseReportFilename(self, agentId, caseId):
+   def makeAgentCaseReportFilename(self, agentId, caseId, ext):
       """
       Create filename for case detail report from agent and case.
       """
       c = caseId.replace('.', '_')
-      return self.cleanForFilename(agentId) + "_case_" + c + ".html"
+      return self.cleanForFilename(agentId) + "_case_" + c + "." + ext
 
 
    def limitString(self, s, limit, indicator = " ..."):
@@ -515,7 +552,36 @@ class FuzzingFactory:
          return ss
 
 
-   def createMasterReport(self, outdir):
+   def createMasterReportJSON(self, outdir):
+      """
+      Create report master JSON file.
+
+      :param outdir: Directory where to create file.
+      :type outdir: str
+      :returns: str -- Name of created file.
+      """
+      res = {}
+      for agentId in self.agents:
+         if not res.has_key(agentId):
+            res[agentId] = {}
+         for caseId in self.agents[agentId]:
+            case = self.agents[agentId][caseId]
+            c = {}
+            report_filename = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'json')
+            c["behavior"] = case["behavior"]
+            c["behaviorClose"] = case["behaviorClose"]
+            c["remoteCloseCode"] = case["remoteCloseCode"]
+            c["duration"] = case["duration"]
+            c["reportfile"] = report_filename
+            res[agentId][caseId] = c
+
+      report_filename = "index.json"
+      f = open(os.path.join(outdir, report_filename), 'w')
+      f.write(json.dumps(res, sort_keys = True, indent = 3, separators = (',', ': ')))
+      f.close()
+
+
+   def createMasterReportHTML(self, outdir):
       """
       Create report master HTML file.
 
@@ -645,7 +711,7 @@ class FuzzingFactory:
 
                case = self.agents[agentId][caseId]
 
-               agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId)
+               agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
 
                if case["behavior"] == Case.OK:
                   td_text = "Pass"
@@ -720,7 +786,38 @@ class FuzzingFactory:
       return report_filename
 
 
-   def createAgentCaseReport(self, agentId, caseId, outdir):
+   def createAgentCaseReportJSON(self, agentId, caseId, outdir):
+      """
+      Create case detail report JSON file.
+
+      :param agentId: ID of agent for which to generate report.
+      :type agentId: str
+      :param caseId: ID of case for which to generate report.
+      :type caseId: str
+      :param outdir: Directory where to create file.
+      :type outdir: str
+      :returns: str -- Name of created file.
+      """
+
+      if not self.agents.has_key(agentId):
+         raise Exception("no test data stored for agent %s" % agentId)
+
+      if not self.agents[agentId].has_key(caseId):
+         raise Exception("no test data stored for case %s with agent %s" % (caseId, agentId))
+
+      ## get case to generate report for
+      ##
+      case = self.agents[agentId][caseId]
+
+      ## open report file in create / write-truncate mode
+      ##
+      report_filename = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'json')
+      f = open(os.path.join(outdir, report_filename), 'w')
+      f.write(json.dumps(case, sort_keys = True, indent = 3, separators = (',', ': ')))
+      f.close()
+
+
+   def createAgentCaseReportHTML(self, agentId, caseId, outdir):
       """
       Create case detail report HTML file.
 
@@ -745,7 +842,7 @@ class FuzzingFactory:
 
       ## open report file in create / write-truncate mode
       ##
-      report_filename = self.makeAgentCaseReportFilename(agentId, caseId)
+      report_filename = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
       f = open(os.path.join(outdir, report_filename), 'w')
 
       ## write HTML
@@ -910,7 +1007,9 @@ class FuzzingFactory:
 
          if t[0] in ["RO", "TO", "RF", "TF"]:
 
-            lines = textwrap.wrap(t[1], 100)
+            payloadLen = t[1][0]
+            lines = textwrap.wrap(t[1][1], 100)
+
             if t[0] in ["RO", "TO"]:
                if len(lines) > 0:
                   f.write('         <pre class="%s">%03d %s: %s</pre>\n' % (css_class, i, prefix, lines[0]))
@@ -922,13 +1021,13 @@ class FuzzingFactory:
                      mmask = binascii.b2a_hex(t[6])
                   else:
                      mmask = str(t[6])
-                  f.write('         <pre class="%s">%03d %s: OPCODE=%s, FIN=%s, RSV=%s, MASKED=%s, MASK=%s</pre>\n' % (css_class, i, prefix, str(t[2]), str(t[3]), str(t[4]), str(t[5]), mmask))
+                  f.write('         <pre class="%s">%03d %s: OPCODE=%s, FIN=%s, RSV=%s, PAYLOAD-LEN=%s, MASKED=%s, MASK=%s</pre>\n' % (css_class, i, prefix, str(t[2]), str(t[3]), str(t[4]), payloadLen, str(t[5]), mmask))
                elif t[0] == "TF":
-                  f.write('         <pre class="%s">%03d %s: OPCODE=%s, FIN=%s, RSV=%s, MASK=%s, PAYLOAD-REPEAT-LEN=%s, CHOPSIZE=%s, SYNC=%s</pre>\n' % (css_class, i, prefix, str(t[2]), str(t[3]), str(t[4]), str(t[5]), str(t[6]), str(t[7]), str(t[8])))
+                  f.write('         <pre class="%s">%03d %s: OPCODE=%s, FIN=%s, RSV=%s, PAYLOAD-LEN=%s, MASK=%s, PAYLOAD-REPEAT-LEN=%s, CHOPSIZE=%s, SYNC=%s</pre>\n' % (css_class, i, prefix, str(t[2]), str(t[3]), str(t[4]), payloadLen, str(t[5]), str(t[6]), str(t[7]), str(t[8])))
                else:
                   raise Exception("logic error")
                for ll in lines:
-                  f.write('         <pre class="%s">%s%s</pre>\n' % (css_class, (2+4+len(prefix))*" ", ll))
+                  f.write('         <pre class="%s">%s%s</pre>\n' % (css_class, (2+4+len(prefix))*" ", ll.encode('utf8')))
 
          elif t[0] == "WLM":
             if t[1]:

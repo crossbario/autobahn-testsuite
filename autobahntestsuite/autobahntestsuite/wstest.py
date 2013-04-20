@@ -345,3 +345,7 @@ def run():
       raise Exception("logic error")
 
    reactor.run()
+
+
+if __name__ == '__main__':
+   run()

@@ -316,7 +316,7 @@ for t in createUtf8TestSequences():
                 (object, Case, ),
                 {"PAYLOAD": p[1],
                  "isValid": p[0],
-                 "DESCRIPTION": """%s<br><br>MESSAGE:<br>%s<br>%s""" % (desc, p[1], binascii.b2a_hex(p[1])),
+                 "DESCRIPTION": """%s<br><br>Payload: 0x%s""" % (desc, binascii.b2a_hex(p[1])),
                  "EXPECTATION": """%s""" % exp,
                  "__init__": __init__,
                  "onOpen": onOpen})
