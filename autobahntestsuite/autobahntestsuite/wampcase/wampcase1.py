@@ -16,10 +16,10 @@
 ##
 ###############################################################################
 
-__all__ = ["WampCase1_1", "WampCase1_2", "WampCase1_3"]
+__all__ = ["WampCase1_x_x"]
 
 
-import sys, pickle, json
+import sys, pickle, json, time
 from pprint import pprint
 
 
@@ -28,15 +28,31 @@ from twisted.internet import reactor
 
 from twisted.internet.defer import Deferred, DeferredList
 
-from autobahn.websocket import connectWS
+from autobahn.websocket import WebSocketClientProtocol, connectWS
+
 from autobahn.wamp import WampClientFactory, \
                           WampClientProtocol
 
 
 
-class WampCase1:
+class WampCase1_x_x_Base:
 
    class TestProtocol(WampClientProtocol):
+
+      def sendMessage(self, payload, binary = False):
+         session_id = self.session_id if hasattr(self, 'session_id') else None
+         now = round(1000000 * (time.clock() - self.factory.case.started))
+         rec = (now, session_id, "TX", payload)
+         self.factory.case.wampLog.append(rec)
+         WebSocketClientProtocol.sendMessage(self, payload, binary)
+
+      def onMessage(self, payload, binary):
+         session_id = self.session_id if hasattr(self, 'session_id') else None
+         now = round(1000000 * (time.clock() - self.factory.case.started))
+         rec = (now, session_id, "RX", payload)
+         self.factory.case.wampLog.append(rec)
+         WampClientProtocol.onMessage(self, payload, binary)
+
 
       def onSessionOpen(self):
          for topic in self.factory.subscribeTopics:
@@ -59,7 +75,7 @@ class WampCase1:
          self.subscribeTopics = subscribeTopics
 
       def buildProtocol(self, addr):
-         self.proto = WampCase1.TestProtocol()
+         self.proto = WampCase1_x_x_Base.TestProtocol()
          self.proto.factory = self
          return self.proto
 
@@ -80,26 +96,16 @@ class WampCase1:
 
       self.received = {}
       self.expected = {}
+      self.wampLog = []
 
       self.subscribedTopic = "http://example.com/simple"
       self.notSubscribedTopic = "http://example.com/foobar"
 
       self.sentIndex = 0
-      self.toSend = [None,
-                     100,
-                     0.1234,
-                     -1000000,
-                     u"Foobar",
-                     True,
-                     False,
-                     [1, 2, 3],
-                     {u'foo': u'bar'},
-                     [range(1,10), range(1,10)],
-                     ]
 
 
    def done(self, _):
-      res = (json.dumps(self.received) == json.dumps(self.expected), self.expected, self.received)
+      res = (json.dumps(self.received) == json.dumps(self.expected), self.expected, self.received, self.wampLog)
       self.finished.callback(res)
 
 
@@ -110,42 +116,61 @@ class WampCase1:
 
    def run(self):
       debug = False
+      self.started = time.clock()
 
       d1 = Deferred()
       g1 = Deferred()
-      c1 = WampCase1.TestFactory(self, d1, g1, subscribeTopics = [self.subscribedTopic])
+      c1 = WampCase1_x_x_Base.TestFactory(self, d1, g1, subscribeTopics = [self.subscribedTopic])
+      c1.name = "Client 1"
       connectWS(c1)
 
       d2 = Deferred()
       g2 = Deferred()
-      c2 = WampCase1.TestFactory(self, d2, g2, subscribeTopics = [self.subscribedTopic])
+      c2 = WampCase1_x_x_Base.TestFactory(self, d2, g2, subscribeTopics = [self.subscribedTopic])
+      c2.name = "Client 2"
       connectWS(c2)
 
       d3 = Deferred()
       g3 = Deferred()
-      c3 = WampCase1.TestFactory(self, d3, g3, subscribeTopics = [self.subscribedTopic, self.notSubscribedTopic])
+      c3 = WampCase1_x_x_Base.TestFactory(self, d3, g3, subscribeTopics = [self.subscribedTopic, self.notSubscribedTopic])
+      c3.name = "Client 3"
       connectWS(c3)
 
       d4 = Deferred()
       g4 = Deferred()
-      c4 = WampCase1.TestFactory(self, d4, g4, subscribeTopics = [self.notSubscribedTopic])
+      c4 = WampCase1_x_x_Base.TestFactory(self, d4, g4, subscribeTopics = [self.notSubscribedTopic])
+      c4.name = "Client 4"
       connectWS(c4)
 
       d5 = Deferred()
       g5 = Deferred()
-      c5 = WampCase1.TestFactory(self, d5, g5, subscribeTopics = [])
+      c5 = WampCase1_x_x_Base.TestFactory(self, d5, g5, subscribeTopics = [])
+      c5.name = "Client 5"
       connectWS(c5)
 
       self.clients = [c1, c2, c3, c4, c5]
 
 
       def dotest():
-         if self.sentIndex < len(self.toSend):
+         if self.sentIndex < len(self.payloads):
             #print "publish from ", c1.proto.session_id
-            if self.EXCLUDE_ME is None:
-               c1.proto.publish(self.subscribedTopic, self.toSend[self.sentIndex])
-            else:               
-               c1.proto.publish(self.subscribedTopic, self.toSend[self.sentIndex], excludeMe = self.EXCLUDE_ME)
+
+            ## map exclude indices to session IDs
+            ##
+            exclude = []
+            for i in self.settings.EXCLUDE:
+               exclude.append(self.clients[i].proto.session_id)
+
+            if self.settings.EXCLUDE_ME is None:
+               if len(exclude) > 0:
+                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], exclude = exclude)
+               else:
+                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex])
+            else:
+               if len(exclude) > 0:
+                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME, exclude = exclude)
+               else:
+                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME)
             self.sentIndex += 1
             reactor.callLater(0, dotest)
             #dotest()
@@ -160,37 +185,71 @@ class WampCase1:
             self.expected[c.proto.session_id] = []
             self.received[c.proto.session_id] = []
 
-         if self.EXCLUDE_ME is None or self.EXCLUDE_ME:
-            receivers = [c2, c3]
-         else:
-            receivers = [c1, c2, c3]
+         receivers = [self.clients[i] for i in self.settings.RECEIVERS]
 
          for c in receivers:
-            for d in self.toSend:
+            for d in self.payloads:
                self.expected[c.proto.session_id].append((self.subscribedTopic, d))
 
          reactor.callLater(0.1, dotest)
          #dotest()
 
+      def error(err):
+         print err
 
-      DeferredList([d1, d2, d3, d4, d5]).addCallback(connected)
+      DeferredList([d1, d2, d3, d4, d5]).addCallbacks(connected, error)
 
-      DeferredList([g1, g2, g3, g4, g5]).addCallback(self.done)
+      DeferredList([g1, g2, g3, g4, g5]).addCallbacks(self.done, error)
 
       self.finished = Deferred()
       return self.finished
 
 
-class WampCase1_1(WampCase1):
-   EXCLUDE_ME = None
+class Settings:
+   def __init__(self, excludeMe, exclude, eligible, receivers):
+      self.EXCLUDE_ME = excludeMe
+      self.EXCLUDE = exclude
+      self.ELIGIBLE = eligible
+      self.RECEIVERS = receivers
 
-   DESCRIPTION = """Connect 4 consumers. """
 
-   EXPECTATION = """Receive echo'ed text message (with payload as sent). Clean close with normal code."""
+WampCase1_x_x = []
 
+SETTINGS = [Settings(None, [], None, [1, 2]),
+            Settings(True, [], None, [1, 2]),
+            Settings(False, [], None, [0, 1, 2]),
+            Settings(False, [0], None, [1, 2]),
+            Settings(None, [2], None, [0, 1]),
+            Settings(None, [1, 2], None, [0]),
+            Settings(None, [0, 1, 2], None, []),
+           ]
 
-class WampCase1_2(WampCase1):
-   EXCLUDE_ME = True
+PAYLOADS = [[None],
+            [100],
+            [0.1234],
+            [-1000000],
+            ["hello"],
+            [True],
+            [False],
+            [666, 23, 999],
+            [{}],
+            [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
+            ]
 
-class WampCase1_3(WampCase1):
-   EXCLUDE_ME = False
+j = 1
+for s in SETTINGS:
+   i = 1
+   for d in PAYLOADS:
+      DESCRIPTION = ""
+      EXPECTATION = ""
+      C = type("WampCase1_%d_%d" % (j, i),
+               (object, WampCase1_x_x_Base, ),
+               {"__init__": WampCase1_x_x_Base.__init__,
+                "run": WampCase1_x_x_Base.run,
+                "DESCRIPTION": """%s""" % DESCRIPTION,
+                "EXPECTATION": """%s""" % EXPECTATION,
+                "payloads": d,
+                "settings": s})
+      WampCase1_x_x.append(C)
+      i += 1
+   j += 1

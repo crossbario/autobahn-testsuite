@@ -20,4 +20,6 @@ __all__ = ["WampCases"]
 
 from wampcase1 import *
 
-WampCases = [WampCase1_1, WampCase1_2, WampCase1_3]
+WampCases = []
+
+WampCases.extend(WampCase1_x_x)

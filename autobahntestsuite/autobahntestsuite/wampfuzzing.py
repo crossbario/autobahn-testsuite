@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-import sys
+import sys, os
 from pprint import pprint
 
 from twisted.python import log
@@ -25,6 +25,11 @@ from twisted.internet import reactor
 
 from wampcase import WampCases
 
+CSS_WAMPSUMMARY = """
+.wamplog {
+   font-family: Consolas, monospace;
+}
+"""
 
 class WampFuzzingClient:
 
@@ -42,7 +47,18 @@ class WampFuzzingClient:
 
 
    def logResult(self, res):
-      print self.test.__class__, "OK" if res[0] else "FAIL"
+      print self.test.__class__.__name__, "OK" if res[0] else "FAIL"
+
+      fn = os.path.join('reports', self.test.__class__.__name__ + ".html")
+      f = open(fn, 'w')
+      f.write(self.formatResultAsHtml(res))
+      f.close()
+
+      #pprint(res[3])
+      #print self.formatResultAsHtml(res)
+      #if not res[0]:
+      #   pprint(res[1])
+      #   pprint(res[2])
       self.next()
 
 
@@ -55,9 +71,26 @@ class WampFuzzingClient:
       if self.currentCaseIndex < len(WampCases):
          self.test = WampCases[self.currentCaseIndex](self.url, self.debugWs, self.debugWamp)
          d = self.test.run()
-         d.addCallback(self.logResult)
+         d.addCallbacks(self.logResult, self.error)
       else:
          self.finished()
+
+
+   def formatResultAsHtml(self, res):
+      hlog = "".join(["<tr><td>%d</td><td>%s</td><td>%s</td><td>%s</td></tr>" % l for l in res[3]])
+      s = """<DOCTYPE html>
+<html>
+   <head>
+      <style>%s</style>
+   </head>
+   <body>
+      <table class="wamplog">
+         %s
+      </table>
+   </body>
+</html>      
+      """ % (CSS_WAMPSUMMARY, hlog)
+      return s
 
 
 
