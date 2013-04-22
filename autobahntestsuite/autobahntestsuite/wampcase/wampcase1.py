@@ -244,6 +244,10 @@ SETTINGS2 = [Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
              Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
             ]
 
+SETTINGS = []
+SETTINGS.extend(SETTINGS1)
+SETTINGS.extend(SETTINGS2)
+
 ## the event payload the publisher sends in one session
 ##
 PAYLOADS = [[None],
@@ -261,7 +265,7 @@ PAYLOADS = [[None],
 ## now dynamically create case classes
 ##
 j = 1
-for s in SETTINGS1:
+for s in SETTINGS:
    i = 1
    for d in PAYLOADS:
       DESCRIPTION = ""

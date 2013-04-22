@@ -23,7 +23,7 @@ from twisted.python import log
 from twisted.internet import reactor
 
 
-from wampcase import WampCases
+from wampcase import Cases
 
 CSS_WAMPSUMMARY = """
 .wamplog {
@@ -68,8 +68,8 @@ class WampFuzzingClient:
 
    def next(self):
       self.currentCaseIndex += 1
-      if self.currentCaseIndex < len(WampCases):
-         self.test = WampCases[self.currentCaseIndex](self.url, self.debugWs, self.debugWamp)
+      if self.currentCaseIndex < len(Cases):
+         self.test = Cases[self.currentCaseIndex](self.url, self.debugWs, self.debugWamp)
          d = self.test.run()
          d.addCallbacks(self.logResult, self.error)
       else:
