@@ -98,9 +98,6 @@ class WampCase1_x_x_Base:
       self.expected = {}
       self.wampLog = []
 
-      self.subscribedTopic = "http://example.com/simple"
-      self.notSubscribedTopic = "http://example.com/foobar"
-
       self.sentIndex = 0
 
 
@@ -118,42 +115,26 @@ class WampCase1_x_x_Base:
       debug = False
       self.started = time.clock()
 
-      d1 = Deferred()
-      g1 = Deferred()
-      c1 = WampCase1_x_x_Base.TestFactory(self, d1, g1, subscribeTopics = [self.subscribedTopic])
-      c1.name = "Client 1"
-      connectWS(c1)
-
-      d2 = Deferred()
-      g2 = Deferred()
-      c2 = WampCase1_x_x_Base.TestFactory(self, d2, g2, subscribeTopics = [self.subscribedTopic])
-      c2.name = "Client 2"
-      connectWS(c2)
-
-      d3 = Deferred()
-      g3 = Deferred()
-      c3 = WampCase1_x_x_Base.TestFactory(self, d3, g3, subscribeTopics = [self.subscribedTopic, self.notSubscribedTopic])
-      c3.name = "Client 3"
-      connectWS(c3)
-
-      d4 = Deferred()
-      g4 = Deferred()
-      c4 = WampCase1_x_x_Base.TestFactory(self, d4, g4, subscribeTopics = [self.notSubscribedTopic])
-      c4.name = "Client 4"
-      connectWS(c4)
-
-      d5 = Deferred()
-      g5 = Deferred()
-      c5 = WampCase1_x_x_Base.TestFactory(self, d5, g5, subscribeTopics = [])
-      c5.name = "Client 5"
-      connectWS(c5)
-
-      self.clients = [c1, c2, c3, c4, c5]
-
+      self.clients = []
+      fireOnConnected = []
+      fireOnClosed = []
+      i = 1
+      for c in self.settings.PEERS:
+         d = Deferred()
+         g = Deferred()
+         c = WampCase1_x_x_Base.TestFactory(self, d, g, subscribeTopics = c)
+         c.name = "Peer %d" % i
+         self.clients.append(c)
+         fireOnConnected.append(d)
+         fireOnClosed.append(g)
+         connectWS(c)
+         i += 1
 
       def dotest():
          if self.sentIndex < len(self.payloads):
-            #print "publish from ", c1.proto.session_id
+
+            publisher = self.clients[0]
+            #print "publish from ", publisher.proto.session_id
 
             ## map exclude indices to session IDs
             ##
@@ -163,14 +144,14 @@ class WampCase1_x_x_Base:
 
             if self.settings.EXCLUDE_ME is None:
                if len(exclude) > 0:
-                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], exclude = exclude)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], exclude = exclude)
                else:
-                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex])
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex])
             else:
                if len(exclude) > 0:
-                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME, exclude = exclude)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME, exclude = exclude)
                else:
-                  c1.proto.publish(self.subscribedTopic, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME)
             self.sentIndex += 1
             reactor.callLater(0, dotest)
             #dotest()
@@ -189,7 +170,7 @@ class WampCase1_x_x_Base:
 
          for c in receivers:
             for d in self.payloads:
-               self.expected[c.proto.session_id].append((self.subscribedTopic, d))
+               self.expected[c.proto.session_id].append((self.settings.PUBLICATION_TOPIC, d))
 
          reactor.callLater(0.1, dotest)
          #dotest()
@@ -197,33 +178,74 @@ class WampCase1_x_x_Base:
       def error(err):
          print err
 
-      DeferredList([d1, d2, d3, d4, d5]).addCallbacks(connected, error)
-
-      DeferredList([g1, g2, g3, g4, g5]).addCallbacks(self.done, error)
+      DeferredList(fireOnConnected).addCallbacks(connected, error)
+      DeferredList(fireOnClosed).addCallbacks(self.done, error)
 
       self.finished = Deferred()
       return self.finished
 
 
+## the set of cases we construct and export from this module
+##
+WampCase1_x_x = []
+
 class Settings:
-   def __init__(self, excludeMe, exclude, eligible, receivers):
+   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible, receivers):
+      self.PEERS = peers
+      self.PUBLICATION_TOPIC = publicationTopic
       self.EXCLUDE_ME = excludeMe
       self.EXCLUDE = exclude
       self.ELIGIBLE = eligible
       self.RECEIVERS = receivers
 
 
-WampCase1_x_x = []
+## the topic our test publisher will publish to
+##
+TOPIC_PUBLISHED_TO = "http://example.com/simple"
 
-SETTINGS = [Settings(None, [], None, [1, 2]),
-            Settings(True, [], None, [1, 2]),
-            Settings(False, [], None, [0, 1, 2]),
-            Settings(False, [0], None, [1, 2]),
-            Settings(None, [2], None, [0, 1]),
-            Settings(None, [1, 2], None, [0]),
-            Settings(None, [0, 1, 2], None, []),
+## some topic the test publisher will NOT publish to
+##
+TOPIC_NOT_PUBLISHED_TO = "http://example.com/foobar"
+
+
+## for each peer, list of topics the peer subscribes to
+## the publisher is always the first peer in this list
+##
+PEERSET1 = [
+              [TOPIC_PUBLISHED_TO],
+              [TOPIC_PUBLISHED_TO]
            ]
 
+## these settings control the options the publisher uses
+## during publishing
+##
+SETTINGS1 = [Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
+             Settings(PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
+             Settings(PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
+             Settings(PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
+             Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
+             Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
+            ]
+
+PEERSET2 = [
+              [TOPIC_PUBLISHED_TO],
+              [TOPIC_PUBLISHED_TO],
+              [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
+              [TOPIC_NOT_PUBLISHED_TO],
+              []
+           ]
+
+SETTINGS2 = [Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
+             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
+            ]
+
+## the event payload the publisher sends in one session
+##
 PAYLOADS = [[None],
             [100],
             [0.1234],
@@ -236,8 +258,10 @@ PAYLOADS = [[None],
             [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
             ]
 
+## now dynamically create case classes
+##
 j = 1
-for s in SETTINGS:
+for s in SETTINGS1:
    i = 1
    for d in PAYLOADS:
       DESCRIPTION = ""
