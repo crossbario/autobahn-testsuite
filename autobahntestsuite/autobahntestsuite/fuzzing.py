@@ -1076,7 +1076,6 @@ class FuzzingFactory:
       return report_filename
 
 
-
 class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
    def connectionMade(self):

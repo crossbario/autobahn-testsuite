@@ -144,14 +144,22 @@ class WampCase1_x_x_Base:
 
             if self.settings.EXCLUDE_ME is None:
                if len(exclude) > 0:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], exclude = exclude)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
+                                          self.payloads[self.sentIndex],
+                                          exclude = exclude)
                else:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex])
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
+                                          self.payloads[self.sentIndex])
             else:
                if len(exclude) > 0:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME, exclude = exclude)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
+                                          self.payloads[self.sentIndex],
+                                          excludeMe = self.settings.EXCLUDE_ME,
+                                          exclude = exclude)
                else:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC, self.payloads[self.sentIndex], excludeMe = self.settings.EXCLUDE_ME)
+                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
+                                          self.payloads[self.sentIndex],
+                                          excludeMe = self.settings.EXCLUDE_ME)
             self.sentIndex += 1
             reactor.callLater(0, dotest)
             #dotest()
