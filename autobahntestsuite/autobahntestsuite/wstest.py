@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import autobahntestsuite
 from autobahn.websocket import connectWS, listenWS
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
+from wampfuzzing import FuzzingWampClient
 from echo import EchoClientFactory, EchoServerFactory
 from broadcast import BroadcastClientFactory, BroadcastServerFactory
 from testee import TesteeClientFactory, TesteeServerFactory
@@ -41,6 +42,8 @@ from massconnect import MassConnectTest
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
+                         SPEC_FUZZINGWAMPSERVER, \
+                         SPEC_FUZZINGWAMPCLIENT, \
                          SPEC_WSPERFCONTROL, \
                          SPEC_MASSCONNECT
 
@@ -52,6 +55,8 @@ class WsTestOptions(usage.Options):
             'broadcastserver',
             'fuzzingserver',
             'fuzzingclient',
+            'fuzzingwampserver',
+            'fuzzingwampclient',
             'testeeserver',
             'testeeclient',
             'wsperfcontrol',
@@ -89,6 +94,8 @@ class WsTestOptions(usage.Options):
 
       if self['mode'] in ['fuzzingclient',
                           'fuzzingserver',
+                          'fuzzingwampclient',
+                          'fuzzingwampserver',
                           'wsperfcontrol',
                           'massconnect']:
          if not self['spec']:
@@ -98,6 +105,8 @@ class WsTestOptions(usage.Options):
             dsf = {
                      'fuzzingclient': ['fuzzingclient.json', SPEC_FUZZINGCLIENT],
                      'fuzzingserver': ['fuzzingserver.json', SPEC_FUZZINGSERVER],
+                     'fuzzingwampclient': ['fuzzingwampclient.json', SPEC_FUZZINGWAMPCLIENT],
+                     'fuzzingwampserver': ['fuzzingwampserver.json', SPEC_FUZZINGWAMPSERVER],
                      'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL],
                      'massconnect': ['massconnect.json', SPEC_MASSCONNECT]
                   }
@@ -181,7 +190,10 @@ def run():
 
    mode = str(o.opts['mode'])
 
-   if mode in ['fuzzingclient', 'fuzzingserver']:
+   if mode in ['fuzzingclient',
+               'fuzzingserver',
+               'fuzzingwampclient',
+               'fuzzingwampserver']:
 
       spec = str(o.opts['spec'])
       spec = json.loads(open(spec).read())
@@ -211,6 +223,16 @@ def run():
          factory = FuzzingClientFactory(spec, debug)
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
+
+      elif mode == 'fuzzingwampserver':
+
+         raise Exception("not implemented")
+
+      elif mode == 'fuzzingwampclient':
+
+         client = FuzzingWampClient(spec, debug)
+         # no connectWS done here, since this is done within
+         # FuzzingWampClient automatically to orchestrate tests
 
       else:
          raise Exception("logic error")

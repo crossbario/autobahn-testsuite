@@ -31,6 +31,7 @@ import testee
 import wsperfcontrol
 import wsperfmaster
 import case
+import caseset
 import report
 import spectemplate
 import fuzzing

@@ -16,6 +16,14 @@
 ##
 ###############################################################################
 
+__all__ = ("Cases",
+           "CaseCategories",
+           "CaseSubCategories",
+           "CaseBasename",)
+
+
+CaseBasename = "Case"
+
 ##
 ## To add new cases
 ##
@@ -279,46 +287,3 @@ Cases.extend(Case9_8_X)
 #Cases += [Case9_9_1]
 
 Cases += [Case10_1_1]
-
-
-## Class1_2_3 => '1.2.3'
-##
-def caseClasstoId(klass):
-   return '.'.join(klass.__name__[4:].split("_"))
-
-## Class1_2_3 => (1, 2, 3)
-##
-def caseClasstoIdTuple(klass):
-   return tuple([int(x) for x in klass.__name__[4:].split("_")])
-
-## '1.2.3' => (1, 2, 3)
-##
-def caseIdtoIdTuple(id):
-   return tuple([int(x) for x in id.split('.')])
-
-## (1, 2, 3) => '1.2.3'
-##
-def caseIdTupletoId(idt):
-   return '.'.join([str(x) for x in list(idt)])
-
-## Truncates the rest of the description after the first HTML tag
-## and coalesces whitespace
-##
-def caseClassToPrettyDescription(klass):
-   return ' '.join(klass.DESCRIPTION.split('<')[0].split())
-
-## Index:
-## "1.2.3" => Index (1-based) of Case1_2_3 in Cases
-##
-CasesIndices = {}
-i = 1
-for c in Cases:
-   CasesIndices[caseClasstoId(c)] = i
-   i += 1
-
-## Index:
-## "1.2.3" => Case1_2_3
-##
-CasesById = {}
-for c in Cases:
-   CasesById[caseClasstoId(c)] = c

@@ -16,14 +16,26 @@
 ##
 ###############################################################################
 
+__all__ = ("FuzzingWampClient",)
+
+
 import sys, os
 from pprint import pprint
 
 from twisted.python import log
 from twisted.internet import reactor
 
+# for versions
+import autobahn
+import autobahntestsuite
 
-from wampcase import Cases
+from wampcase import Cases, \
+                     CaseCategories, \
+                     CaseSubCategories, \
+                     CaseBasename
+
+from caseset import CaseSet
+
 
 CSS_WAMPSUMMARY = """
 .wamplog {
@@ -91,6 +103,22 @@ class WampFuzzingClient:
 </html>      
       """ % (CSS_WAMPSUMMARY, hlog)
       return s
+
+
+class FuzzingWampClient:
+   def __init__(self, spec, debug = False):
+      self.spec = spec
+      self.debug = debug
+
+      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
+
+      self.specCases = self.CaseSet.parseSpecCases(self.spec)
+      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
+
+      print "Autobahn WebSockets %s/%s Fuzzing WAMP Client" % (autobahntestsuite.version, autobahn.version)
+      print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
+      print "Cases = %s" % str(self.specCases)
+      print "Servers = %s" % str([x["url"] + "@" + x["agent"] for x in spec["servers"]])
 
 
 
