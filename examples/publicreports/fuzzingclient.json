@@ -1,0 +1,47 @@
+
+{
+   "options": {"failByDrop": false},
+   "outdir": "./reports/servers",
+
+   "servers": [
+                  {
+                     "agent": "AutobahnPython 0.6 CPy",
+                     "url": "ws://192.168.56.102:9006",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "AutobahnPython 0.6 CPy-wsaccel",
+                     "url": "ws://192.168.56.102:9000",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "AutobahnPython 0.6 PyPy",
+                     "url": "ws://192.168.56.102:9005",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "WebSocket++ 0.3.0-dev",
+                     "url": "ws://192.168.56.102:9002",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "Jetty 9.0.2.v20130417",
+                     "url": "ws://192.168.56.102:9001",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "ws v20130429",
+                     "url": "ws://192.168.56.102:8181",
+                     "options": {"version": 18}
+                  },
+                  {
+                     "agent": "cowboy v20130429",
+                     "url": "ws://192.168.56.102:9009/websocket",
+                     "options": {"version": 18}
+                  }
+               ],
+
+   "cases": ["*"],
+   "exclude-cases": [],
+   "exclude-agent-cases": {}
+}
