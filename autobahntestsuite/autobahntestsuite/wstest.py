@@ -28,6 +28,8 @@ import autobahn
 import autobahntestsuite
 
 from autobahn.websocket import connectWS, listenWS
+from autobahn.utf8validator import Utf8Validator
+from autobahn.xormasker import XorMaskerNull
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from echo import EchoClientFactory, EchoServerFactory
@@ -178,6 +180,8 @@ def run():
       log.startLogging(sys.stdout)
 
    print "Using Twisted reactor class %s" % str(reactor.__class__)
+   print "Using UTF8 Validator class %s" % str(Utf8Validator)
+   print "Using XOR Masker classes %s" % str(XorMaskerNull)
 
    mode = str(o.opts['mode'])
 
