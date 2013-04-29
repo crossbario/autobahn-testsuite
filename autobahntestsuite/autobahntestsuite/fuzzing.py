@@ -1150,7 +1150,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
       self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
-      print "Autobahn WebSockets %s/%s Fuzzing Client" % (autobahntestsuite.version, autobahn.version)
+      print "Autobahn Fuzzing WebSocket Client (Autobahn Version %s / Autobahn Testsuite Version %s)" % (autobahntestsuite.version, autobahn.version)
       print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
       print "Servers = %s" % str([x["url"] + "@" + x["agent"] for x in spec["servers"]])
