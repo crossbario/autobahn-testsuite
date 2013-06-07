@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 ##
 ###############################################################################
 
-from autobahn.websocket import WebSocketProtocol
-from twisted.python import log
 import pickle
-import textwrap
 
 
 class Case:
@@ -49,6 +46,14 @@ class Case:
       self.reportTime = False
       self.subcase = None
       self.suppressClose = False # suppresses automatic close behavior (used in cases that deliberately send bad close behavior)
+
+      ## defaults for permessage-deflate - will be overridden in
+      ## permessage-deflate test cases (but only for those)
+      ##
+      self.perMessageDeflate = False
+      self.perMessageDeflateOffers = []
+      self.perMessageDeflateAccept = lambda acceptNoContextTakeover, acceptMaxWindowBits, requestNoContextTakeover, requestMaxWindowBits: None
+
       self.init()
 
    def getSubcaseCount(self):
