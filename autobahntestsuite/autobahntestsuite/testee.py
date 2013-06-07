@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ class TesteeServerFactory(WebSocketServerFactory):
          server = "AutobahnPython/%s" % autobahn.version
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
       self.setProtocolOptions(failByDrop = False) # spec conformance
+      self.setProtocolOptions(perMessageDeflate = True)
 
 
 
@@ -69,6 +70,7 @@ class TesteeClientFactory(WebSocketClientFactory):
    def __init__(self, url, debug = False, ident = None):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
       self.setProtocolOptions(failByDrop = False) # spec conformance
+      self.setProtocolOptions(perMessageDeflate = True)
 
       self.endCaseId = None
       self.currentCaseId = 0
