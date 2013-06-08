@@ -175,9 +175,33 @@ def createWssContext(o, factory):
 
 
 def loadTestData():
-   TEST_DATA = {'gutenberg_faust': {'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt', 'file': 'pg2229.txt'},
-                'lena512': {'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp', 'file': 'lena512.bmp'},
-                'ooms': {'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439', 'file': '10.1.1.105.5439.pdf'}}
+   TEST_DATA = {'gutenberg_faust':
+                  {'desc': "Human readable text, Goethe's Faust I (German)",
+                   'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
+                   'file':
+                   'pg2229.txt'
+                  },
+                'lena512':
+                  {'desc': 'Lena Picture, Bitmap 512x512 bw',
+                   'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
+                   'file': 'lena512.bmp'
+                  },
+                'ooms':
+                  {'desc': 'A larger PDF',
+                   'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
+                   'file': '10.1.1.105.5439.pdf'
+                  },
+                'json_data1':
+                  {'desc': 'Large JSON data file',
+                   'url': None,
+                   'file': 'data1.json'
+                  },
+                'html_data1':
+                  {'desc': 'Large HTML file',
+                   'url': None,
+                   'file': 'data1.html'
+                  }
+               }
 
    for t in TEST_DATA:
       fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA[t]['file'])

@@ -44,8 +44,8 @@ def init(self):
 
    self.p.perMessageDeflate = True
    if self.p.isServer:
-#      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept()
-      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept(True, 8)
+      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept()
+#      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept(True, 8)
    else:
       self.p.perMessageDeflateOffers = [PerMessageDeflateOffer()]
 
