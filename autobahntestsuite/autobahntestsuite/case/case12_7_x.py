@@ -21,7 +21,7 @@ __all__ = ['Case12_7_X', 'Case12_8_X']
 import copy, os
 
 from case import Case
-from autobahn.websocket import PerMessageDeflateOffer, PerMessageDeflateAccept
+from autobahn.compress import *
 
 ## list of (payload length, message count, case timeout)
 tests = [(0, 1000, 60),
@@ -42,12 +42,17 @@ def init(self):
    self.reportTime = True
    self.reportCompressionRatio = True
 
-   self.p.perMessageDeflate = True
    if self.p.isServer:
-      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept()
-#      self.p.perMessageDeflateAccept = lambda protocol, connectionRequest, perMessageDeflateOffer: PerMessageDeflateAccept(True, 8)
+      def perMessageCompressionAccept(protocol, connectionRequest, perMessageCompressionOffer):
+         if isinstance(perMessageCompressionOffer, PerMessageDeflateOffer):
+            return PerMessageDeflateAccept(True, 0)
+         elif isinstance(perMessageCompressionOffer, PerMessageBzip2Offer):
+            return PerMessageBzip2Accept()
+         else:
+            return None
+      self.p.perMessageCompressionAccept = perMessageCompressionAccept
    else:
-      self.p.perMessageDeflateOffers = [PerMessageDeflateOffer()]
+      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
 
    #self.payload = "Hello, world!" * 4096
    #self.payload = self.payload[:self.LEN]

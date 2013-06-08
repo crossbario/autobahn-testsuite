@@ -1031,7 +1031,6 @@ class FuzzingFactory:
 class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
    def connectionMade(self):
-      #self.perMessageDeflate = True
       WebSocketServerProtocol.connectionMade(self)
       FuzzingProtocol.connectionMade(self)
 

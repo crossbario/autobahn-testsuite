@@ -26,6 +26,8 @@ from autobahn.websocket import WebSocketClientFactory, \
 from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol
 
+from autobahn.compress import *
+
 
 class TesteeServerProtocol(WebSocketServerProtocol):
 
@@ -43,7 +45,18 @@ class TesteeServerFactory(WebSocketServerFactory):
          server = "AutobahnPython/%s" % autobahn.version
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
       self.setProtocolOptions(failByDrop = False) # spec conformance
-      self.setProtocolOptions(perMessageDeflate = True)
+
+      ## enable permessage-XXX compression extensions
+      ##
+      def perMessageCompressAccept(protocol, connectionRequest, perMessageCompressionOffer):
+         if isinstance(perMessageCompressionOffer, PerMessageDeflateOffer):
+            return PerMessageDeflateAccept()
+         elif isinstance(perMessageCompressionOffer, PerMessageBzip2Offer):
+            return PerMessageBzip2Accept()
+         else:
+            return None
+
+      self.setProtocolOptions(perMessageCompressAccept = perMessageCompressAccept)
 
 
 
@@ -70,7 +83,11 @@ class TesteeClientFactory(WebSocketClientFactory):
    def __init__(self, url, debug = False, ident = None):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
       self.setProtocolOptions(failByDrop = False) # spec conformance
-      self.setProtocolOptions(perMessageDeflate = True)
+
+      ## enable permessage-XXX compression extensions
+      ##
+      perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      self.setProtocolOptions(perMessageCompressionOffers = perMessageCompressionOffers)
 
       self.endCaseId = None
       self.currentCaseId = 0
