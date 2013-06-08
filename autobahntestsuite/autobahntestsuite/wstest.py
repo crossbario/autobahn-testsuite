@@ -174,6 +174,18 @@ def createWssContext(o, factory):
    return contextFactory
 
 
+def loadTestData():
+   TEST_DATA = {'gutenberg_faust': {'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt', 'file': 'pg2229.txt'},
+                'lena512': {'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp', 'file': 'lena512.bmp'},
+                'ooms': {'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439', 'file': '10.1.1.105.5439.pdf'}}
+
+   for t in TEST_DATA:
+      fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA[t]['file'])
+      TEST_DATA[t]['data'] = open(fn, 'rb').read()
+
+   return TEST_DATA
+
+
 def run():
 
    o = WsTestOptions()
@@ -194,6 +206,8 @@ def run():
 
    mode = str(o.opts['mode'])
 
+   testData = loadTestData()
+
    if mode in ['fuzzingclient',
                'fuzzingserver',
                'fuzzingwampclient',
@@ -211,6 +225,7 @@ def run():
             o.opts['cert'] = spec.get('cert', None)
 
          factory = FuzzingServerFactory(spec, debug)
+         factory.testData = testData
          context = createWssContext(o, factory)
          listenWS(factory, context)
 
@@ -225,6 +240,7 @@ def run():
 
       elif mode == 'fuzzingclient':
          factory = FuzzingClientFactory(spec, debug)
+         factory.testData = testData
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
 

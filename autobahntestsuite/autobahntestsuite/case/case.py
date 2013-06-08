@@ -28,6 +28,7 @@ class Case:
    UNCLEAN = "UNCLEAN"
    FAILED_BY_CLIENT = "FAILED BY CLIENT"
    INFORMATIONAL = "INFORMATIONAL"
+   UNIMPLEMENTED = "UNIMPLEMENTED"
    
    # to remove
    NO_CLOSE = "NO_CLOSE"
@@ -44,6 +45,8 @@ class Case:
       self.result = "Actual events differ from any expected."
       self.resultClose = "TCP connection was dropped without close handshake"
       self.reportTime = False
+      self.reportCompressionRatio = False
+      self.trafficStats = None
       self.subcase = None
       self.suppressClose = False # suppresses automatic close behavior (used in cases that deliberately send bad close behavior)
 
@@ -52,7 +55,7 @@ class Case:
       ##
       self.perMessageDeflate = False
       self.perMessageDeflateOffers = []
-      self.perMessageDeflateAccept = lambda acceptNoContextTakeover, acceptMaxWindowBits, requestNoContextTakeover, requestMaxWindowBits: None
+      self.perMessageDeflateAccept = lambda connectionRequest, acceptNoContextTakeover, acceptMaxWindowBits, requestNoContextTakeover, requestMaxWindowBits: None
 
       self.init()
 

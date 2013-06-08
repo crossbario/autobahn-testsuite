@@ -58,7 +58,7 @@ More information:
 
 setup (
    name = 'autobahntestsuite',
-   version = '0.5.3',
+   version = '0.5.4',
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
@@ -66,7 +66,7 @@ setup (
    author_email = 'autobahnws@googlegroups.com',
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
-   install_requires = ['setuptools', 'Autobahn>=0.5.1', 'Twisted>=11.1'],
+   install_requires = ['setuptools', 'Autobahn>=0.6.0', 'Twisted>=11.1'],
    packages = find_packages(),
    #packages = ['autobahntestsuite'],
    include_package_data = True,

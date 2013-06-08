@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -45,7 +45,8 @@ CaseCategories = {"0": "Handshake",
                   "7": "Close Handling",
                   "8": "Misc",
                   "9": "Limits/Performance",
-                  "10": "Misc"}
+                  "10": "Misc",
+                  "12": "Compression Limits/Performance"}
 
 CaseSubCategories = {"1.1": "Text Messages",
                      "1.2": "Binary Messages",
@@ -67,6 +68,7 @@ CaseSubCategories = {"1.1": "Text Messages",
 #                     "7.10": "Close frame structure: invalid close codes (peer initiated)",
 #                     "7.11": "Peer initiated timeouts",
                      "7.13": "Informational close information (fuzzer initiated)",
+                     
                      "9.1": "Text Message (increasing size)",
                      "9.2": "Binary Message (increasing size)",
                      "9.3": "Fragmented Text Message (fixed size, increasing fragment size)",
@@ -77,7 +79,11 @@ CaseSubCategories = {"1.1": "Text Messages",
                      "9.8": "Binary Message Roundtrip Time (fixed number, increasing size)",
                      "9.9": "Text Message (unlimited size)",
                      "9.10": "Binary Message (unlimited size)",
-                     "10.1": "Auto-Fragmentation"}
+                     "10.1": "Auto-Fragmentation",
+
+                     "12.7": "Compressed Text Message Roundtrip Time (fixed number, increasing size)",
+                     "12.8": "Compressed Binary Message Roundtrip Time (fixed number, increasing size)",
+                     }
 
 ##
 ## Cases
@@ -249,6 +255,8 @@ from case9_9_1 import *
 
 from case10_1_1 import *
 
+from case12_7_x import *
+
 
 ##
 ## This is the list of Case classes that will be run by the fuzzing server/client
@@ -287,3 +295,8 @@ Cases.extend(Case9_8_X)
 #Cases += [Case9_9_1]
 
 Cases += [Case10_1_1]
+
+#Cases += [Case12_1_1]
+
+Cases.extend(Case12_7_X)
+Cases.extend(Case12_8_X)

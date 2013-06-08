@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-import sys, os, re, json, binascii, datetime, time, random, textwrap
+import os, json, binascii, time, textwrap
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -30,9 +30,7 @@ from autobahn.websocket import WebSocketProtocol, \
                                WebSocketServerProtocol, \
                                WebSocketClientFactory, \
                                WebSocketClientProtocol, \
-                               HttpException, \
-                               connectWS, \
-                               listenWS
+                               connectWS
 
 from case import Case, \
                  Cases, \
@@ -60,6 +58,7 @@ def binLogData(data, maxlen = 64):
 
 
 def asciiLogData(data, maxlen = 64, replace = False):
+   ellipses = " ..."
    try:
       if len(data) > maxlen - len(ellipses):
          dd = data[:maxlen] + ellipses
@@ -80,10 +79,17 @@ class FuzzingProtocol:
 
    def connectionMade(self):
 
-      self.case = None
-      self.runCase = None
-      self.caseAgent = None
-      self.caseStarted = None
+      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted']
+
+      for attr in attrs:
+         if not hasattr(self, attr):
+            setattr(self, attr, None)
+
+      #self.case = None
+      #self.runCase = None
+      #self.caseAgent = None
+      #self.caseStarted = None
+
       self.caseStart = 0
       self.caseEnd = 0
 
@@ -115,6 +121,7 @@ class FuzzingProtocol:
                        "started": self.caseStarted,
                        "duration": int(round(1000. * (self.caseEnd - self.caseStart))), # case execution time in ms
                        "reportTime": self.runCase.reportTime, # True/False switch to control report output of duration
+                       "reportCompressionRatio": self.runCase.reportCompressionRatio,
                        "behavior": self.runCase.behavior,
                        "behaviorClose": self.runCase.behaviorClose,
                        "expected": self.runCase.expected,
@@ -143,7 +150,8 @@ class FuzzingProtocol:
                        "txOctetStats": self.txOctetStats,
                        "txFrameStats": self.txFrameStats,
                        "httpRequest": self.http_request_data,
-                       "httpResponse": self.http_response_data}
+                       "httpResponse": self.http_response_data,
+                       "trafficStats": self.runCase.trafficStats.__json__() if self.runCase.trafficStats else None}
 
          def cleanBin(e_old):
             e_new = []
@@ -639,47 +647,62 @@ class FuzzingFactory:
 
                case = self.agents[agentId][caseId]
 
-               agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
+               if case["behavior"] != Case.UNIMPLEMENTED:
 
-               if case["behavior"] == Case.OK:
-                  td_text = "Pass"
-                  td_class = "case_ok"
-               elif case["behavior"] == Case.NON_STRICT:
-                  td_text = "Non-Strict"
-                  td_class = "case_non_strict"
-               elif case["behavior"] == Case.NO_CLOSE:
-                  td_text = "No Close"
-                  td_class = "case_no_close"
-               elif case["behavior"] == Case.INFORMATIONAL:
-                  td_text = "Info"
-                  td_class = "case_info"
-               else:
-                  td_text = "Fail"
-                  td_class = "case_failed"
+                  agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
 
-               if case["behaviorClose"] == Case.OK:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_ok"
-               elif case["behaviorClose"] == Case.FAILED_BY_CLIENT:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_almost"
-               elif case["behaviorClose"] == Case.WRONG_CODE:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_non_strict"
-               elif case["behaviorClose"] == Case.UNCLEAN:
-                  ctd_text = "Unclean"
-                  ctd_class = "case_failed"
-               elif case["behaviorClose"] == Case.INFORMATIONAL:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_info"
-               else:
-                  ctd_text = "Fail"
-                  ctd_class = "case_failed"
+                  if case["behavior"] == Case.OK:
+                     td_text = "Pass"
+                     td_class = "case_ok"
+                  elif case["behavior"] == Case.NON_STRICT:
+                     td_text = "Non-Strict"
+                     td_class = "case_non_strict"
+                  elif case["behavior"] == Case.NO_CLOSE:
+                     td_text = "No Close"
+                     td_class = "case_no_close"
+                  elif case["behavior"] == Case.INFORMATIONAL:
+                     td_text = "Info"
+                     td_class = "case_info"
+                  else:
+                     td_text = "Fail"
+                     td_class = "case_failed"
 
-               if case["reportTime"]:
-                  f.write('            <td class="%s"><a href="%s">%s</a><br/><span class="case_duration">%s ms</span></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, case["duration"],ctd_class,ctd_text))
+                  if case["behaviorClose"] == Case.OK:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_ok"
+                  elif case["behaviorClose"] == Case.FAILED_BY_CLIENT:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_almost"
+                  elif case["behaviorClose"] == Case.WRONG_CODE:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_non_strict"
+                  elif case["behaviorClose"] == Case.UNCLEAN:
+                     ctd_text = "Unclean"
+                     ctd_class = "case_failed"
+                  elif case["behaviorClose"] == Case.INFORMATIONAL:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_info"
+                  else:
+                     ctd_text = "Fail"
+                     ctd_class = "case_failed"
+
+                  detail = ""
+
+                  if case["reportTime"]:
+                     detail += "%d ms" % case["duration"]
+
+                  if case["reportCompressionRatio"] and case["trafficStats"] is not None:
+                     crIn = case["trafficStats"]["incomingCompressionRatio"]
+                     crOut = case["trafficStats"]["outgoingCompressionRatio"]
+                     detail += " [%s/%s]" % ("%.3f" % crIn if crIn is not None else "-", "%.3f" % crOut if crOut is not None else "-")
+
+                  if detail != "":
+                     f.write('            <td class="%s"><a href="%s">%s</a><br/><span class="case_duration">%s</span></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, detail, ctd_class, ctd_text))
+                  else:
+                     f.write('            <td class="%s"><a href="%s">%s</a></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, ctd_class, ctd_text))
+
                else:
-                  f.write('            <td class="%s"><a href="%s">%s</a></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text,ctd_class,ctd_text))
+                  f.write('            <td class="case_unimplemented close_flex" colspan="2">Unimplemented</td>\n')
 
             else:
                f.write('            <td class="case_missing close_flex" colspan="2">Missing</td>\n')
@@ -1004,9 +1027,11 @@ class FuzzingFactory:
       return report_filename
 
 
+
 class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
    def connectionMade(self):
+      #self.perMessageDeflate = True
       WebSocketServerProtocol.connectionMade(self)
       FuzzingProtocol.connectionMade(self)
 
@@ -1078,6 +1103,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
       return None
 
 
+
 class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
    protocol = FuzzingServerProtocol
@@ -1112,16 +1138,12 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
       print "Cases = %s" % str(self.specCases)
 
 
+
 class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
 
    def connectionMade(self):
       FuzzingProtocol.connectionMade(self)
       WebSocketClientProtocol.connectionMade(self)
-
-      self.caseAgent = self.factory.agent
-      self.case = self.factory.currentCaseIndex
-      self.Case = Cases[self.case - 1]
-      self.runCase = self.Case(self)
       self.caseStarted = utcnow()
       print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, self.peerstr)
 
@@ -1129,6 +1151,7 @@ class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
    def connectionLost(self, reason):
       WebSocketClientProtocol.connectionLost(self, reason)
       FuzzingProtocol.connectionLost(self, reason)
+
 
 
 class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
@@ -1160,6 +1183,18 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          if self.nextCase():
             connectWS(self)
 
+
+   def buildProtocol(self, addr):
+      proto = FuzzingClientProtocol()
+      proto.factory = self
+
+      proto.caseAgent = self.agent
+      proto.case = self.currentCaseIndex
+      proto.Case = Cases[self.currentCaseIndex - 1]
+      proto.runCase = proto.Case(proto)
+
+      return proto
+ 
 
    def nextServer(self):
       self.currSpecCase = -1

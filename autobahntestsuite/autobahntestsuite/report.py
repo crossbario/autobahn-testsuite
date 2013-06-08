@@ -234,6 +234,11 @@ td.case_info {
    text-align: center;
 }
 
+td.case_unimplemented {
+   background-color: #800080;
+   text-align: center;
+}
+
 td.case_failed {
    background-color: #900;
    text-align: center;
