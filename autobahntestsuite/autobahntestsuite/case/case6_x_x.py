@@ -394,7 +394,7 @@ if __name__ == '__main__':
    #test_utf8(UTF8_TEST_SEQUENCES)
 
    TESTPOINTS = [(0xfffb, u'\ufffb'),
-                 (0xd807, u'\ud807'),
+                 # (0xd807, u'\ud807'), # Jython does not like this
                  (0x11000, None),
                  (0x110000, None)]
    test_encode(TESTPOINTS)
