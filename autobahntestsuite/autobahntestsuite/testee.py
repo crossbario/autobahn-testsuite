@@ -86,7 +86,8 @@ class TesteeClientFactory(WebSocketClientFactory):
 
       ## enable permessage-XXX compression extensions
       ##
-      perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      #perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      perMessageCompressionOffers = [PerMessageDeflateOffer()]
       self.setProtocolOptions(perMessageCompressionOffers = perMessageCompressionOffers)
 
       self.endCaseId = None

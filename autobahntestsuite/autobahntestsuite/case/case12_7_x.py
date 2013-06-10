@@ -45,6 +45,7 @@ def init(self):
    if self.p.isServer:
       def perMessageCompressionAccept(protocol, connectionRequest, perMessageCompressionOffer):
          if isinstance(perMessageCompressionOffer, PerMessageDeflateOffer):
+            #return PerMessageDeflateAccept(True, 0)
             return PerMessageDeflateAccept(True, 0)
          elif isinstance(perMessageCompressionOffer, PerMessageBzip2Offer):
             return PerMessageBzip2Accept()
@@ -69,7 +70,7 @@ def onOpen(self):
                          "closeCode": [self.p.CLOSE_STATUS_CODE_NORMAL],
                          "requireClean": True}
 
-   if self.p._deflateParams is None:
+   if self.p._perMessageCompress is None:
       self.behavior = Case.UNIMPLEMENTED
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
    else:
