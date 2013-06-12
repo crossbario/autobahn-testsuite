@@ -51,11 +51,14 @@ class TesteeServerFactory(WebSocketServerFactory):
       def accept(offers):
          for offer in offers:
             if isinstance(offer, PerMessageDeflateOffer):
-               return PerMessageDeflateAccept(offer)
-            #elif isinstance(offer, PerMessageBzip2Offer):
-            #   return PerMessageBzip2Accept(offer)
-            #elif isinstance(offer, PerMessageSnappyOffer):
-            #   return PerMessageSnappyAccept(offer)
+               return PerMessageDeflateOfferAccept(offer)
+
+            elif isinstance(offer, PerMessageBzip2Offer):
+               return PerMessageBzip2OfferAccept(offer)
+
+            elif isinstance(offer, PerMessageSnappyOffer):
+               return PerMessageSnappyOfferAccept(offer)
+
       self.setProtocolOptions(perMessageCompressAccept = accept)
 
 
@@ -89,6 +92,19 @@ class TesteeClientFactory(WebSocketClientFactory):
 #      offers = [PerMessageDeflateOffer()]
       offers = [PerMessageSnappyOffer(), PerMessageBzip2Offer(), PerMessageDeflateOffer()]
       self.setProtocolOptions(perMessageCompressionOffers = offers)
+
+      def accept(response):
+         if isinstance(response, PerMessageDeflateResponse):
+            return PerMessageDeflateResponseAccept(response)
+
+         elif isinstance(response, PerMessageBzip2Response):
+            return PerMessageBzip2ResponseAccept(response)
+
+         elif isinstance(response, PerMessageSnappyResponse):
+            return PerMessageSnappyResponseAccept(response)
+
+      self.setProtocolOptions(perMessageCompressionAccept = accept)
+
 
       self.endCaseId = None
       self.currentCaseId = 0

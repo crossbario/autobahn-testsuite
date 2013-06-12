@@ -46,14 +46,18 @@ def init(self):
       def accept(offers):
          for offer in offers:
             if isinstance(offer, PerMessageDeflateOffer):
-               # THIS DOES NOT WORK!!!
                #offer.requestMaxWindowBits = 8
                #offer.requestNoContextTakeover = True
-               return PerMessageDeflateAccept(offer, True, 8)
-            elif isinstance(offer, PerMessageBzip2Offer):
-               return PerMessageBzip2Accept(offer)
-            elif isinstance(offer, PerMessageSnappyOffer):
-               return PerMessageSnappyAccept(offer)
+               #return PerMessageDeflateOfferAccept(offer, True, 8)
+               return PerMessageDeflateOfferAccept(offer, True, 8, windowBits = 8)
+#               return PerMessageDeflateOfferAccept(offer, True, 8, noContextTakeover = True, windowBits = 8)
+
+            #elif isinstance(offer, PerMessageBzip2Offer):
+            #   return PerMessageBzip2OfferAccept(offer)
+
+            #elif isinstance(offer, PerMessageSnappyOffer):
+            #   return PerMessageSnappyOfferAccept(offer)
+
       self.p.perMessageCompressionAccept = accept
    else:
       self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageSnappy(), PerMessageDeflateOffer()]
