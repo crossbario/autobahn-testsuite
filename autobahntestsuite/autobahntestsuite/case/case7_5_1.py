@@ -17,6 +17,7 @@
 ###############################################################################
 
 from case import Case
+import binascii
 
 class Case7_5_1(Case):
 
@@ -34,7 +35,11 @@ class Case7_5_1(Case):
          self.behavior = Case.FAILED
          self.passed = False
          self.result = self.resultClose
-   
+
+      ## the close reason we sent was invalid UTF8, so we
+      ## convert to HEX representation for later case reporting
+      self.p.localCloseReason = binascii.b2a_hex(self.p.localCloseReason)
+
    def onOpen(self):
       self.payload = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5\xed\xa0\x80\x65\x64\x69\x74\x65\x64'
       self.expected[Case.OK] = []      

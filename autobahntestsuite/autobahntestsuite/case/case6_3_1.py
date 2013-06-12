@@ -29,7 +29,7 @@ class Case6_3_1(Case):
    PAYLOAD3 = '\x65\x64\x69\x74\x65\x64'
    PAYLOAD = PAYLOAD1 + PAYLOAD2 + PAYLOAD3
 
-   DESCRIPTION = """Send invalid UTF-8 text message unfragmented.<br><br>MESSAGE:<br>%s<br>%s""" % (PAYLOAD, binascii.b2a_hex(PAYLOAD))
+   DESCRIPTION = """Send invalid UTF-8 text message unfragmented.<br><br>MESSAGE:<br>%s""" % binascii.b2a_hex(PAYLOAD)
 
    EXPECTATION = """The connection is failed immediately, since the payload is not valid UTF-8."""
 

@@ -58,7 +58,7 @@ More information:
 
 setup (
    name = 'autobahntestsuite',
-   version = '0.5.4',
+   version = '0.5.5',
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
