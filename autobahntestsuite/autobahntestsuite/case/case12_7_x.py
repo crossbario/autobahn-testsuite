@@ -43,17 +43,20 @@ def init(self):
    self.reportCompressionRatio = True
 
    if self.p.isServer:
-      def perMessageCompressionAccept(protocol, connectionRequest, perMessageCompressionOffer):
-         if isinstance(perMessageCompressionOffer, PerMessageDeflateOffer):
-            #return PerMessageDeflateAccept(True, 0)
-            return PerMessageDeflateAccept(True, 0)
-         elif isinstance(perMessageCompressionOffer, PerMessageBzip2Offer):
-            return PerMessageBzip2Accept()
-         else:
-            return None
-      self.p.perMessageCompressionAccept = perMessageCompressionAccept
+      def accept(offers):
+         for offer in offers:
+            if isinstance(offer, PerMessageDeflateOffer):
+               # THIS DOES NOT WORK!!!
+               #offer.requestMaxWindowBits = 8
+               #offer.requestNoContextTakeover = True
+               return PerMessageDeflateAccept(offer, True, 8)
+            elif isinstance(offer, PerMessageBzip2Offer):
+               return PerMessageBzip2Accept(offer)
+            elif isinstance(offer, PerMessageSnappyOffer):
+               return PerMessageSnappyAccept(offer)
+      self.p.perMessageCompressionAccept = accept
    else:
-      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageSnappy(), PerMessageDeflateOffer()]
 
    #self.payload = "Hello, world!" * 4096
    #self.payload = self.payload[:self.LEN]

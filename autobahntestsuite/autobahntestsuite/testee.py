@@ -48,15 +48,15 @@ class TesteeServerFactory(WebSocketServerFactory):
 
       ## enable permessage-XXX compression extensions
       ##
-      def perMessageCompressAccept(protocol, connectionRequest, perMessageCompressionOffer):
-         if isinstance(perMessageCompressionOffer, PerMessageDeflateOffer):
-            return PerMessageDeflateAccept()
-         elif isinstance(perMessageCompressionOffer, PerMessageBzip2Offer):
-            return PerMessageBzip2Accept()
-         else:
-            return None
-
-      self.setProtocolOptions(perMessageCompressAccept = perMessageCompressAccept)
+      def accept(offers):
+         for offer in offers:
+            if isinstance(offer, PerMessageDeflateOffer):
+               return PerMessageDeflateAccept(offer)
+            #elif isinstance(offer, PerMessageBzip2Offer):
+            #   return PerMessageBzip2Accept(offer)
+            #elif isinstance(offer, PerMessageSnappyOffer):
+            #   return PerMessageSnappyAccept(offer)
+      self.setProtocolOptions(perMessageCompressAccept = accept)
 
 
 
@@ -86,9 +86,9 @@ class TesteeClientFactory(WebSocketClientFactory):
 
       ## enable permessage-XXX compression extensions
       ##
-      #perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageDeflateOffer()]
-      perMessageCompressionOffers = [PerMessageDeflateOffer()]
-      self.setProtocolOptions(perMessageCompressionOffers = perMessageCompressionOffers)
+#      offers = [PerMessageDeflateOffer()]
+      offers = [PerMessageSnappyOffer(), PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      self.setProtocolOptions(perMessageCompressionOffers = offers)
 
       self.endCaseId = None
       self.currentCaseId = 0
