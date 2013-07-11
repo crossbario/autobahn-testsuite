@@ -67,6 +67,13 @@ def init(self):
 #      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageSnappyOffer(), PerMessageDeflateOffer()]
       self.p.perMessageCompressionOffers = [PerMessageDeflateOffer()]
 
+      def accept(response):
+         if isinstance(response, PerMessageDeflateResponse):
+            return PerMessageDeflateResponseAccept(response)
+
+      self.p.perMessageCompressionAccept = accept
+
+
    #self.payload = "Hello, world!" * 4096
    #self.payload = self.payload[:self.LEN]
    #print self.__class__.__name__
