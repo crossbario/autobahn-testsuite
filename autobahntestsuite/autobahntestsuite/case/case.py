@@ -107,7 +107,7 @@ class Case:
       elif self.p.remoteCloseCode != None and self.p.remoteCloseCode not in self.expectedClose["closeCode"]:
          self.behaviorClose = Case.WRONG_CODE
          self.resultClose = "The close code should have been %s or empty" % ','.join(map(str,self.expectedClose["closeCode"]))
-      elif not self.p.isServer and self.p.droppedByMe:
+      elif not self.p.factory.isServer and self.p.droppedByMe:
          self.behaviorClose = Case.FAILED_BY_CLIENT
          self.resultClose = "It is preferred that the server close the TCP connection"
       else:

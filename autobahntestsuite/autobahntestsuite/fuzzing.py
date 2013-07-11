@@ -143,7 +143,7 @@ class FuzzingProtocol:
                        "localCloseReason": self.localCloseReason,
                        "remoteCloseCode": self.remoteCloseCode,
                        "remoteCloseReason": self.remoteCloseReason,
-                       "isServer": self.isServer,
+                       "isServer": self.factory.isServer,
                        "createStats": self.createStats,
                        "rxOctetStats": self.rxOctetStats,
                        "rxFrameStats": self.rxFrameStats,

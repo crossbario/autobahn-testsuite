@@ -59,7 +59,7 @@ class TesteeServerFactory(WebSocketServerFactory):
             elif isinstance(offer, PerMessageSnappyOffer):
                return PerMessageSnappyOfferAccept(offer)
 
-      self.setProtocolOptions(perMessageCompressAccept = accept)
+      self.setProtocolOptions(perMessageCompressionAccept = accept)
 
 
 

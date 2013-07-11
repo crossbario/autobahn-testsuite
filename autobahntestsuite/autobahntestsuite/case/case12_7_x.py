@@ -42,15 +42,19 @@ def init(self):
    self.reportTime = True
    self.reportCompressionRatio = True
 
-   if self.p.isServer:
+   self.expectedClose = {"closedByMe": True,
+                         "closeCode": [self.p.CLOSE_STATUS_CODE_NORMAL],
+                         "requireClean": True}
+
+   if self.p.factory.isServer:
       def accept(offers):
          for offer in offers:
             if isinstance(offer, PerMessageDeflateOffer):
                #offer.requestMaxWindowBits = 8
                #offer.requestNoContextTakeover = True
-               #return PerMessageDeflateOfferAccept(offer, True, 8)
-               return PerMessageDeflateOfferAccept(offer, True, 8, windowBits = 8)
-#               return PerMessageDeflateOfferAccept(offer, True, 8, noContextTakeover = True, windowBits = 8)
+               return PerMessageDeflateOfferAccept(offer)
+               #return PerMessageDeflateOfferAccept(offer, True, 8, windowBits = 8)
+               #return PerMessageDeflateOfferAccept(offer, True, 8, noContextTakeover = True, windowBits = 8)
 
             #elif isinstance(offer, PerMessageBzip2Offer):
             #   return PerMessageBzip2OfferAccept(offer)
@@ -60,7 +64,8 @@ def init(self):
 
       self.p.perMessageCompressionAccept = accept
    else:
-      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageSnappy(), PerMessageDeflateOffer()]
+#      self.p.perMessageCompressionOffers = [PerMessageBzip2Offer(), PerMessageSnappyOffer(), PerMessageDeflateOffer()]
+      self.p.perMessageCompressionOffers = [PerMessageDeflateOffer()]
 
    #self.payload = "Hello, world!" * 4096
    #self.payload = self.payload[:self.LEN]
@@ -73,9 +78,6 @@ def init(self):
 
 def onOpen(self):
    self.p.enableWirelog(False)
-   self.expectedClose = {"closedByMe": True,
-                         "closeCode": [self.p.CLOSE_STATUS_CODE_NORMAL],
-                         "requireClean": True}
 
    if self.p._perMessageCompress is None:
       self.behavior = Case.UNIMPLEMENTED
