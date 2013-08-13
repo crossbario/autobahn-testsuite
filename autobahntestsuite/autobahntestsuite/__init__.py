@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -31,8 +31,10 @@ import testee
 import wsperfcontrol
 import wsperfmaster
 import case
+import caseset
 import report
 import spectemplate
 import fuzzing
+import wampfuzzing
 import wamptestserver
 import massconnect

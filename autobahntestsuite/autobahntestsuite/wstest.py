@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -32,6 +32,7 @@ from autobahn.utf8validator import Utf8Validator
 from autobahn.xormasker import XorMaskerNull
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
+from wampfuzzing import FuzzingWampClient
 from echo import EchoClientFactory, EchoServerFactory
 from broadcast import BroadcastClientFactory, BroadcastServerFactory
 from testee import TesteeClientFactory, TesteeServerFactory
@@ -43,6 +44,8 @@ from massconnect import MassConnectTest
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
+                         SPEC_FUZZINGWAMPSERVER, \
+                         SPEC_FUZZINGWAMPCLIENT, \
                          SPEC_WSPERFCONTROL, \
                          SPEC_MASSCONNECT
 
@@ -54,6 +57,8 @@ class WsTestOptions(usage.Options):
             'broadcastserver',
             'fuzzingserver',
             'fuzzingclient',
+            'fuzzingwampserver',
+            'fuzzingwampclient',
             'testeeserver',
             'testeeclient',
             'wsperfcontrol',
@@ -91,6 +96,8 @@ class WsTestOptions(usage.Options):
 
       if self['mode'] in ['fuzzingclient',
                           'fuzzingserver',
+                          'fuzzingwampclient',
+                          'fuzzingwampserver',
                           'wsperfcontrol',
                           'massconnect']:
          if not self['spec']:
@@ -100,6 +107,8 @@ class WsTestOptions(usage.Options):
             dsf = {
                      'fuzzingclient': ['fuzzingclient.json', SPEC_FUZZINGCLIENT],
                      'fuzzingserver': ['fuzzingserver.json', SPEC_FUZZINGSERVER],
+                     'fuzzingwampclient': ['fuzzingwampclient.json', SPEC_FUZZINGWAMPCLIENT],
+                     'fuzzingwampserver': ['fuzzingwampserver.json', SPEC_FUZZINGWAMPSERVER],
                      'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL],
                      'massconnect': ['massconnect.json', SPEC_MASSCONNECT]
                   }
@@ -165,6 +174,42 @@ def createWssContext(o, factory):
    return contextFactory
 
 
+def loadTestData():
+   TEST_DATA = {'gutenberg_faust':
+                  {'desc': "Human readable text, Goethe's Faust I (German)",
+                   'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
+                   'file':
+                   'pg2229.txt'
+                  },
+                'lena512':
+                  {'desc': 'Lena Picture, Bitmap 512x512 bw',
+                   'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
+                   'file': 'lena512.bmp'
+                  },
+                'ooms':
+                  {'desc': 'A larger PDF',
+                   'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
+                   'file': '10.1.1.105.5439.pdf'
+                  },
+                'json_data1':
+                  {'desc': 'Large JSON data file',
+                   'url': None,
+                   'file': 'data1.json'
+                  },
+                'html_data1':
+                  {'desc': 'Large HTML file',
+                   'url': None,
+                   'file': 'data1.html'
+                  }
+               }
+
+   for t in TEST_DATA:
+      fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA[t]['file'])
+      TEST_DATA[t]['data'] = open(fn, 'rb').read()
+
+   return TEST_DATA
+
+
 def run():
 
    o = WsTestOptions()
@@ -185,7 +230,12 @@ def run():
 
    mode = str(o.opts['mode'])
 
-   if mode in ['fuzzingclient', 'fuzzingserver']:
+   testData = loadTestData()
+
+   if mode in ['fuzzingclient',
+               'fuzzingserver',
+               'fuzzingwampclient',
+               'fuzzingwampserver']:
 
       spec = str(o.opts['spec'])
       spec = json.loads(open(spec).read())
@@ -199,6 +249,7 @@ def run():
             o.opts['cert'] = spec.get('cert', None)
 
          factory = FuzzingServerFactory(spec, debug)
+         factory.testData = testData
          context = createWssContext(o, factory)
          listenWS(factory, context)
 
@@ -213,8 +264,19 @@ def run():
 
       elif mode == 'fuzzingclient':
          factory = FuzzingClientFactory(spec, debug)
+         factory.testData = testData
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
+
+      elif mode == 'fuzzingwampserver':
+
+         raise Exception("not implemented")
+
+      elif mode == 'fuzzingwampclient':
+
+         client = FuzzingWampClient(spec, debug)
+         # no connectWS done here, since this is done within
+         # FuzzingWampClient automatically to orchestrate tests
 
       else:
          raise Exception("logic error")

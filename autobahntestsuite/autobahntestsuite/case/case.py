@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -16,10 +16,7 @@
 ##
 ###############################################################################
 
-from autobahn.websocket import WebSocketProtocol
-from twisted.python import log
 import pickle
-import textwrap
 
 
 class Case:
@@ -31,6 +28,7 @@ class Case:
    UNCLEAN = "UNCLEAN"
    FAILED_BY_CLIENT = "FAILED BY CLIENT"
    INFORMATIONAL = "INFORMATIONAL"
+   UNIMPLEMENTED = "UNIMPLEMENTED"
    
    # to remove
    NO_CLOSE = "NO_CLOSE"
@@ -47,8 +45,18 @@ class Case:
       self.result = "Actual events differ from any expected."
       self.resultClose = "TCP connection was dropped without close handshake"
       self.reportTime = False
+      self.reportCompressionRatio = False
+      self.trafficStats = None
       self.subcase = None
       self.suppressClose = False # suppresses automatic close behavior (used in cases that deliberately send bad close behavior)
+
+      ## defaults for permessage-deflate - will be overridden in
+      ## permessage-deflate test cases (but only for those)
+      ##
+      self.perMessageDeflate = False
+      self.perMessageDeflateOffers = []
+      self.perMessageDeflateAccept = lambda connectionRequest, acceptNoContextTakeover, acceptMaxWindowBits, requestNoContextTakeover, requestMaxWindowBits: None
+
       self.init()
 
    def getSubcaseCount(self):
@@ -99,7 +107,7 @@ class Case:
       elif self.p.remoteCloseCode != None and self.p.remoteCloseCode not in self.expectedClose["closeCode"]:
          self.behaviorClose = Case.WRONG_CODE
          self.resultClose = "The close code should have been %s or empty" % ','.join(map(str,self.expectedClose["closeCode"]))
-      elif not self.p.isServer and self.p.droppedByMe:
+      elif not self.p.factory.isServer and self.p.droppedByMe:
          self.behaviorClose = Case.FAILED_BY_CLIENT
          self.resultClose = "It is preferred that the server close the TCP connection"
       else:

@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -15,6 +15,15 @@
 ##  limitations under the License.
 ##
 ###############################################################################
+
+__all__ = ("CSS_COMMON",
+           "CSS_MASTER_REPORT",
+           "CSS_DETAIL_REPORT",
+           "JS_MASTER_REPORT")
+
+##
+## CSS/JS include bits for WebSocket and WAMP test reports
+##
 
 ## CSS common for all reports
 ##
@@ -222,6 +231,11 @@ td.case_non_strict, td.case_no_close {
 
 td.case_info {
    background-color: #4095BF;
+   text-align: center;
+}
+
+td.case_unimplemented {
+   background-color: #800080;
    text-align: center;
 }
 

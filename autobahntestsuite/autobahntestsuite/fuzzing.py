@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-import sys, os, re, json, binascii, datetime, time, random, textwrap
+import os, json, binascii, time, textwrap
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -30,21 +30,15 @@ from autobahn.websocket import WebSocketProtocol, \
                                WebSocketServerProtocol, \
                                WebSocketClientFactory, \
                                WebSocketClientProtocol, \
-                               HttpException, \
-                               connectWS, \
-                               listenWS
+                               connectWS
 
 from case import Case, \
                  Cases, \
                  CaseCategories, \
                  CaseSubCategories, \
-                 caseClasstoId, \
-                 caseClasstoIdTuple, \
-                 caseClassToPrettyDescription, \
-                 CasesIndices, \
-                 CasesById, \
-                 caseIdtoIdTuple, \
-                 caseIdTupletoId
+                 CaseBasename
+
+from caseset import CaseSet
 
 from autobahn.util import utcnow
 
@@ -52,74 +46,6 @@ from report import CSS_COMMON, \
                    CSS_DETAIL_REPORT, \
                    CSS_MASTER_REPORT, \
                    JS_MASTER_REPORT
-
-
-def resolveCasePatternList(patterns):
-   """
-   Return list of test cases that match against a list of case patterns.
-   """
-   specCases = []
-   for c in patterns:
-      if c.find('*') >= 0:
-         s = c.replace('.', '\.').replace('*', '.*')
-         p = re.compile(s)
-         t = []
-         for x in CasesIndices.keys():
-            if p.match(x):
-               t.append(caseIdtoIdTuple(x))
-         for h in sorted(t):
-            specCases.append(caseIdTupletoId(h))
-      else:
-         specCases.append(c)
-   return specCases
-
-
-def parseSpecCases(spec):
-   """
-   Return list of test cases that match against case patterns, minus exclude patterns.
-   """
-   specCases = resolveCasePatternList(spec["cases"])
-   if spec.has_key("exclude-cases"):
-      excludeCases = resolveCasePatternList(spec["exclude-cases"])
-   else:
-      excludeCases = []
-   c = list(set(specCases) - set(excludeCases))
-   cases = [caseIdTupletoId(y) for y in sorted([caseIdtoIdTuple(x) for x in c])]
-   return cases
-
-
-def parseExcludeAgentCases(spec):
-   """
-   Parses "exclude-agent-cases" from the spec into a list of pairs
-   of agent pattern and case pattern list.
-   """
-   if spec.has_key("exclude-agent-cases"):
-      ee = spec["exclude-agent-cases"]
-      pats1 = []
-      for e in ee:
-         s1 = "^" + e.replace('.', '\.').replace('*', '.*') + "$"
-         p1 = re.compile(s1)
-         pats2 = []
-         for z in ee[e]:
-            s2 = "^" + z.replace('.', '\.').replace('*', '.*') + "$"
-            p2 = re.compile(s2)
-            pats2.append(p2)
-         pats1.append((p1, pats2))
-      return pats1
-   else:
-      return []
-
-
-def checkAgentCaseExclude(patterns, agent, case):
-   """
-   Check if we should exclude a specific case for given agent.
-   """
-   for p in patterns:
-      if p[0].match(agent):
-         for pp in p[1]:
-            if pp.match(case):
-               return True
-   return False
 
 
 def binLogData(data, maxlen = 64):
@@ -132,6 +58,7 @@ def binLogData(data, maxlen = 64):
 
 
 def asciiLogData(data, maxlen = 64, replace = False):
+   ellipses = " ..."
    try:
       if len(data) > maxlen - len(ellipses):
          dd = data[:maxlen] + ellipses
@@ -152,10 +79,17 @@ class FuzzingProtocol:
 
    def connectionMade(self):
 
-      self.case = None
-      self.runCase = None
-      self.caseAgent = None
-      self.caseStarted = None
+      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted']
+
+      for attr in attrs:
+         if not hasattr(self, attr):
+            setattr(self, attr, None)
+
+      #self.case = None
+      #self.runCase = None
+      #self.caseAgent = None
+      #self.caseStarted = None
+
       self.caseStart = 0
       self.caseEnd = 0
 
@@ -180,13 +114,14 @@ class FuzzingProtocol:
          self.caseEnd = time.time()
 
          caseResult = {"case": self.case,
-                       "id": caseClasstoId(self.Case),
+                       "id": self.factory.CaseSet.caseClasstoId(self.Case),
                        "description": self.Case.DESCRIPTION,
                        "expectation": self.Case.EXPECTATION,
                        "agent": self.caseAgent,
                        "started": self.caseStarted,
                        "duration": int(round(1000. * (self.caseEnd - self.caseStart))), # case execution time in ms
                        "reportTime": self.runCase.reportTime, # True/False switch to control report output of duration
+                       "reportCompressionRatio": self.runCase.reportCompressionRatio,
                        "behavior": self.runCase.behavior,
                        "behaviorClose": self.runCase.behaviorClose,
                        "expected": self.runCase.expected,
@@ -208,14 +143,15 @@ class FuzzingProtocol:
                        "localCloseReason": self.localCloseReason,
                        "remoteCloseCode": self.remoteCloseCode,
                        "remoteCloseReason": self.remoteCloseReason,
-                       "isServer": self.isServer,
+                       "isServer": self.factory.isServer,
                        "createStats": self.createStats,
                        "rxOctetStats": self.rxOctetStats,
                        "rxFrameStats": self.rxFrameStats,
                        "txOctetStats": self.txOctetStats,
                        "txFrameStats": self.txFrameStats,
                        "httpRequest": self.http_request_data,
-                       "httpResponse": self.http_response_data}
+                       "httpResponse": self.http_response_data,
+                       "trafficStats": self.runCase.trafficStats.__json__() if self.runCase.trafficStats else None}
 
          def cleanBin(e_old):
             e_new = []
@@ -339,8 +275,8 @@ class FuzzingProtocol:
 
       if self.runCase:
 
-         cc_id = caseClasstoId(self.runCase.__class__)
-         if checkAgentCaseExclude(self.factory.specExcludeAgentCases, self.caseAgent, cc_id):
+         cc_id = self.factory.CaseSet.caseClasstoId(self.runCase.__class__)
+         if self.factory.CaseSet.checkAgentCaseExclude(self.factory.specExcludeAgentCases, self.caseAgent, cc_id):
             print "Skipping test case %s for agent %s by test configuration!" % (cc_id, self.caseAgent)
             self.runCase = None
             self.sendClose()
@@ -364,12 +300,12 @@ class FuzzingProtocol:
             }))
             self.sendClose()
 
-         self.factory.addResultListener(self.caseAgent, caseClasstoId(self.Case), sendResults)
+         self.factory.addResultListener(self.caseAgent, self.factory.CaseSet.caseClasstoId(self.Case), sendResults)
 
       elif self.path == "/getCaseInfo":
          self.sendMessage(json.dumps({
-            'id':caseClasstoId(self.Case),
-            'description':caseClassToPrettyDescription(self.Case),
+            'id': self.factory.CaseSet.caseClasstoId(self.Case),
+            'description': self.factory.CaseSet.caseClassToPrettyDescription(self.Case),
          }))
          self.sendClose()
 
@@ -663,8 +599,8 @@ class FuzzingFactory:
       ##
       cl = []
       for c in Cases:
-         t = caseClasstoIdTuple(c)
-         cl.append((t, caseIdTupletoId(t)))
+         t = self.CaseSet.caseClasstoIdTuple(c)
+         cl.append((t, self.CaseSet.caseIdTupletoId(t)))
       cl = sorted(cl)
       caseList = []
       for c in cl:
@@ -711,47 +647,62 @@ class FuzzingFactory:
 
                case = self.agents[agentId][caseId]
 
-               agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
+               if case["behavior"] != Case.UNIMPLEMENTED:
 
-               if case["behavior"] == Case.OK:
-                  td_text = "Pass"
-                  td_class = "case_ok"
-               elif case["behavior"] == Case.NON_STRICT:
-                  td_text = "Non-Strict"
-                  td_class = "case_non_strict"
-               elif case["behavior"] == Case.NO_CLOSE:
-                  td_text = "No Close"
-                  td_class = "case_no_close"
-               elif case["behavior"] == Case.INFORMATIONAL:
-                  td_text = "Info"
-                  td_class = "case_info"
-               else:
-                  td_text = "Fail"
-                  td_class = "case_failed"
+                  agent_case_report_file = self.makeAgentCaseReportFilename(agentId, caseId, ext = 'html')
 
-               if case["behaviorClose"] == Case.OK:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_ok"
-               elif case["behaviorClose"] == Case.FAILED_BY_CLIENT:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_almost"
-               elif case["behaviorClose"] == Case.WRONG_CODE:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_non_strict"
-               elif case["behaviorClose"] == Case.UNCLEAN:
-                  ctd_text = "Unclean"
-                  ctd_class = "case_failed"
-               elif case["behaviorClose"] == Case.INFORMATIONAL:
-                  ctd_text = "%s" % str(case["remoteCloseCode"])
-                  ctd_class = "case_info"
-               else:
-                  ctd_text = "Fail"
-                  ctd_class = "case_failed"
+                  if case["behavior"] == Case.OK:
+                     td_text = "Pass"
+                     td_class = "case_ok"
+                  elif case["behavior"] == Case.NON_STRICT:
+                     td_text = "Non-Strict"
+                     td_class = "case_non_strict"
+                  elif case["behavior"] == Case.NO_CLOSE:
+                     td_text = "No Close"
+                     td_class = "case_no_close"
+                  elif case["behavior"] == Case.INFORMATIONAL:
+                     td_text = "Info"
+                     td_class = "case_info"
+                  else:
+                     td_text = "Fail"
+                     td_class = "case_failed"
 
-               if case["reportTime"]:
-                  f.write('            <td class="%s"><a href="%s">%s</a><br/><span class="case_duration">%s ms</span></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, case["duration"],ctd_class,ctd_text))
+                  if case["behaviorClose"] == Case.OK:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_ok"
+                  elif case["behaviorClose"] == Case.FAILED_BY_CLIENT:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_almost"
+                  elif case["behaviorClose"] == Case.WRONG_CODE:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_non_strict"
+                  elif case["behaviorClose"] == Case.UNCLEAN:
+                     ctd_text = "Unclean"
+                     ctd_class = "case_failed"
+                  elif case["behaviorClose"] == Case.INFORMATIONAL:
+                     ctd_text = "%s" % str(case["remoteCloseCode"])
+                     ctd_class = "case_info"
+                  else:
+                     ctd_text = "Fail"
+                     ctd_class = "case_failed"
+
+                  detail = ""
+
+                  if case["reportTime"]:
+                     detail += "%d ms" % case["duration"]
+
+                  if case["reportCompressionRatio"] and case["trafficStats"] is not None:
+                     crIn = case["trafficStats"]["incomingCompressionRatio"]
+                     crOut = case["trafficStats"]["outgoingCompressionRatio"]
+                     detail += " [%s/%s]" % ("%.3f" % crIn if crIn is not None else "-", "%.3f" % crOut if crOut is not None else "-")
+
+                  if detail != "":
+                     f.write('            <td class="%s"><a href="%s">%s</a><br/><span class="case_duration">%s</span></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, detail, ctd_class, ctd_text))
+                  else:
+                     f.write('            <td class="%s"><a href="%s">%s</a></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text, ctd_class, ctd_text))
+
                else:
-                  f.write('            <td class="%s"><a href="%s">%s</a></td><td class="close close_hide %s"><span class="close_code">%s</span></td>\n' % (td_class, agent_case_report_file, td_text,ctd_class,ctd_text))
+                  f.write('            <td class="case_unimplemented close_flex" colspan="2">Unimplemented</td>\n')
 
             else:
                f.write('            <td class="case_missing close_flex" colspan="2">Missing</td>\n')
@@ -765,7 +716,7 @@ class FuzzingFactory:
       ##
       f.write('      <div id="test_case_descriptions">\n')
       for caseId in caseList:
-         CCase = CasesById[caseId]
+         CCase = self.CaseSet.CasesById[caseId]
          f.write('      <br/>\n')
          f.write('      <a name="case_desc_%s"></a>\n' % caseId.replace('.', '_'))
          f.write('      <h2>Case %s</h2>\n' % caseId)
@@ -1111,7 +1062,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
       if self.case:
          if self.case >= 1 and self.case <= len(self.factory.specCases):
-            self.Case = CasesById[self.factory.specCases[self.case - 1]]
+            self.Case = self.factory.CaseSet.CasesById[self.factory.specCases[self.case - 1]]
             if connectionRequest.path == "/runCase":
                self.runCase = self.Case(self)
          else:
@@ -1123,7 +1074,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
          if not self.caseAgent:
             raise Exception("need agent to run case")
          self.caseStarted = utcnow()
-         print "Running test case ID %s for agent %s from peer %s" % (caseClasstoId(self.Case), self.caseAgent, connectionRequest.peerstr)
+         print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, connectionRequest.peerstr)
 
       elif connectionRequest.path == "/updateReports":
          if not self.caseAgent:
@@ -1151,6 +1102,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
       return None
 
 
+
 class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
    protocol = FuzzingServerProtocol
@@ -1175,11 +1127,15 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
       self.setProtocolOptions(**spec.get("options", {}))
 
       self.spec = spec
-      self.specCases = parseSpecCases(self.spec)
-      self.specExcludeAgentCases = parseExcludeAgentCases(self.spec)
+
+      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
+
+      self.specCases = self.CaseSet.parseSpecCases(self.spec)
+      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
       print "Autobahn WebSockets %s/%s Fuzzing Server (Port %d%s)" % (autobahntestsuite.version, autobahn.version, self.port, ' TLS' if self.isSecure else '')
       print "Ok, will run %d test cases for any clients connecting" % len(self.specCases)
       print "Cases = %s" % str(self.specCases)
+
 
 
 class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
@@ -1187,18 +1143,14 @@ class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
    def connectionMade(self):
       FuzzingProtocol.connectionMade(self)
       WebSocketClientProtocol.connectionMade(self)
-
-      self.caseAgent = self.factory.agent
-      self.case = self.factory.currentCaseIndex
-      self.Case = Cases[self.case - 1]
-      self.runCase = self.Case(self)
       self.caseStarted = utcnow()
-      print "Running test case ID %s for agent %s from peer %s" % (caseClasstoId(self.Case), self.caseAgent, self.peerstr)
+      print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, self.peerstr)
 
 
    def connectionLost(self, reason):
       WebSocketClientProtocol.connectionLost(self, reason)
       FuzzingProtocol.connectionLost(self, reason)
+
 
 
 class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
@@ -1215,9 +1167,12 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       self.logFrames = True
 
       self.spec = spec
-      self.specCases = parseSpecCases(self.spec)
-      self.specExcludeAgentCases = parseExcludeAgentCases(self.spec)
-      print "Autobahn WebSockets %s/%s Fuzzing Client" % (autobahntestsuite.version, autobahn.version)
+
+      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
+
+      self.specCases = self.CaseSet.parseSpecCases(self.spec)
+      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
+      print "Autobahn Fuzzing WebSocket Client (Autobahn Version %s / Autobahn Testsuite Version %s)" % (autobahntestsuite.version, autobahn.version)
       print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
       print "Servers = %s" % str([x["url"] + "@" + x["agent"] for x in spec["servers"]])
@@ -1227,6 +1182,18 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          if self.nextCase():
             connectWS(self)
 
+
+   def buildProtocol(self, addr):
+      proto = FuzzingClientProtocol()
+      proto.factory = self
+
+      proto.caseAgent = self.agent
+      proto.case = self.currentCaseIndex
+      proto.Case = Cases[self.currentCaseIndex - 1]
+      proto.runCase = proto.Case(proto)
+
+      return proto
+ 
 
    def nextServer(self):
       self.currSpecCase = -1
@@ -1261,7 +1228,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       self.currSpecCase += 1
       if self.currSpecCase < len(self.specCases):
          self.currentCaseId = self.specCases[self.currSpecCase]
-         self.currentCaseIndex = CasesIndices[self.currentCaseId]
+         self.currentCaseIndex = self.CaseSet.CasesIndices[self.currentCaseId]
          return True
       else:
          return False

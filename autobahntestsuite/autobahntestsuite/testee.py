@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -26,9 +26,7 @@ from autobahn.websocket import WebSocketClientFactory, \
 from autobahn.websocket import WebSocketServerFactory, \
                                WebSocketServerProtocol
 
-from case import Cases, \
-                 CaseCategories, \
-                 caseClasstoId
+from autobahn.compress import *
 
 
 class TesteeServerProtocol(WebSocketServerProtocol):
@@ -47,6 +45,21 @@ class TesteeServerFactory(WebSocketServerFactory):
          server = "AutobahnPython/%s" % autobahn.version
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
       self.setProtocolOptions(failByDrop = False) # spec conformance
+
+      ## enable permessage-XXX compression extensions
+      ##
+      def accept(offers):
+         for offer in offers:
+            if isinstance(offer, PerMessageDeflateOffer):
+               return PerMessageDeflateOfferAccept(offer)
+
+            elif isinstance(offer, PerMessageBzip2Offer):
+               return PerMessageBzip2OfferAccept(offer)
+
+            elif isinstance(offer, PerMessageSnappyOffer):
+               return PerMessageSnappyOfferAccept(offer)
+
+      self.setProtocolOptions(perMessageCompressionAccept = accept)
 
 
 
@@ -73,6 +86,25 @@ class TesteeClientFactory(WebSocketClientFactory):
    def __init__(self, url, debug = False, ident = None):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
       self.setProtocolOptions(failByDrop = False) # spec conformance
+
+      ## enable permessage-XXX compression extensions
+      ##
+#      offers = [PerMessageDeflateOffer()]
+      offers = [PerMessageSnappyOffer(), PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      self.setProtocolOptions(perMessageCompressionOffers = offers)
+
+      def accept(response):
+         if isinstance(response, PerMessageDeflateResponse):
+            return PerMessageDeflateResponseAccept(response)
+
+         elif isinstance(response, PerMessageBzip2Response):
+            return PerMessageBzip2ResponseAccept(response)
+
+         elif isinstance(response, PerMessageSnappyResponse):
+            return PerMessageSnappyResponseAccept(response)
+
+      self.setProtocolOptions(perMessageCompressionAccept = accept)
+
 
       self.endCaseId = None
       self.currentCaseId = 0
