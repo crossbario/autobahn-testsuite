@@ -24,7 +24,7 @@ import binascii
 
 class Case6_3_2(Case6_3_1):
 
-   DESCRIPTION = """Send invalid UTF-8 text message in fragments of 1 octet, resulting in frames ending on positions which are not code point ends.<br><br>MESSAGE:<br>%s<br>%s""" % (Case6_3_1.PAYLOAD, binascii.b2a_hex(Case6_3_1.PAYLOAD))
+   DESCRIPTION = """Send invalid UTF-8 text message in fragments of 1 octet, resulting in frames ending on positions which are not code point ends.<br><br>MESSAGE:<br>%s""" % binascii.b2a_hex(Case6_3_1.PAYLOAD)
 
    EXPECTATION = """The connection is failed immediately, since the payload is not valid UTF-8."""
 
