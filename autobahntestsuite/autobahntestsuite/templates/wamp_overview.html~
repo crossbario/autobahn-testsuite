@@ -1,0 +1,21 @@
+<DOCTYPE html>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <style>{{style}}</style>
+   </head>
+   <body>
+     <h1>WAMP Implementation Test Report</h1>
+      <table class="wamplog">
+	<tr>
+	  <th>Test</th>
+	  <th>Result</th>
+# for report in reports:
+         <tr>
+            <td><a href="{{report.filename}}">{{report.test_name}}</a></td>
+	    <td>{{report.test_result}}</td>
+         </tr>
+# endfor
+      </table>
+   </body>
+</html>      

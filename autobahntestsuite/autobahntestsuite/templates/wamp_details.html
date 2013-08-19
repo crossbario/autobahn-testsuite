@@ -1,0 +1,50 @@
+<DOCTYPE html>
+<html>
+
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <style>{{style}}</style>
+   </head>
+
+   <body>
+
+      {# FIXME: Use name of actual implementation under test #}
+      <h1>AutobahnPython 0.6 - {{test_name}}: {{outcome}}</h1>
+
+      <h2>Description</h2>
+         <p><em>TBD</em></p>
+
+      <h2>Expectation</h2>
+         <p><em>TBD</em></p>
+
+      <h2>Outcome</h2>
+	 <p>Expected:<br>
+	   <div class="wamplog">{{expected}}</div></p>
+	 <p>Observed:<br>
+	   <div class="wamplog">{{observed}}</div></p>
+
+      <h2>Closing Behaviour</h2>
+         <p>TBD</p>
+
+      <h2>Wire Log</h2>
+      {# FIXME: Better name for heading? #}
+         <table class="wamplog">
+    	    <tr>
+	      {# TODO: Check headers for plausibility #}
+	       <th>Session ID</th>
+	       <th>Direction</th>
+	       <th>Payload</th>
+	       <th>Time (ns)</th>
+# for record in record_list:
+            <tr>
+	       <td>{{record.session_id}}</td>
+	       <td>{{record.direction}}</td>
+	       <td>{{record.payload}}</td>
+               <td>{{record.time}}</td>
+            </tr>
+# endfor
+         </table>
+
+   </body>
+
+</html>      

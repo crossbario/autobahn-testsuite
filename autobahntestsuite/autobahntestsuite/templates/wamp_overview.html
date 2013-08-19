@@ -1,0 +1,34 @@
+<DOCTYPE html>
+<html>
+   <head>
+      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+      <style>
+	.wamplog {
+	   font-family: Consolas, monospace;
+	}
+</style>
+   </head>
+   <body>
+     <h1>WAMP Implementation Test Report</h1>
+      <table class="wamplog">
+	<tr>
+	  <th>Test</th>
+	  {# TODO: Use dynamic names #}
+	  <th>AutobahnPython 0.6.0</th>
+# for report in reports:
+         <tr>
+            <td><a href="#{{report.test_name}}">{{report.test_name}}</a></td>
+	    <td><a href="{{report.filename}}">{{report.test_result}}</a></td>
+         </tr>
+# endfor
+      </table>
+# for report in reports:
+      <a name="{{report.test_name}}"></a>
+      <h2>{{report.test_name}}</a></h2>
+      <h3>Case Description</h3>
+      TBD
+      <h3>Case Expectation</h3>
+      TBD
+# endfor
+   </body>
+</html>      
