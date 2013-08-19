@@ -21,7 +21,7 @@ __all__ = ["WampCase1_x_x"]
 
 import sys, pickle, json, time
 from pprint import pprint
-
+from collections import namedtuple
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -33,7 +33,7 @@ from autobahn.websocket import WebSocketClientProtocol, connectWS
 from autobahn.wamp import WampClientFactory, \
                           WampClientProtocol
 
-
+Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
 
 class WampCase1_x_x_Base:
 
@@ -42,17 +42,16 @@ class WampCase1_x_x_Base:
       def sendMessage(self, payload, binary = False):
          session_id = self.session_id if hasattr(self, 'session_id') else None
          now = round(1000000 * (time.clock() - self.factory.case.started))
-         rec = (now, session_id, "TX", payload)
-         self.factory.case.wampLog.append(rec)
+         telegram = Telegram(now, session_id, "TX", payload)
+         self.factory.case.wampLog.append(telegram)
          WebSocketClientProtocol.sendMessage(self, payload, binary)
 
       def onMessage(self, payload, binary):
          session_id = self.session_id if hasattr(self, 'session_id') else None
          now = round(1000000 * (time.clock() - self.factory.case.started))
-         rec = (now, session_id, "RX", payload)
-         self.factory.case.wampLog.append(rec)
+         telegram = Telegram(now, session_id, "RX", payload)
+         self.factory.case.wampLog.append(telegram)
          WampClientProtocol.onMessage(self, payload, binary)
-
 
       def onSessionOpen(self):
          for topic in self.factory.subscribeTopics:
@@ -68,7 +67,8 @@ class WampCase1_x_x_Base:
    class TestFactory(WampClientFactory):
 
       def __init__(self, case, onReady, onGone, subscribeTopics):
-         WampClientFactory.__init__(self, case.url, debug = case.debugWs, debugWamp = case.debugWamp)
+         WampClientFactory.__init__(self, case.url, debug = case.debugWs,
+                                    debugWamp = case.debugWamp)
          self.case = case
          self.onReady = onReady
          self.onGone = onGone
@@ -102,7 +102,8 @@ class WampCase1_x_x_Base:
 
 
    def done(self, _):
-      res = (json.dumps(self.received) == json.dumps(self.expected), self.expected, self.received, self.wampLog)
+      res = (json.dumps(self.received) == json.dumps(self.expected),
+             self.expected, self.received, self.wampLog)
       self.finished.callback(res)
 
 
@@ -178,7 +179,8 @@ class WampCase1_x_x_Base:
 
          for c in receivers:
             for d in self.payloads:
-               self.expected[c.proto.session_id].append((self.settings.PUBLICATION_TOPIC, d))
+               self.expected[c.proto.session_id].append(
+                  (self.settings.PUBLICATION_TOPIC, d))
 
          reactor.callLater(0.1, dotest)
          #dotest()
@@ -198,7 +200,8 @@ class WampCase1_x_x_Base:
 WampCase1_x_x = []
 
 class Settings:
-   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible, receivers):
+   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible,
+                receivers):
       self.PEERS = peers
       self.PUBLICATION_TOPIC = publicationTopic
       self.EXCLUDE_ME = excludeMe
@@ -253,8 +256,8 @@ SETTINGS2 = [Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
             ]
 
 SETTINGS = []
-SETTINGS.extend(SETTINGS1)
-SETTINGS.extend(SETTINGS2)
+for settings in [SETTINGS1, SETTINGS2]:
+   SETTINGS.extend(settings)
 
 ## the event payload the publisher sends in one session
 ##
@@ -267,7 +270,9 @@ PAYLOADS = [[None],
             [False],
             [666, 23, 999],
             [{}],
-            [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
+            [100, "hello", {u'foo': u'bar'},
+             [1, 2, 3],
+             ["hello", 20, {'baz': 'poo'}]]
             ]
 
 ## now dynamically create case classes

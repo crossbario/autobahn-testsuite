@@ -66,10 +66,14 @@ setup (
    author_email = 'autobahnws@googlegroups.com',
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
-   install_requires = ['setuptools', 'Autobahn>=0.6.0', 'Twisted>=11.1'],
+   install_requires = ['setuptools', 'Autobahn>=0.6.0', 'Twisted>=11.1',
+                       'jinja2>=2.6'],
    packages = find_packages(),
    #packages = ['autobahntestsuite'],
    include_package_data = True,
+   package_data = {
+        '': ['templates/*.html'],
+    },
    zip_safe = False,
    entry_points = {
       'console_scripts': [
