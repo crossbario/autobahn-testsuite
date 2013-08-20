@@ -15,11 +15,18 @@
 ##  limitations under the License.
 ##
 ###############################################################################
+import jinja2
+import os
+import sys
+
 
 __all__ = ("CSS_COMMON",
            "CSS_MASTER_REPORT",
            "CSS_DETAIL_REPORT",
-           "JS_MASTER_REPORT")
+           "JS_MASTER_REPORT",
+           "HtmlReport")
+
+## TODO: Move the constants to jinja2 template files
 
 ##
 ## CSS/JS include bits for WebSocket and WAMP test reports
@@ -407,3 +414,79 @@ function toggleClose() {
    }
 }
 """
+
+
+REPORT_DIR_PERMISSIONS = 0770
+
+
+class HtmlReportGenerator(object):
+
+
+    def __init__(self, report_dirname):
+        self.report_dirname = report_dirname
+        env = jinja2.Environment(
+            loader=jinja2.PackageLoader("autobahntestsuite", "templates"),
+            line_statement_prefix="#")
+        self.wamp_details_tpl = env.get_template("wamp_details.html")
+        self.wamp_index_tpl = env.get_template("wamp_overview.html")
+
+        # Check if the 'reports' directory exists; try to create it otherwise.
+        if not os.path.isdir(report_dirname):
+            self.createReportDirectory()
+
+
+    def createReportDirectory(self):
+       """
+       Create the directory for storing the reports. If this is not possible,
+       terminate the script.
+       """
+       try:
+          os.mkdir(self.report_dirname, REPORT_DIR_PERMISSIONS)
+       except OSError, exc:
+          print "Could not create directory: %s" % exc
+          sys.exit(1)
+
+
+    ### TODO: Move the creation of reports to a separate class.
+    def createReport(self, res, report_filename, readable_test_name):
+       """
+       Create an HTML file called `report_filename` in the
+       `report_dirname` directory with details about the test case.
+       """
+       report_path = os.path.join(self.report_dirname, report_filename)
+       try:
+          f = open(report_path, "w")
+       except IOError, ex:
+          print "Could not create file %s: %s." % (report_path, ex)
+          return
+       try:
+           f.write(self.formatResultAsHtml(res, readable_test_name))
+       except Exception, ex:
+           print "Could not write report: %s." % ex
+       f.close()
+
+
+    def formatResultAsHtml(self, res, readable_test_name):
+       """
+       Create an HTML document with a table containing information about
+       the test outcome.
+       """
+       html = self.wamp_details_tpl.render(record_list=res[3],
+                                           test_name = readable_test_name,
+                                           expected=res[1],
+                                           observed=res[2],
+                                           outcome="Pass" if res[0] else "Fail")
+       return html
+
+    def createIndex(self, reports):
+        """
+        Create an HTML document with a table containing an overview of all
+        tests and links to the detailed documents.
+        """
+        try:
+            with open(os.path.join(self.report_dirname, "index.html"),
+                      "w") as f:
+                html = self.wamp_index_tpl.render(reports=reports)
+                f.write(html)
+        except Exception, ex:
+            print "Could not create index file: %s" % ex

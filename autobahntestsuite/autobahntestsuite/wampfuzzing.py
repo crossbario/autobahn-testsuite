@@ -19,9 +19,8 @@
 __all__ = ("FuzzingWampClient",)
 
 
-import sys, os, collections
+import sys, collections
 import jinja2
-from pprint import pprint
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -29,6 +28,7 @@ from twisted.internet import reactor
 # for versions
 import autobahn
 import autobahntestsuite
+import report
 
 from wampcase import Cases, \
                      CaseCategories, \
@@ -39,13 +39,6 @@ from caseset import CaseSet
 
 # Specification of report directory
 REPORT_DIR = "reports"
-REPORT_DIR_PERMISSIONS = 0770
-
-CSS_WAMPSUMMARY = """
-.wamplog {
-   font-family: Consolas, monospace;
-}
-"""
 
 WS_URI = "ws://localhost:9000"
 
@@ -53,56 +46,47 @@ ReportSpec = collections.namedtuple("ReportSpec",
                                     ["filename", "test_name", "test_result"])
 
 class WampFuzzingClient(object):
-   """A test driver for WAMP test cases.
+   """
+   A test driver for WAMP test cases.
    """
 
 
    def __init__(self, url, debugWs = False, debugWamp = False):
-      """Initialize test driver.
+      """
+      Initialize test driver.
       """
       self.url = url
       self.debugWs = debugWs
       self.debugWamp = debugWamp
-      self.currentCaseIndex = -1
+      self.currentCaseIndex = -1 # The 0-based number of the current test case
       self.test = None
-      self.reports = []
-      env = jinja2.Environment(
-         loader=jinja2.PackageLoader("autobahntestsuite", "templates"),
-         line_statement_prefix="#")
-      self.wamp_details_tpl = env.get_template("wamp_details.html")
-      self.wamp_index_tpl = env.get_template("wamp_overview.html")
-      
-      # Check if the 'reports' directory exists; try to create it otherwise.
-      if not os.path.isdir(REPORT_DIR):
-         self.createReportDir()
 
+      self.reports = [] # Basic information about test reports
 
-   def createReportDir(self):
-      """Create the directory for storing the reports. If this is not possible,
-         terminate the script.
-      """
-      try:
-         os.mkdir(REPORT_DIR, REPORT_DIR_PERMISSIONS)
-      except OSError, exc:
-         print "Could not create directory: %s" % exc
-         sys.exit(1)
+      # TODO: Add a JSON report generator
+      self.report_generators = [report.HtmlReportGenerator(REPORT_DIR)]
 
 
    @property
    def currentTestName(self):
-      """Provide the name of the current test case.
+      """
+      Provide the name of the current test case.
       """
       return self.test.__class__.__name__
 
-   
+
    @property
    def readableTestName(self):
+      """
+      Provide the name of the current test case as presented in the reports.
+      """
       return " ".join([self.currentTestName[:8],
                          self.currentTestName[8:].replace("_", ".")])
 
-   
+
    def next(self):
-      """Execute the next available test.
+      """
+      Execute the next available test.
       """
       self.currentCaseIndex += 1
       if self.currentCaseIndex < len(Cases):
@@ -111,6 +95,10 @@ class WampFuzzingClient(object):
          # `Cases` in wampcases' __init__.py.
          self.test = Cases[self.currentCaseIndex](self.url, self.debugWs,
                                                   self.debugWamp)
+         # Write information about the current test to stdout and make sure
+         # that the information is presented on the screen instantly.
+         # Do not write a line break - this is done after "PASS" or "FAIL"
+         # is printed in `logResult`.
          sys.stdout.write("Running test %d/%d (%s)... " % (
                self.currentCaseIndex + 1,
                len(Cases),
@@ -122,75 +110,54 @@ class WampFuzzingClient(object):
          # No more test cases ==> stop the reactor...
          self.finished()
 
+
    def logResult(self, res):
-      """Print a short informational message about test success or failure,
-         create a file with detailed test result information.
+      """
+      Print a short informational message about test success or failure,
+      create a file with detailed test result information.
       """
       print "PASS" if res[0] else "FAIL"
-      self.createHtmlReport(res)
+      report_filename = self.createFilename()
+      # Remember high-level information about the test case that will be
+      # needed to create the index page.
+      self.reports.append(ReportSpec(report_filename, self.readableTestName,
+                                     "PASS" if res[0] else "FAILED"))
+      for generator in self.report_generators:
+         generator.createReport(res, report_filename, self.readableTestName)
       self.next()
 
 
+   # TODO: Move filename creation to the respective report generators!
+   #+ They are format-specific.   
    def createFilename(self):
-      """Create the filename for the current test.
+      """
+      Create the filename for the current test.
       """
       return "%s.html" % self.currentTestName
 
 
-   ### TODO: Move the creation of reports to a separate class.
-   def createHtmlReport(self, res):
-      """Create an HTML file in the `REPORT_DIR` with details about the
-         test case.
-      """
-      report_filename = self.createFilename()
-      self.reports.append(ReportSpec(report_filename, self.readableTestName,
-                                     "PASS" if res[0] else "FAILED"))
-      report_path = os.path.join(REPORT_DIR, report_filename)
-      try:
-         f = open(report_path, "w")
-      except IOError:
-         print "Could not create file", report_path
-         reactor.stop()
-      f.write(self.formatResultAsHtml(res))
-      f.close()
-
-
-   def formatResultAsHtml(self, res):
-      """Create an HTML document with a table containing information about
-         the test outcome.
-      """
-      html = self.wamp_details_tpl.render(style=CSS_WAMPSUMMARY,
-                                          record_list=res[3],
-                                          test_name = self.readableTestName,
-                                          expected=res[1],
-                                          observed=res[2],
-                                          outcome="Pass" if res[0] else "Fail")
-      return html
-
-
    def finished(self):
-      """Print a terminating message and stop the script.
       """
-      try:
-         with open(os.path.join(REPORT_DIR, "index.html"), "w") as f:
-            html = self.wamp_index_tpl.render(style=CSS_WAMPSUMMARY,
-                                              reports=self.reports)
-            f.write(html)
-      except Exception, ex:
-         print "Exception %s occurred" % ex
+      Print a terminating message and stop the script.
+      """
+      for generator in self.report_generators:
+         generator.createIndex(self.reports)
       print ("Done. Point your browser to %s/index.html to see the results." %
              REPORT_DIR)
       reactor.stop()
 
 
    def printError(self, err):
-      """Print an error message thrown by a test case.
+      """
+      Print an error message thrown by a test case.
       """
       print err
 
 
 
 class FuzzingWampClient(object):
+
+
    def __init__(self, spec, debug = False):
       self.spec = spec
       self.debug = debug
@@ -214,7 +181,6 @@ class FuzzingWampClient(object):
 
 
 if __name__ == '__main__':
-
    debug = len(sys.argv) > 1 and sys.argv[1] == 'debug'
    if debug:
       log.startLogging(sys.stdout)
