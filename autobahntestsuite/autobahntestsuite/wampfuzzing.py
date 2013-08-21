@@ -19,8 +19,7 @@
 __all__ = ("FuzzingWampClient",)
 
 
-import sys, collections
-import jinja2
+import sys, collections, os, json
 
 from twisted.python import log
 from twisted.internet import reactor
@@ -45,19 +44,45 @@ WS_URI = "ws://localhost:9000"
 ReportSpec = collections.namedtuple("ReportSpec",
                                     ["filename", "test_name", "test_result"])
 
-class WampFuzzingClient(object):
+
+class FuzzingWampClient(object):
    """
    A test driver for WAMP test cases.
    """
 
 
-   def __init__(self, url, debugWs = False, debugWamp = False):
-      """
-      Initialize test driver.
-      """
-      self.url = url
-      self.debugWs = debugWs
-      self.debugWamp = debugWamp
+   def __init__(self, spec, debug = False):
+      self.spec = spec
+      self.debug = debug
+
+      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories,
+                             CaseSubCategories)
+
+      self.specCases = self.CaseSet.parseSpecCases(self.spec)
+      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(
+         self.spec)
+
+      print (("Autobahn Fuzzing WAMP Client (Autobahn Version %s / "
+              "Autobahn Testsuite Version %s)") % (autobahntestsuite.version,
+                                                   autobahn.version))
+      print "Ok, will run %d test cases against %d servers" % (
+            len(self.specCases), len(spec["servers"]))
+      print "Cases = %s" % str(self.specCases)
+      print "Servers = %s" % str(["%s@%s" % (x["url"], x["agent"])
+                                  for x in spec["servers"]])
+
+      try:
+         for server in spec["servers"]:
+            if server["agent"] == "AutobahnPython":
+               self.url = server["url"]
+      except KeyError, ex:
+         print "Problem with specification file: Key %s not found." % ex
+         reactor.stop()
+
+      # TODO Distinguish between debug modes (using the spec file?)
+      self.debugWs = debug
+      self.debugWamp = debug
+      #
       self.currentCaseIndex = -1 # The 0-based number of the current test case
       self.test = None
 
@@ -65,6 +90,9 @@ class WampFuzzingClient(object):
 
       # TODO: Add a JSON report generator
       self.report_generators = [report.HtmlReportGenerator(REPORT_DIR)]
+
+      # Start performing tests
+      self.next()
 
 
    @property
@@ -98,26 +126,29 @@ class WampFuzzingClient(object):
          # Write information about the current test to stdout and make sure
          # that the information is presented on the screen instantly.
          # Do not write a line break - this is done after "PASS" or "FAIL"
-         # is printed in `logResult`.
+         # is printed in `reportTestResult`.
          sys.stdout.write("Running test %d/%d (%s)... " % (
                self.currentCaseIndex + 1,
                len(Cases),
                self.currentTestName))
          sys.stdout.flush()
          d = self.test.run()
-         d.addCallbacks(self.logResult, self.printError)
+         d.addCallbacks(self.reportTestResult, self.printError)
       else:
-         # No more test cases ==> stop the reactor...
-         self.finished()
+         # No more test cases ==> create index.html
+         self.createIndexFile()
+         print ("Done. Point your browser to %s/index.html to see the "
+                "results.") % REPORT_DIR
 
 
-   def logResult(self, res):
+   def reportTestResult(self, res):
       """
       Print a short informational message about test success or failure,
       create a file with detailed test result information.
       """
       print "PASS" if res[0] else "FAIL"
       report_filename = self.createFilename()
+
       # Remember high-level information about the test case that will be
       # needed to create the index page.
       self.reports.append(ReportSpec(report_filename, self.readableTestName,
@@ -136,15 +167,12 @@ class WampFuzzingClient(object):
       return "%s.html" % self.currentTestName
 
 
-   def finished(self):
+   def createIndexFile(self):
       """
       Print a terminating message and stop the script.
       """
       for generator in self.report_generators:
          generator.createIndex(self.reports)
-      print ("Done. Point your browser to %s/index.html to see the results." %
-             REPORT_DIR)
-      reactor.stop()
 
 
    def printError(self, err):
@@ -154,38 +182,20 @@ class WampFuzzingClient(object):
       print err
 
 
-
-class FuzzingWampClient(object):
-
-
-   def __init__(self, spec, debug = False):
-      self.spec = spec
-      self.debug = debug
-
-      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories,
-                             CaseSubCategories)
-
-      self.specCases = self.CaseSet.parseSpecCases(self.spec)
-      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(
-         self.spec)
-
-      print (("Autobahn Fuzzing WAMP Client (Autobahn Version %s / "
-              "Autobahn Testsuite Version %s)") % (autobahntestsuite.version,
-                                                   autobahn.version))
-      print "Ok, will run %d test cases against %d servers" % (
-            len(self.specCases), len(spec["servers"]))
-      print "Cases = %s" % str(self.specCases)
-      print "Servers = %s" % str(["%s@%s" % (x["url"], x["agent"])
-                                  for x in spec["servers"]])
-
-
-
 if __name__ == '__main__':
    debug = len(sys.argv) > 1 and sys.argv[1] == 'debug'
    if debug:
       log.startLogging(sys.stdout)
 
-   c = WampFuzzingClient(WS_URI, debugWs = debug, debugWamp = debug)
+   spec = "fuzzingwampclient.json"
+   if not os.path.exists(spec):
+      from spectemplate import SPEC_FUZZINGWAMPCLIENT
+      with open(spec, "w") as f:
+         f.write(SPEC_FUZZINGWAMPCLIENT)
+   with open(spec) as f:
+      spec = json.loads(f.read())
+      
+   c = FuzzingWampClient(spec)
    c.next()
 
    reactor.run()

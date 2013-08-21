@@ -51,6 +51,11 @@ from spectemplate import SPEC_FUZZINGSERVER, \
 
 
 class WsTestOptions(usage.Options):
+   """
+   Reads options from the command-line and checks them for plausibility.
+   """
+
+   # Available modes, specified with the --mode (or short: -m) flag.
    MODES = ['echoserver',
             'echoclient',
             'broadcastclient',
@@ -67,22 +72,56 @@ class WsTestOptions(usage.Options):
             'wampclient',
             'massconnect']
 
+   # Modes that need a specification file
+   MODES_NEEDING_SPEC = ['fuzzingclient',
+                         'fuzzingserver',
+                         'wsperfcontrol',
+                         'massconnect']
+
+   # Modes that need a Websocket URI
+   MODES_NEEDING_WSURI = ['echoclient',
+                          'echoserver',
+                          'broadcastclient',
+                          'broadcastserver',
+                          'testeeclient',
+                          'testeeserver',
+                          'wsperfcontrol',
+                          'wampserver',
+                          'wampclient']
+
+   # Default content of specification files for various modes
+   DEFAULT_SPECIFICATIONS = {'fuzzingclient':     SPEC_FUZZINGCLIENT,
+                             'fuzzingserver':     SPEC_FUZZINGSERVER,
+                             'wsperfcontrol':     SPEC_WSPERFCONTROL,
+                             'massconnect':       SPEC_MASSCONNECT,
+                             'fuzzingwampclient': SPEC_FUZZINGWAMPCLIENT,
+                             'fuzzingwampserver': SPEC_FUZZINGWAMPSERVER
+                             }
+
+   
    optParameters = [
       ['mode', 'm', None, 'Test mode, one of: %s [required]' % ', '.join(MODES)],
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
-      ['key', 'k', None, 'Server private key file for secure WebSocket (WSS) [required in server modes for WSS].'],
-      ['cert', 'c', None, 'Server certificate file for secure WebSocket (WSS) [required in server modes for WSS].'],
-      ['ident', 'i', None, 'Override client or server identifier for testee modes.']
+      ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) '
+                          '[required in server modes for WSS].')],
+      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) '
+                           '[required in server modes for WSS].')],
+      ['ident', 'i', None,
+       'Override client or server identifier for testee modes.']
    ]
 
    optFlags = [
       ['debug', 'd', 'Debug output [default: off].'],
-      ['autobahnversion', 'a', 'Print version information for Autobahn and AutobahnTestSuite.']
+      ['autobahnversion', 'a',
+       'Print version information for Autobahn and AutobahnTestSuite.']
    ]
 
    def postOptions(self):
-
+      """
+      Process the given options. Perform plausibility checks, etc...
+      """
+      
       if self['autobahnversion']:
          print "Autobahn %s" % autobahn.version
          print "AutobahnTestSuite %s" % autobahntestsuite.version
@@ -91,7 +130,7 @@ class WsTestOptions(usage.Options):
       if not self['mode']:
          raise usage.UsageError, "a mode must be specified to run!"
 
-      if not self['mode'] in WsTestOptions.MODES:
+      if self['mode'] not in WsTestOptions.MODES:
          raise usage.UsageError, "invalid mode %s" % self['mode']
 
       if self['mode'] in ['fuzzingclient',
@@ -101,40 +140,32 @@ class WsTestOptions(usage.Options):
                           'wsperfcontrol',
                           'massconnect']:
          if not self['spec']:
+          self.updateSpec()
 
-            #raise usage.UsageError, "mode needs a spec file!"
+      if self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and not self['wsuri']:
+         raise usage.UsageError, "mode needs a WebSocket URI!"
 
-            dsf = {
-                     'fuzzingclient': ['fuzzingclient.json', SPEC_FUZZINGCLIENT],
-                     'fuzzingserver': ['fuzzingserver.json', SPEC_FUZZINGSERVER],
-                     'fuzzingwampclient': ['fuzzingwampclient.json', SPEC_FUZZINGWAMPCLIENT],
-                     'fuzzingwampserver': ['fuzzingwampserver.json', SPEC_FUZZINGWAMPSERVER],
-                     'wsperfcontrol': ['wsperfcontrol.json', SPEC_WSPERFCONTROL],
-                     'massconnect': ['massconnect.json', SPEC_MASSCONNECT]
-                  }
+   def updateSpec(self):
+      """
+      Update the 'spec' option according to the chosen mode.
+      Create a specification file if necessary.
+      """
 
-            self['spec'] = dsf[self['mode']][0]
+      self['spec'] = filename = "%s.json" % self['mode']
+      content = WsTestOptions.DEFAULT_SPECIFICATIONS[self['mode']]
 
-            if not os.path.isfile(self['spec']):
-               print "Auto-generating spec file %s" % self['spec']
-               f = open(self['spec'], 'w')
-               f.write(dsf[self['mode']][1])
-               f.close()
-            else:
-               print "Using implicit spec file %s" % self['spec']
+      if not os.path.isfile(filename):
+         print "Auto-generating spec file %s" % filename
+         f = open(filename, 'w')
+         f.write(content)
+         f.close()
+      else:
+         print "Using implicit spec file %s" % filename
 
-      if self['mode'] in ['echoclient',
-                          'echoserver',
-                          'broadcastclient',
-                          'broadcastserver',
-                          'testeeclient',
-                          'testeeserver',
-                          'wsperfcontrol']:
-         if not self['wsuri']:
-            raise usage.UsageError, "mode needs a WebSocket URI!"
-
-
+# Help string to be presented if the user wants to use an encrypted connection
+# but didn't specify key and / or certificate
 OPENSSL_HELP = """
+Server key and certificate required for WSS
 To generate server test key/certificate:
 
 openssl genrsa -out server.key 2048
@@ -147,23 +178,24 @@ wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
 """
 
 def createWssContext(o, factory):
+   """Create an SSL context factory for WSS connections.
+   """
+
    if factory.isSecure:
 
+      # Check if an OpenSSL library can be imported; abort if it's missing. 
       try:
          from twisted.internet import ssl
       except ImportError, e:
          print "You need OpenSSL/pyOpenSSL installed for secure WebSockets (wss)!"
          sys.exit(1)
 
-      if o.opts['key'] is None:
-         print "Server key and certificate required for WSS"
-         print OPENSSL_HELP
-         sys.exit(1)
-      if o.opts['cert'] is None:
-         print "Server key and certificate required for WSS"
+      # Make sure the necessary options ('key' and 'cert') are available
+      if o.opts['key'] is None or o.opts['cert'] is None:
          print OPENSSL_HELP
          sys.exit(1)
 
+      # Create the context factory based on the given key and certificate
       key = str(o.opts['key'])
       cert = str(o.opts['cert'])
       contextFactory = ssl.DefaultOpenSSLContextFactory(key, cert)
@@ -175,36 +207,39 @@ def createWssContext(o, factory):
 
 
 def loadTestData():
-   TEST_DATA = {'gutenberg_faust':
-                  {'desc': "Human readable text, Goethe's Faust I (German)",
-                   'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
-                   'file':
-                   'pg2229.txt'
-                  },
-                'lena512':
-                  {'desc': 'Lena Picture, Bitmap 512x512 bw',
-                   'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
-                   'file': 'lena512.bmp'
-                  },
-                'ooms':
-                  {'desc': 'A larger PDF',
-                   'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
-                   'file': '10.1.1.105.5439.pdf'
-                  },
-                'json_data1':
-                  {'desc': 'Large JSON data file',
-                   'url': None,
-                   'file': 'data1.json'
-                  },
-                'html_data1':
-                  {'desc': 'Large HTML file',
-                   'url': None,
-                   'file': 'data1.html'
-                  }
-               }
+   TEST_DATA = {
+      'gutenberg_faust':
+         {'desc': "Human readable text, Goethe's Faust I (German)",
+          'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
+          'file':
+             'pg2229.txt'
+          },
+      'lena512':
+         {'desc': 'Lena Picture, Bitmap 512x512 bw',
+          'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
+          'file': 'lena512.bmp'
+          },
+      'ooms':
+         {'desc': 'A larger PDF',
+          'url':
+             'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
+          'file': '10.1.1.105.5439.pdf'
+          },
+      'json_data1':
+         {'desc': 'Large JSON data file',
+          'url': None,
+          'file': 'data1.json'
+          },
+      'html_data1':
+         {'desc': 'Large HTML file',
+          'url': None,
+          'file': 'data1.html'
+          }
+      }
 
    for t in TEST_DATA:
-      fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA[t]['file'])
+      fn = pkg_resources.resource_filename("autobahntestsuite",
+                                           "testdata/%s" % TEST_DATA[t]['file'])
       TEST_DATA[t]['data'] = open(fn, 'rb').read()
 
    return TEST_DATA
@@ -242,7 +277,8 @@ def run():
 
       if mode == 'fuzzingserver':
 
-         ## use TLS server key/cert from spec, but allow overriding from cmd line
+         ## use TLS server key/cert from spec, but allow overriding
+         ## from cmd line
          if not o.opts['key']:
             o.opts['key'] = spec.get('key', None)
          if not o.opts['cert']:
@@ -253,7 +289,8 @@ def run():
          context = createWssContext(o, factory)
          listenWS(factory, context)
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/fuzzingserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                       "web/fuzzingserver"))
          curdir = File('.')
          webdir.putChild('cwd', curdir)
          web = Site(webdir)
@@ -302,7 +339,8 @@ def run():
 
       if mode == 'echoserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/echoserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                       "web/echoserver"))
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
@@ -322,7 +360,8 @@ def run():
 
       if mode == 'broadcastserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/broadcastserver"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                       "web/broadcastserver"))
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 
@@ -359,7 +398,8 @@ def run():
 
       ## Web Server for UI static files
       ##
-      webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wsperfmaster"))
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                    "web/wsperfmaster"))
       web = Site(webdir)
       reactor.listenTCP(8080, web)
 
@@ -381,7 +421,8 @@ def run():
 
       if mode == 'wampserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wamp"))
+         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                       "web/wamp"))
          web = Site(webdir)
          reactor.listenTCP(8080, web)
 

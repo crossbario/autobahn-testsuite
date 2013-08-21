@@ -4,3 +4,4 @@
 /autobahntestsuite/dist/*
 /autobahntestsuite/autobahntestsuite.egg-info*/
 /reports
+*~
