@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-__all__ = ["WampCase1_x_x"]
+__all__ = ["WampCase2_x_x"]
 
 
 import sys, pickle, json, time
@@ -35,7 +35,7 @@ from autobahn.wamp import WampClientFactory, \
 
 Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
 
-class WampCase1_x_x_Base:
+class WampCase2_x_x_Base:
 
    class TestProtocol(WampClientProtocol):
 
@@ -75,7 +75,7 @@ class WampCase1_x_x_Base:
          self.subscribeTopics = subscribeTopics
 
       def buildProtocol(self, addr):
-         self.proto = WampCase1_x_x_Base.TestProtocol()
+         self.proto = WampCase2_x_x_Base.TestProtocol()
          self.proto.factory = self
          return self.proto
 
@@ -123,7 +123,7 @@ class WampCase1_x_x_Base:
       for c in self.settings.PEERS:
          d = Deferred()
          g = Deferred()
-         c = WampCase1_x_x_Base.TestFactory(self, d, g, subscribeTopics = c)
+         c = WampCase2_x_x_Base.TestFactory(self, d, g, subscribeTopics = c)
          c.name = "Peer %d" % i
          self.clients.append(c)
          fireOnConnected.append(d)
@@ -181,7 +181,6 @@ class WampCase1_x_x_Base:
             for d in self.payloads:
                self.expected[c.proto.session_id].append(
                   (self.settings.PUBLICATION_TOPIC, d))
-
          reactor.callLater(0.1, dotest)
          #dotest()
 
@@ -197,7 +196,7 @@ class WampCase1_x_x_Base:
 
 ## the set of cases we construct and export from this module
 ##
-WampCase1_x_x = []
+WampCase2_x_x = []
 
 class Settings:
    def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible,
@@ -283,14 +282,14 @@ for s in SETTINGS:
    for d in PAYLOADS:
       DESCRIPTION = ""
       EXPECTATION = ""
-      C = type("WampCase1_%d_%d" % (j, i),
-               (object, WampCase1_x_x_Base, ),
-               {"__init__": WampCase1_x_x_Base.__init__,
-                "run": WampCase1_x_x_Base.run,
+      C = type("WampCase2_%d_%d" % (j, i),
+               (object, WampCase2_x_x_Base, ),
+               {"__init__": WampCase2_x_x_Base.__init__,
+                "run": WampCase2_x_x_Base.run,
                 "DESCRIPTION": """%s""" % DESCRIPTION,
                 "EXPECTATION": """%s""" % EXPECTATION,
                 "payloads": d,
                 "settings": s})
-      WampCase1_x_x.append(C)
+      WampCase2_x_x.append(C)
       i += 1
    j += 1

@@ -36,9 +36,6 @@ from wampcase import Cases, \
 
 from caseset import CaseSet
 
-# Specification of report directory
-REPORT_DIR = "reports"
-
 WS_URI = "ws://localhost:9000"
 
 ReportSpec = collections.namedtuple("ReportSpec",
@@ -54,7 +51,7 @@ class FuzzingWampClient(object):
    def __init__(self, spec, debug = False):
       self.spec = spec
       self.debug = debug
-
+      self.report_dir = self.spec["outdir"]
       self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories,
                              CaseSubCategories)
 
@@ -86,10 +83,11 @@ class FuzzingWampClient(object):
       self.currentCaseIndex = -1 # The 0-based number of the current test case
       self.test = None
 
+      # TODO: Change self.reports to be able to handle more than one server
       self.reports = [] # Basic information about test reports
 
       # TODO: Add a JSON report generator
-      self.report_generators = [report.HtmlReportGenerator(REPORT_DIR)]
+      self.report_generators = [report.HtmlReportGenerator(self.report_dir)]
 
       # Start performing tests
       self.next()
@@ -132,13 +130,15 @@ class FuzzingWampClient(object):
                len(Cases),
                self.currentTestName))
          sys.stdout.flush()
+         # TODO: Iterate over all servers specified in self.spec
          d = self.test.run()
          d.addCallbacks(self.reportTestResult, self.printError)
       else:
          # No more test cases ==> create index.html
          self.createIndexFile()
          print ("Done. Point your browser to %s/index.html to see the "
-                "results.") % REPORT_DIR
+                "results.") % self.report_dir
+         reactor.stop()
 
 
    def reportTestResult(self, res):
@@ -164,7 +164,8 @@ class FuzzingWampClient(object):
       """
       Create the filename for the current test.
       """
-      return "%s.html" % self.currentTestName
+      # TODO: use server agent name from spec to allow for several servers
+      return "autobahnpython_%s.html" % self.currentTestName.lower()
 
 
    def createIndexFile(self):
@@ -196,6 +197,5 @@ if __name__ == '__main__':
       spec = json.loads(f.read())
       
    c = FuzzingWampClient(spec)
-   c.next()
 
    reactor.run()

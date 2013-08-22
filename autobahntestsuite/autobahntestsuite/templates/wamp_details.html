@@ -3,52 +3,268 @@
 
    <head>
       <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <style>
-	.wamplog {
-	    font-family: Consolas, monospace;
-	}
+      <style lang="css">
+body {
+   background-color: #F4F4F4;
+   color: #333;
+   font-family: Segoe UI,Tahoma,Arial,Verdana,sans-serif;
+}
+
+p#intro {
+   font-family: Cambria,serif;
+   font-size: 1.1em;
+   color: #444;
+}
+
+p#intro a {
+   color: #444;
+}
+
+p#intro a:visited {
+   color: #444;
+}
+
+.block {
+   background-color: #e0e0e0;
+   padding: 16px;
+   margin: 20px;
+}
+
+p.case_text_block {
+   border-radius: 10px;
+   border: 1px solid #aaa;
+   padding: 16px;
+   margin: 4px 20px;
+   color: #444;
+}
+
+p.case_desc {
+}
+
+p.case_expect {
+}
+
+p.case_outcome {
+}
+
+p.case_closing_beh {
+}
+
+pre.http_dump {
+   font-family: Consolas, "Courier New", monospace;
+   font-size: 0.8em;
+   color: #333;
+   border-radius: 10px;
+   border: 1px solid #aaa;
+   padding: 16px;
+   margin: 4px 20px;
+}
+
+span.case_pickle {
+   font-family: Consolas, "Courier New", monospace;
+   font-size: 0.7em;
+   color: #000;
+}
+
+p#case_result,p#close_result {
+   border-radius: 10px;
+   background-color: #e8e2d1;
+   padding: 20px;
+   margin: 20px;
+}
+
+h1 {
+   margin-left: 60px;
+}
+
+h2 {
+   margin-left: 30px;
+}
+
+h3 {
+   margin-left: 50px;
+}
+
+a.up {
+   float: right;
+   border-radius: 16px;
+   margin-top: 16px;
+   margin-bottom: 10px;
+
+   margin-right: 30px;
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-bottom: 2px;
+   padding-top: 2px;
+   background-color: #666;
+   color: #fff;
+   text-decoration: none;
+   font-size: 0.8em;
+}
+
+a.up:visited {
+}
+
+a.up:hover {
+   background-color: #028ec9;
+}
 </style>
+      <style lang="css">
+p.case {
+   color: #fff;
+   border-radius: 10px;
+   padding: 20px;
+   margin: 12px 20px;
+   font-size: 1.2em;
+}
+
+p.case_ok {
+   background-color: #0a0;
+}
+
+p.case_non_strict, p.case_no_close {
+   background-color: #9a0;
+}
+
+p.case_info {
+   background-color: #4095BF;
+}
+
+p.case_failed {
+   background-color: #900;
+}
+
+table {
+   border-collapse: collapse;
+   border-spacing: 0px;
+   margin-left: 80px;
+   margin-bottom: 12px;
+   margin-top: 0px;
+}
+
+td
+{
+   margin: 0;
+   font-size: 0.8em;
+   border: 1px #fff solid;
+   padding-top: 6px;
+   padding-bottom: 6px;
+   padding-left: 16px;
+   padding-right: 16px;
+   text-align: right;
+}
+
+td.right {
+   text-align: right;
+}
+
+td.left {
+   text-align: left;
+}
+
+tr.stats_header {
+   color: #eee;
+   background-color: #000;
+}
+
+tr.stats_row {
+   color: #000;
+   background-color: #fc3;
+}
+
+tr.stats_total {
+   color: #fff;
+   background-color: #888;
+}
+
+div#wirelog {
+   margin-top: 20px;
+   margin-bottom: 80px;
+}
+
+pre.wirelog_rx_octets {color: #aaa; margin: 0; background-color: #060; padding: 2px;}
+pre.wirelog_tx_octets {color: #aaa; margin: 0; background-color: #600; padding: 2px;}
+pre.wirelog_tx_octets_sync {color: #aaa; margin: 0; background-color: #606; padding: 2px;}
+
+pre.wirelog_rx_frame {color: #fff; margin: 0; background-color: #0a0; padding: 2px;}
+pre.wirelog_tx_frame {color: #fff; margin: 0; background-color: #a00; padding: 2px;}
+pre.wirelog_tx_frame_sync {color: #fff; margin: 0; background-color: #a0a; padding: 2px;}
+
+pre.wirelog_delay {color: #fff; margin: 0; background-color: #000; padding: 2px;}
+pre.wirelog_kill_after {color: #fff; margin: 0; background-color: #000; padding: 2px;}
+
+pre.wirelog_tcp_closed_by_me {color: #fff; margin: 0; background-color: #008; padding: 2px;}
+pre.wirelog_tcp_closed_by_peer {color: #fff; margin: 0; background-color: #000; padding: 2px;}
+.wamplog {font-family: Consolas, monospace;}
+</style>
+
    </head>
-
    <body>
-
-      {# FIXME: Use name of actual implementation under test #}
-      <h1>AutobahnPython 0.6 - {{test_name}}: {{outcome}}</h1>
-
-      <h2>Description</h2>
-         <p><em>TBD</em></p>
-
-      <h2>Expectation</h2>
-         <p><em>TBD</em></p>
-
-      <h2>Outcome</h2>
-	 <p>Expected:<br>
-	   <div class="wamplog">{{expected}}</div></p>
-	 <p>Observed:<br>
-	   <div class="wamplog">{{observed}}</div></p>
-
-      <h2>Closing Behaviour</h2>
-         <p>TBD</p>
-
-      <h2>Wire Log</h2>
-      {# FIXME: Better name for heading? #}
-         <table class="wamplog">
-    	    <tr>
-	      {# TODO: Check headers for plausibility #}
-	       <th>Session ID</th>
-	       <th>Direction</th>
-	       <th>Payload</th>
-	       <th>Time (ns)</th>
-# for record in record_list:
-            <tr>
-	       <td>{{record.session_id}}</td>
-	       <td>{{record.direction}}</td>
-	       <td>{{record.payload}}</td>
-               <td>{{record.time}}</td>
-            </tr>
-# endfor
-         </table>
-
+     # set static_img_dir = "http://autobahn.ws/static/img"
+     <a name="top"></a>
+     <br/>
+     <center>
+       <a href="http://autobahn.ws/testsuite" 
+	  title="Autobahn WebSockets Testsuite">
+	 <img src="{{static_img_dir}}/ws_protocol_test_report.png"
+              border="0" width="820" height="46" 
+	      alt="Autobahn WebSockets Testsuite Report">
+         </img>
+       </a>
+     </center>
+     <center>
+       <a href="http://autobahn.ws"  
+          title="Autobahn WebSockets">
+         <img src="{{static_img_dir}}/ws_protocol_test_report_autobahn.png"
+	      border="0" width="300" height="68" alt="Autobahn WebSockets">                </img>
+       </a>
+     </center>
+     <br/>
+     # set status="ok" if outcome else "failed"
+     <p class="case case_ok">
+       {# FIXME: Use name of actual implementation under test #}
+       AutobahnPython 0.6 - 
+       <span style="font-size: 1.3em;">
+	 <b>{{test_name}}</b>
+       </span> : 
+       {{outcome}}
+     </p>
+     <p class="case_text_block case_desc"><b>Description</b>
+       <br/>
+       <em>TBD</em>
+     </p>
+     <p class="case_text_block case_expect">
+       <b>Expectation</b>
+       <br/>
+       <em>TBD</em>
+     </p>
+     <p class="case_text_block case_outcome">
+       <b>Outcome</b>
+       <br/>
+       <i>Expected:</i>
+       <br/>
+       <span class="case_pickle">{{expected}}</span>
+       <br/>
+       <i>Observed:</i>
+       <br/>
+       <span class="case_pickle">{{observed}}</span>
+     </p>
+     <p class="case_text_block case_closing_beh">
+       <b>Closing Behaviour</b>
+       <br/>
+       <em>TBD</em>
+       <br/>
+     </p>
+     <hr/>
+     <h2>Wire Log</h2>
+     <div id="wirelog">
+     # set counter = 0
+     # for record in record_list:
+       # set direction = "tx" if record.direction == "TX" else "rx"
+       <pre class="wirelog_{{direction}}_frame">{{"%03d" % counter}} {{record.direction}} FRAME : SESSION-ID={{record.session_id}}, PAYLOAD={{record.payload}}, TIME={{record.time}}</pre>
+       # set counter = counter + 1
+     # endfor
+     <br/>
+     <hr/>
    </body>
-
 </html>      

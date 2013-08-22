@@ -441,7 +441,7 @@ class HtmlReportGenerator(object):
        terminate the script.
        """
        try:
-          os.mkdir(self.report_dirname, REPORT_DIR_PERMISSIONS)
+          os.makedirs(self.report_dirname, REPORT_DIR_PERMISSIONS)
        except OSError, exc:
           print "Could not create directory: %s" % exc
           sys.exit(1)
