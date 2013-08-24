@@ -426,7 +426,8 @@ class HtmlReportGenerator(object):
         self.report_dirname = report_dirname
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("autobahntestsuite", "templates"),
-            line_statement_prefix="#")
+            line_statement_prefix="#",
+            line_comment_prefix="##")
         self.wamp_details_tpl = env.get_template("wamp_details.html")
         self.wamp_index_tpl = env.get_template("wamp_overview.html")
 
@@ -486,7 +487,7 @@ class HtmlReportGenerator(object):
         try:
             with open(os.path.join(self.report_dirname, "index.html"),
                       "w") as f:
-                html = self.wamp_index_tpl.render(reports=reports)
+                html = self.wamp_index_tpl.render(categories=reports)
                 f.write(html)
         except Exception, ex:
             print "Could not create index file: %s" % ex

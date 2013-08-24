@@ -1,34 +1,425 @@
 <DOCTYPE html>
 <html>
-   <head>
-      <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-      <style>
-	.wamplog {
-	   font-family: Consolas, monospace;
-	}
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <style lang="css">
+body {
+   background-color: #F4F4F4;
+   color: #333;
+   font-family: Segoe UI,Tahoma,Arial,Verdana,sans-serif;
+}
+   
+p#intro {
+   font-family: Cambria,serif;
+   font-size: 1.1em;
+   color: #444;
+}
+   
+p#intro a {
+   color: #444;
+}
+
+p#intro a:visited {
+   color: #444;
+}
+
+.block {
+   background-color: #e0e0e0;
+   padding: 16px;
+   margin: 20px;
+}
+
+p.case_text_block {
+   border-radius: 10px;
+   border: 1px solid #aaa;
+   padding: 16px;
+   margin: 4px 20px;
+   color: #444;
+}
+
+p.case_desc {
+}
+
+p.case_expect {
+}
+
+p.case_outcome {
+}
+
+p.case_closing_beh {
+}
+
+pre.http_dump {
+   font-family: Consolas, "Courier New", monospace;
+   font-size: 0.8em;
+   color: #333;
+   border-radius: 10px;
+   border: 1px solid #aaa;
+   padding: 16px;
+   margin: 4px 20px;
+}
+
+span.case_pickle {
+   font-family: Consolas, "Courier New", monospace;
+   font-size: 0.7em;
+   color: #000;
+}
+
+p#case_result,p#close_result {
+   border-radius: 10px;
+   background-color: #e8e2d1;
+   padding: 20px;
+   margin: 20px;
+}
+
+h1 {
+   margin-left: 60px;
+}
+
+h2 {
+   margin-left: 30px;
+}
+
+h3 {
+   margin-left: 50px;
+}
+
+a.up {
+   float: right;
+   border-radius: 16px;
+   margin-top: 16px;
+   margin-bottom: 10px;
+
+   margin-right: 30px;
+   padding-left: 10px;
+   padding-right: 10px;
+   padding-bottom: 2px;
+   padding-top: 2px;
+   background-color: #666;
+   color: #fff;
+   text-decoration: none;
+   font-size: 0.8em;
+}
+
+a.up:visited {
+}
+
+a.up:hover {
+   background-color: #028ec9;
+}
 </style>
+      <style lang="css">
+table {
+   border-collapse: collapse;
+   border-spacing: 0px;
+}
+
+td {
+   margin: 0;
+   border: 1px solid #fff;
+   padding-top: 6px;
+   padding-bottom: 6px;
+   padding-left: 16px;
+   padding-right: 16px;
+   font-size: 0.9em;
+   color: #fff;
+}
+
+table#agent_case_results {
+   border-collapse: collapse;
+   border-spacing: 0px;
+   border-radius: 10px;
+   margin-left: 20px;
+   margin-right: 20px;
+   margin-bottom: 40px;
+}
+
+td.outcome_desc {
+   width: 100%;
+   color: #333;
+   font-size: 0.8em;
+}
+
+tr.agent_case_result_row a {
+   color: #eee;
+}
+
+td.agent {
+   color: #fff;
+   font-size: 1.0em;
+   text-align: center;
+   background-color: #048;
+   font-size: 0.8em;
+   word-wrap: break-word;
+   padding: 4px;
+   width: 140px;
+}
+
+td.case {
+   background-color: #666;
+   text-align: left;
+   padding-left: 40px;
+   font-size: 0.9em;
+}
+
+td.case_category {
+   color: #fff;
+   background-color: #000;
+   text-align: left;
+   padding-left: 20px;
+   font-size: 1.0em;
+}
+
+td.case_subcategory {
+   color: #fff;
+   background-color: #333;
+   text-align: left;
+   padding-left: 30px;
+   font-size: 0.9em;
+}
+
+td.close {
+   width: 15px;
+   padding: 6px;
+   font-size: 0.7em;
+   color: #fff;
+   min-width: 0px;
+}
+
+td.case_ok {
+   background-color: #0a0;
+   text-align: center;
+}
+
+td.case_almost {
+   background-color: #6d6;
+   text-align: center;
+}
+
+td.case_non_strict, td.case_no_close {
+   background-color: #9a0;
+   text-align: center;
+}
+
+td.case_info {
+   background-color: #4095BF;
+   text-align: center;
+}
+
+td.case_unimplemented {
+   background-color: #800080;
+   text-align: center;
+}
+
+td.case_failed {
+   background-color: #900;
+   text-align: center;
+}
+
+td.case_missing {
+   color: #fff;
+   background-color: #a05a2c;
+   text-align: center;
+}
+
+span.case_duration {
+   font-size: 0.7em;
+   color: #fff;
+}
+
+*.unselectable {
+   user-select: none;
+   -moz-user-select: -moz-none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+}
+
+div#toggle_button {
+   position: fixed;
+   bottom: 10px;
+   right: 10px;
+   background-color: rgba(60, 60, 60, 0.5);
+   border-radius: 12px;
+   color: #fff;
+   font-size: 0.7em;
+   padding: 5px 10px;
+}
+
+div#toggle_button:hover {
+   background-color: #028ec9;
+}
+</style>
+<script language="javascript">
+var isClosed = false;
+
+function closeHelper(display,colspan) {
+   // hide all close codes
+   var a = document.getElementsByClassName("close_hide");
+   for (var i in a) {
+      if (a[i].style) {
+         a[i].style.display = display;
+      }
+   }
+
+   // set colspans
+   var a = document.getElementsByClassName("close_flex");
+   for (var i in a) {
+      a[i].colSpan = colspan;
+   }
+
+   var a = document.getElementsByClassName("case_subcategory");
+   for (var i in a) {
+      a[i].colSpan = 1 * colspan + 1;
+   }
+}
+
+function toggleClose() {
+   if (window.isClosed == false) {
+      closeHelper("none",1);
+      window.isClosed = true;
+   } else {
+      closeHelper("table-cell",2);
+      window.isClosed = false;
+   }
+}
+</script>
    </head>
    <body>
+     <a href="#">
+       <div id="toggle_button" class="unselectable" 
+	    onclick="toggleClose();">Toggle Details</div>
+     </a>
+     <a name="top"></a>
+     <br/>
+     # set static_image_dir = "http://autobahn.ws/static/img"
+     <center>
+       <a href="http://autobahn.ws/testsuite" 
+	  title="Autobahn WebSockets Testsuite">
+	 <img src="{{static_image_dir}}/ws_protocol_test_report.png"
+	      border="0" width="820" height="46" 
+	      alt="Autobahn WebSockets Testsuite Report">
+         </img>
+       </a>
+     </center>
+     <center>
+       <a href="http://autobahn.ws" title="Autobahn WebSockets">          
+	 <img src="{{static_image_dir}}/ws_protocol_test_report_autobahn.png"
+	      border="0" width="300" height="68" alt="Autobahn WebSockets">                 </img>
+       </a>
+     </center>
+     <div id="master_report_header" class="block">
+ 
      <h1>WAMP Implementation Test Report</h1>
-      <table class="wamplog">
-	<tr>
-	  <th>Test</th>
-	  {# TODO: Use dynamic names #}
-	  <th>AutobahnPython 0.6.0</th>
-# for report in reports:
+      <table id="case_outcome_desc">
          <tr>
-            <td><a href="#{{report.test_name}}">{{report.test_name}}</a></td>
-	    <td><a href="{{report.filename}}">{{report.test_result}}</a></td>
+            <td class="case_ok">Pass</td>
+            <td class="outcome_desc">Test case was executed and passed
+            successfully.</td>
          </tr>
-# endfor
+         <tr>
+            <td class="case_non_strict">Non-Strict</td>
+            <td class="outcome_desc">Test case was executed and passed
+            non-strictly.  A non-strict behavior is one that does not
+            adhere to a SHOULD-behavior as described in the protocol
+            specification or a well-defined, canonical behavior that
+            appears to be desirable but left open in the protocol
+            specification.  An implementation with non-strict behavior
+            is still conformant to the protocol specification.
+	    </td>
+         </tr>
+         <tr>
+            <td class="case_failed">Fail</td>
+            <td class="outcome_desc">Test case was executed and
+            failed. An implementation which fails a test case - other
+            than a performance/limits related one - is non-conforming
+            to a MUST-behavior as described in the protocol
+            specification.
+	    </td>
+         </tr>
+         <tr>
+            <td class="case_info">Info</td>
+            <td class="outcome_desc">Informational test case which
+            detects certain implementation behavior left unspecified
+            by the spec but nevertheless potentially interesting to
+            implementors.
+	    </td>
+         </tr>
+         <tr>
+            <td class="case_missing">Missing</td>
+            <td class="outcome_desc">Test case is missing, either
+            because it was skipped via the test suite configuration or
+            deactivated, i.e. because the implementation does not
+            implement the tested feature or breaks during running the
+            test case.
+	    </td>
+         </tr>
       </table>
-# for report in reports:
-      <a name="{{report.test_name}}"></a>
-      <h2>{{report.test_name}}</a></h2>
-      <h3>Case Description</h3>
-      TBD
-      <h3>Case Expectation</h3>
-      TBD
-# endfor
+      </div>
+      <table id="agent_case_results">
+	# for category in categories:
+        <tr class="case_category_row">
+          <td class="case_category">
+	    {{category.cat_id}} {{category.name}}
+	  </td>
+	  # set server = "AutobahnPython"
+	  {# TODO: iterate over servers #}
+          <td class="agent close_flex" colspan="2">{{server}}</td>
+        </tr>
+	# for subcategory in category.sub_categories:
+        <tr class="case_subcategory_row">
+          <td class="case_subcategory" colspan="3">
+	    {{category.cat_id}}.{{subcategory.subcat_id}} {{subcategory.name}}
+	  </td>
+        </tr>
+	# for (server, test_reports) in subcategory.test_cases:
+        <tr class="agent_case_result_row">
+	  # set first_report = test_reports[0]
+          <td class="case">
+	    <a href="#{{first_report.test_name}}">
+	      {{first_report.test_name}}
+	    </a>
+	  </td>
+	  # for report in test_reports:
+	  # set status="ok" if report.test_result == "Pass" else "failed"
+          <td class="case_{{status}}">
+	    <a href="{{report.filename}}">{{report.test_result}}</a>
+	  </td>
+	  <td class="close close_hide case_{{status}}">
+	    <span class="close_code">TBD</span>
+	  </td>
+	  # endfor
+        </tr>
+	# endfor
+	# endfor
+	# endfor
+      </table>
+      <br/>
+      <hr/>
+      <div id="test_case_descriptions">
+	<br/>
+	# for category in categories:
+	# for subcategory in category.sub_categories:
+	# for test_name, _ in subcategory.test_cases:
+	<a name="{{test_name}}"></a>
+	<h2>{{test_name}}</h2>
+	<a class="up" href="#top">Up</a>
+	<p class="case_text_block case_desc">
+	  <b>Case Description</b>
+	  <br/>
+	  <br/>
+	  <em>TBD</em>
+	</p>
+      <p class="case_text_block case_expect">
+	<b>Case Expectation</b>
+	<br/>
+	<br/>
+	<em>TBD</em></p>
+      <br/>
+      # endfor
+      # endfor
+      # endfor
+      </div>
+      <br/>
+      <hr/>
    </body>
 </html>      
