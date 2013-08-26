@@ -34,6 +34,10 @@ def createUtf8TestSequences():
    # 1 Some correct UTF-8 text
    vss = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
    vs = ["Some valid UTF-8 sequences", []]
+   vs[1].append((True, 'hello\x24world')) # U+0024
+   vs[1].append((True, 'hello\xC2\xA2world')) # U+00A2
+   vs[1].append((True, 'hello\xE2\x82\xACworld')) # U+20AC
+   vs[1].append((True, 'hello\xF0\xA4\xAD\xA2world')) # U+24B62
    vs[1].append((True, vss))
    UTF8_TEST_SEQUENCES.append(vs)
 
