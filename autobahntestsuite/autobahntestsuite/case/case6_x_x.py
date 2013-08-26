@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -214,6 +214,18 @@ def createUtf8TestSequences():
    return UTF8_TEST_SEQUENCES
 
 
+def createValidUtf8TestSequences():
+   """
+   Generate some exotic, but valid UTF8 test strings.
+   """
+   VALID_UTF8_TEST_SEQUENCES = []
+   for test in createUtf8TestSequences():
+      valids = [x[1] for x in test[1] if x[0]]
+      if len(valids) > 0:
+         VALID_UTF8_TEST_SEQUENCES.append([test[0], valids])
+   return VALID_UTF8_TEST_SEQUENCES
+
+
 def test_utf8(UTF8_TEST_SEQUENCES):
    """
    These tests verify the UTF-8 decoder/validator on the various test cases from
@@ -393,8 +405,11 @@ if __name__ == '__main__':
    #UTF8_TEST_SEQUENCES = createUtf8TestSequences()
    #test_utf8(UTF8_TEST_SEQUENCES)
 
-   TESTPOINTS = [(0xfffb, u'\ufffb'),
-                 # (0xd807, u'\ud807'), # Jython does not like this
-                 (0x11000, None),
-                 (0x110000, None)]
-   test_encode(TESTPOINTS)
+   #TESTPOINTS = [(0xfffb, u'\ufffb'),
+   #              # (0xd807, u'\ud807'), # Jython does not like this
+   #              (0x11000, None),
+   #              (0x110000, None)]
+   #test_encode(TESTPOINTS)
+
+   from pprint import pprint
+   pprint(createValidUtf8TestSequences())
