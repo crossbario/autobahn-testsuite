@@ -22,7 +22,7 @@ __all__ = ("FuzzingWampClient",)
 import sys, collections, os, json
 
 from twisted.python import log
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 
 # for versions
 import autobahn
@@ -45,6 +45,7 @@ def subCategoryName(cat_id, subcat_id):
    except KeyError:
       return "Unspecified"
 
+   
 class Category(object):
 
    def __init__(self, cat_id, name):
@@ -64,11 +65,11 @@ class Category(object):
       return sorted(self._testees.iterkeys())
 
    
-   def addTestCase(self, subcat_id, test_case):
+   def addTestCase(self, subcat_id, agent, test_case):
       self._testees[test_case.testee] = None
       if subcat_id not in self._sub_categories:
          self._sub_categories[subcat_id] = SubCategory(self.cat_id, subcat_id)
-      self._sub_categories[subcat_id].addTestCase( test_case)
+      self._sub_categories[subcat_id].addTestCase(agent, test_case)
 
 
 
@@ -87,18 +88,22 @@ class SubCategory(object):
       return sorted(self._test_cases.iteritems())
 
    
-   def addTestCase(self, test_case):
-      self._test_cases[test_case.test_name].append(test_case)
+   def addTestCase(self, agent, test_case):
+      self._test_cases[test_case.test_name].append((agent, test_case))
 
 
 
-class ReportSpec(object):
+class TestResult(object):
 
-   def __init__(self, filename, testee, test_name, test_result):
+   def __init__(self, filename, testee, test_name, test_result, agent, url,
+                description):
       self.filename = filename
       self.testee = testee
       self.test_name = test_name
       self.test_result = test_result
+      self.agent = agent
+      self.url = url
+      self.description = description
 
 
 
@@ -129,9 +134,9 @@ class FuzzingWampClient(object):
                                   for x in spec["servers"]])
 
       try:
+         self.urls = []
          for server in spec["servers"]:
-            if server["agent"] == "AutobahnPython":
-               self.url = server["url"]
+            self.urls.append((server["agent"], server["url"], server["auth"]))
       except KeyError, ex:
          print "Problem with specification file: Key %s not found." % ex
          reactor.stop()
@@ -154,95 +159,91 @@ class FuzzingWampClient(object):
       self.next()
 
 
-   @property
-   def currentTestName(self):
-      """
-      Provide the name of the current test case.
-      """
-      return self.test.__class__.__name__
-
-
-   @property
-   def readableTestName(self):
+   def readableTestName(self, test):
       """
       Provide the name of the current test case as presented in the reports.
       """
-      return " ".join([self.currentTestName[:8],
-                         self.currentTestName[8:].replace("_", ".")])
+      name = test.__class__.__name__
+      return " ".join([name[:8], name[8:].replace("_", ".")])
 
-   @property
-   def identifierParts(self):
-      identifier = self.currentTestName[8:]
+
+   def identifierParts(self, test):
+      identifier = test.__class__.__name__[8:]
+      sys.stdout.flush()
       return [int(x) for x in identifier.split("_")]
 
-   def next(self):
+   def next(self, result=None):
       """
       Execute the next available test.
       """
       self.currentCaseIndex += 1
       if self.currentCaseIndex < len(Cases):
+
          # Fetch the next test case from wampcases.Cases. This list is
          # initialized in the wampcases.wampcases1.py and assigned to
          # `Cases` in wampcases' __init__.py.
-         self.test = Cases[self.currentCaseIndex](self.url, self.debugWs,
-                                                  self.debugWamp)
-         # Write information about the current test to stdout and make sure
-         # that the information is presented on the screen instantly.
-         # Do not write a line break - this is done after "Pass" or "Fail"
-         # is printed in `reportTestResult`.
-         sys.stdout.write("Running test %d/%d (%s)... " % (
-               self.currentCaseIndex + 1,
-               len(Cases),
-               self.currentTestName))
-         sys.stdout.flush()
-         # TODO: Iterate over all servers specified in self.spec
-         d = self.test.run()
-         d.addCallbacks(self.reportTestResult, self.printError)
+         testCls = Cases[self.currentCaseIndex] 
+
+         # Run test case against all agents and gather the resulting
+         # deferreds in a list.
+         runningTests = []
+         print "Running test %d/%d (%s)" % (self.currentCaseIndex + 1,
+                                            len(Cases),
+                                            testCls.__name__)
+         for agent, url, auth in self.urls:
+            test = testCls(url, auth, self.debugWs, self.debugWamp)
+            d = test.run()
+            d.addCallback(self.reportTestResult, test, agent, url)
+            d.addErrback(self.printError)
+            runningTests.append(d)
+
+         # Create a DeferredList from runningTests and attach a callback
+         # to start the next test case when all agents have finished.
+         d = defer.DeferredList(runningTests)
+         d.addCallback(self.next)
       else:
-         # No more test cases ==> create index.html
          self.createIndexFile()
-         print ("Done. Point your browser to %s/index.html to see the "
-                "results.") % self.report_dir
-         reactor.stop()
 
 
-   def reportTestResult(self, res):
+   def reportTestResult(self, res, test, agent, url):
       """
       Print a short informational message about test success or failure,
       create a file with detailed test result information.
       """
-      status_representation =  "Pass" if res[0] else "Fail"
-      print status_representation
-      report_filename = self.createFilename()
-
       # Remember high-level information about the test case that will be
       # needed to create the index page.
-      cat_id, subcat_id = self.identifierParts[:2]
+      cat_id, subcat_id = self.identifierParts(test)[:2]
+
       if cat_id not in self.categories:
          # Create new category for the previously unseen `cat_id`.
          category = Category(cat_id, CaseCategories[str(cat_id)])
          self.categories[cat_id] = category
+      status_representation =  "Pass" if res[0] else "Fail"
+      report_filename = self.createFilename(agent, test)
 
       # Add the test report to the appropriate category / subcategory.
-      self.categories[cat_id].addTestCase(subcat_id,
-                                          ReportSpec(report_filename,
-                                                     "autobahn_python",
-                                                     self.readableTestName,
-                                                     status_representation))
-
+      self.categories[cat_id].addTestCase(subcat_id, agent,
+                                          TestResult(report_filename,
+                                                     agent,
+                                                     self.readableTestName(test),
+                                                     status_representation,
+                                                     agent,
+                                                     url,
+                                                     test.DESCRIPTION))
       for generator in self.report_generators:
-         generator.createReport(res, report_filename, self.readableTestName)
-      self.next()
+         generator.createReport(res, report_filename,
+                                self.readableTestName(test), agent,
+                                test.DESCRIPTION)
 
 
    # TODO: Move filename creation to the respective report generators!
    #+ They are format-specific.
-   def createFilename(self):
+   def createFilename(self, agent, test):
       """
       Create the filename for the current test.
       """
       # TODO: use server agent name from spec to allow for several servers
-      return "autobahnpython_%s.html" % self.currentTestName.lower()
+      return "%s_%s.html" % (agent, test.__class__.__name__.lower())
 
 
    def createIndexFile(self):
@@ -252,6 +253,8 @@ class FuzzingWampClient(object):
       for generator in self.report_generators:
          generator.createIndex([x[1] for x in
                                 sorted(self.categories.iteritems())])
+      print "Done"
+      reactor.stop()
 
 
    def printError(self, err):
@@ -259,7 +262,8 @@ class FuzzingWampClient(object):
       Print an error message thrown by a test case.
       """
       print err
-
+      print "Error for test case %s reported" % self.readableTestName(test)
+      
       
 
 if __name__ == '__main__':
@@ -275,6 +279,6 @@ if __name__ == '__main__':
    with open(spec) as f:
       spec = json.loads(f.read())
 
-   c = FuzzingWampClient(spec)
+   c = FuzzingWampClient(spec, debug)
 
    reactor.run()

@@ -69,6 +69,7 @@ class WsTestOptions(usage.Options):
             'wsperfcontrol',
             'wsperfmaster',
             'wampserver',
+            'wamptesteeserver',
             'wampclient',
             'massconnect']
 
@@ -98,9 +99,10 @@ class WsTestOptions(usage.Options):
                              'fuzzingwampserver': SPEC_FUZZINGWAMPSERVER
                              }
 
-   
+
    optParameters = [
-      ['mode', 'm', None, 'Test mode, one of: %s [required]' % ', '.join(MODES)],
+      ['mode', 'm', None, 'Test mode, one of: %s [required]' %
+       ', '.join(MODES)],
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
       ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) '
@@ -121,7 +123,7 @@ class WsTestOptions(usage.Options):
       """
       Process the given options. Perform plausibility checks, etc...
       """
-      
+
       if self['autobahnversion']:
          print "Autobahn %s" % autobahn.version
          print "AutobahnTestSuite %s" % autobahntestsuite.version
@@ -142,7 +144,8 @@ class WsTestOptions(usage.Options):
          if not self['spec']:
           self.updateSpec()
 
-      if self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and not self['wsuri']:
+      if (self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and
+          not self['wsuri']):
          raise usage.UsageError, "mode needs a WebSocket URI!"
 
    def updateSpec(self):
@@ -162,6 +165,8 @@ class WsTestOptions(usage.Options):
       else:
          print "Using implicit spec file %s" % filename
 
+
+
 # Help string to be presented if the user wants to use an encrypted connection
 # but didn't specify key and / or certificate
 OPENSSL_HELP = """
@@ -177,116 +182,70 @@ Then start wstest:
 wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
 """
 
-def createWssContext(o, factory):
-   """Create an SSL context factory for WSS connections.
-   """
 
-   if factory.isSecure:
 
-      # Check if an OpenSSL library can be imported; abort if it's missing. 
+class WebSocketTestRunner(object):
+
+   def __init__(self):
+      ws_test_options = WsTestOptions()
       try:
-         from twisted.internet import ssl
-      except ImportError, e:
-         print "You need OpenSSL/pyOpenSSL installed for secure WebSockets (wss)!"
+         ws_test_options.parseOptions()
+      except usage.UsageError, errortext:
+         print '%s %s\n' % (sys.argv[0], errortext)
+         print 'Try %s --help for usage details\n' % sys.argv[0]
          sys.exit(1)
 
-      # Make sure the necessary options ('key' and 'cert') are available
-      if o.opts['key'] is None or o.opts['cert'] is None:
-         print OPENSSL_HELP
-         sys.exit(1)
+      self.options = ws_test_options.opts
+      self.debug = self.options['debug']
+      if self.debug:
+         log.startLogging(sys.stdout)
+      self.mode = str(self.options['mode'])
+      self.testData = self._loadTestData()
 
-      # Create the context factory based on the given key and certificate
-      key = str(o.opts['key'])
-      cert = str(o.opts['cert'])
-      contextFactory = ssl.DefaultOpenSSLContextFactory(key, cert)
+      print "Using Twisted reactor class %s" % str(reactor.__class__)
+      print "Using UTF8 Validator class %s" % str(Utf8Validator)
+      print "Using XOR Masker classes %s" % str(XorMaskerNull)
 
-   else:
-      contextFactory = None
-
-   return contextFactory
-
-
-def loadTestData():
-   TEST_DATA = {
-      'gutenberg_faust':
-         {'desc': "Human readable text, Goethe's Faust I (German)",
-          'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
-          'file':
-             'pg2229.txt'
-          },
-      'lena512':
-         {'desc': 'Lena Picture, Bitmap 512x512 bw',
-          'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
-          'file': 'lena512.bmp'
-          },
-      'ooms':
-         {'desc': 'A larger PDF',
-          'url':
-             'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
-          'file': '10.1.1.105.5439.pdf'
-          },
-      'json_data1':
-         {'desc': 'Large JSON data file',
-          'url': None,
-          'file': 'data1.json'
-          },
-      'html_data1':
-         {'desc': 'Large HTML file',
-          'url': None,
-          'file': 'data1.html'
-          }
-      }
-
-   for t in TEST_DATA:
-      fn = pkg_resources.resource_filename("autobahntestsuite",
-                                           "testdata/%s" % TEST_DATA[t]['file'])
-      TEST_DATA[t]['data'] = open(fn, 'rb').read()
-
-   return TEST_DATA
+      
+   def startService(self):
+      methodMapping = dict(
+         fuzzingclient     = self.startFuzzingService,
+         fuzzingserver     = self.startFuzzingService,
+         fuzzingwampclient = self.startFuzzingService,
+         fuzzingwampserver = self.startFuzzingService,
+         testeeclient      = self.startTesteeService,
+         testeeserver      = self.startTesteeService,
+         echoclient        = self.startEchoService,
+         echoserver        = self.startEchoService,
+         broadcastclient   = self.startBroadcastingService,
+         broadcastserver   = self.startBroadcastingService,
+         wsperfcontrol     = self.startWsPerfControl,
+         wsperfmaster      = self.startWsPerfMaster,
+         wampclient        = self.startWampService,
+         wampserver        = self.startWampService,
+         wamptesteeserver  = self.startWampService,
+         massconnect       = self.startMassConnect
+         )
+      try:
+         methodMapping[self.mode]()
+      except KeyError:
+         raise Exception("logic error")
 
 
-def run():
+   def startFuzzingService(self):
+      spec = self._loadSpec()
 
-   o = WsTestOptions()
-   try:
-      o.parseOptions()
-   except usage.UsageError, errortext:
-      print '%s %s\n' % (sys.argv[0], errortext)
-      print 'Try %s --help for usage details\n' % sys.argv[0]
-      sys.exit(1)
-
-   debug = o.opts['debug']
-   if debug:
-      log.startLogging(sys.stdout)
-
-   print "Using Twisted reactor class %s" % str(reactor.__class__)
-   print "Using UTF8 Validator class %s" % str(Utf8Validator)
-   print "Using XOR Masker classes %s" % str(XorMaskerNull)
-
-   mode = str(o.opts['mode'])
-
-   testData = loadTestData()
-
-   if mode in ['fuzzingclient',
-               'fuzzingserver',
-               'fuzzingwampclient',
-               'fuzzingwampserver']:
-
-      spec = str(o.opts['spec'])
-      spec = json.loads(open(spec).read())
-
-      if mode == 'fuzzingserver':
-
+      if self.mode == 'fuzzingserver':
          ## use TLS server key/cert from spec, but allow overriding
          ## from cmd line
-         if not o.opts['key']:
-            o.opts['key'] = spec.get('key', None)
-         if not o.opts['cert']:
-            o.opts['cert'] = spec.get('cert', None)
+         if not self.options['key']:
+            self.options['key'] = spec.get('key', None)
+         if not self.options['cert']:
+            self.options['cert'] = spec.get('cert', None)
 
-         factory = FuzzingServerFactory(spec, debug)
-         factory.testData = testData
-         context = createWssContext(o, factory)
+         factory = FuzzingServerFactory(spec, self.debug)
+         factory.testData = self.testData
+         context = self._createWssContext(factory)
          listenWS(factory, context)
 
          webdir = File(pkg_resources.resource_filename("autobahntestsuite",
@@ -299,97 +258,88 @@ def run():
          else:
             reactor.listenTCP(spec.get("webport", 8080), web)
 
-      elif mode == 'fuzzingclient':
-         factory = FuzzingClientFactory(spec, debug)
-         factory.testData = testData
+      elif self.mode == 'fuzzingclient':
+         factory = FuzzingClientFactory(spec, self.debug)
+         factory.testData = self.testData
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
 
-      elif mode == 'fuzzingwampserver':
-
-         raise Exception("not implemented")
-
-      elif mode == 'fuzzingwampclient':
-
-         client = FuzzingWampClient(spec, debug)
+      elif self.mode == 'fuzzingwampclient':
+         client = FuzzingWampClient(spec, self.debug)
          # no connectWS done here, since this is done within
          # FuzzingWampClient automatically to orchestrate tests
 
+      elif self.mode == 'fuzzingwampserver':
+         raise Exception("not implemented")
+
       else:
          raise Exception("logic error")
 
-   elif mode in ['testeeclient', 'testeeserver']:
 
-      wsuri = str(o.opts['wsuri'])
+   def startTesteeService(self):
+      wsuri = str(self.options['wsuri'])
 
-      if mode == 'testeeserver':
-         factory = TesteeServerFactory(wsuri, debug, ident = o.opts['ident'])
-         listenWS(factory, createWssContext(o, factory))
+      if self.mode == 'testeeserver':
+         factory = TesteeServerFactory(wsuri, self.debug,
+                                       ident = self.options['ident'])
+         listenWS(factory, self._createWssContext(factory))
 
-      elif mode == 'testeeclient':
-         factory = TesteeClientFactory(wsuri, debug, ident = o.opts['ident'])
+      elif self.mode == 'testeeclient':
+         factory = TesteeClientFactory(wsuri, self.debug,
+                                       ident = self.options['ident'])
          connectWS(factory)
 
       else:
          raise Exception("logic error")
 
-   elif mode in ['echoclient', 'echoserver']:
 
-      wsuri = str(o.opts['wsuri'])
+   def startEchoService(self):
+      wsuri = str(self.options['wsuri'])
 
-      if mode == 'echoserver':
+      if self.mode == 'echoserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                       "web/echoserver"))
-         web = Site(webdir)
-         reactor.listenTCP(8080, web)
+         self._setupSite("echoserver")
 
-         factory = EchoServerFactory(wsuri, debug)
-         listenWS(factory, createWssContext(o, factory))
+         factory = EchoServerFactory(wsuri, self.debug)
+         listenWS(factory, self._createWssContext(factory))
 
-      elif mode == 'echoclient':
-         factory = EchoClientFactory(wsuri, debug)
+      elif self.mode == 'echoclient':
+         factory = EchoClientFactory(wsuri, self.debug)
          connectWS(factory)
 
       else:
          raise Exception("logic error")
 
-   elif mode in ['broadcastclient', 'broadcastserver']:
 
-      wsuri = str(o.opts['wsuri'])
+   def startBroadcastingService(self):
+      wsuri = str(self.options['wsuri'])
 
-      if mode == 'broadcastserver':
+      if self.mode == 'broadcastserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                       "web/broadcastserver"))
-         web = Site(webdir)
-         reactor.listenTCP(8080, web)
+         self._setupSite("broadcastserver")
 
-         factory = BroadcastServerFactory(wsuri, debug)
-         listenWS(factory, createWssContext(o, factory))
+         factory = BroadcastServerFactory(wsuri, self.debug)
+         listenWS(factory, self._createWssContext(factory))
 
-      elif mode == 'broadcastclient':
-         factory = BroadcastClientFactory(wsuri, debug)
+      elif self.mode == 'broadcastclient':
+         factory = BroadcastClientFactory(wsuri, self.debug)
          connectWS(factory)
 
       else:
          raise Exception("logic error")
 
-   elif mode == 'wsperfcontrol':
 
-      wsuri = str(o.opts['wsuri'])
-
-      spec = str(o.opts['spec'])
-      spec = json.loads(open(spec).read())
-
+   def startWsPerfControl(self):
+      wsuri = str(self.options['wsuri'])
+      
+      spec = self._loadSpec()
       factory = WsPerfControlFactory(wsuri)
       factory.spec = spec
       factory.debugWsPerf = spec['options']['debug']
-
       connectWS(factory)
 
-   elif mode == 'wsperfmaster':
 
+   def startWsPerfMaster(self):
       ## WAMP Server for wsperf slaves
       ##
       wsperf = WsPerfMasterFactory("ws://localhost:9090")
@@ -398,13 +348,11 @@ def run():
 
       ## Web Server for UI static files
       ##
-      webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                    "web/wsperfmaster"))
-      web = Site(webdir)
-      reactor.listenTCP(8080, web)
+      self._setupSite("wsperfmaster")
 
       ## WAMP Server for UI
       ##
+
       wsperfUi = WsPerfMasterUiFactory("ws://localhost:9091")
       wsperfUi.debug = False
       wsperfUi.debugWamp = False
@@ -415,44 +363,124 @@ def run():
       wsperf.uiFactory = wsperfUi
       wsperfUi.slaveFactory = wsperf
 
-   elif mode in ['wampclient', 'wampserver']:
 
-      wsuri = str(o.opts['wsuri'])
+   def startWampService(self):
+      wsuri = str(self.options['wsuri'])
 
-      if mode == 'wampserver':
+      if self.mode == 'wampserver':
 
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                       "web/wamp"))
-         web = Site(webdir)
-         reactor.listenTCP(8080, web)
+         self._setupSite("wamp")
 
-         factory = WampTestServerFactory(wsuri, debug)
-         listenWS(factory, createWssContext(o, factory))
+         factory = WampTestServerFactory(wsuri, self.debug)
+         listenWS(factory, self._createWssContext(factory))
 
-      elif mode == 'wampclient':
+      elif self.mode == 'wampclient':
+         raise Exception("not yet implemented")
+
+      elif self.mode == 'wamptesteeserver':
          raise Exception("not yet implemented")
 
       else:
          raise Exception("logic error")
 
-   elif mode == 'massconnect':
 
-      spec = str(o.opts['spec'])
-      spec = json.loads(open(spec).read())
+   def startMassConnect(self):
+      spec = self._loadSpec()
 
       test = MassConnectTest(spec)
       d = test.run()
+
       def onTestEnd(res):
          print res
          reactor.stop()
+
       d.addCallback(onTestEnd)
 
-   else:
+   ## Helper methods
 
-      raise Exception("logic error")
+   def _loadSpec(self):
+      spec_filename = str(self.options['spec'])
+      spec = json.loads(open(spec_filename).read())
+      return spec
 
+   
+   def _setupSite(self, prefix):
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                    "web/%s" % prefix))
+      web = Site(webdir)
+      reactor.listenTCP(8080, web)
+
+
+   def _createWssContext(self, factory):
+      """Create an SSL context factory for WSS connections.
+      """
+
+      if not factory.isSecure:
+         return None
+
+      # Check if an OpenSSL library can be imported; abort if it's missing.
+      try:
+         from twisted.internet import ssl
+      except ImportError, e:
+         print ("You need OpenSSL/pyOpenSSL installed for secure WebSockets"
+                "(wss)!")
+         sys.exit(1)
+
+      # Make sure the necessary options ('key' and 'cert') are available
+      if self.options['key'] is None or self.options['cert'] is None:
+         print OPENSSL_HELP
+         sys.exit(1)
+
+      # Create the context factory based on the given key and certificate
+      key = str(self.options['key'])
+      cert = str(self.options['cert'])
+      return ssl.DefaultOpenSSLContextFactory(key, cert)
+
+   
+   def _loadTestData(self):
+      test_data = {
+         'gutenberg_faust':
+            {'desc': "Human readable text, Goethe's Faust I (German)",
+             'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
+             'file':
+                'pg2229.txt'
+             },
+         'lena512':
+            {'desc': 'Lena Picture, Bitmap 512x512 bw',
+             'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
+             'file': 'lena512.bmp'
+             },
+         'ooms':
+            {'desc': 'A larger PDF',
+             'url':
+                'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
+             'file': '10.1.1.105.5439.pdf'
+             },
+         'json_data1':
+            {'desc': 'Large JSON data file',
+             'url': None,
+             'file': 'data1.json'
+             },
+         'html_data1':
+            {'desc': 'Large HTML file',
+             'url': None,
+             'file': 'data1.html'
+             }
+         }
+
+      for t in test_data:
+         fn = pkg_resources.resource_filename("autobahntestsuite",
+                                              "testdata/%s" %
+                                              test_data[t]['file'])
+         test_data[t]['data'] = open(fn, 'rb').read()
+
+      return test_data
+
+def run():
+   test_runner = WebSocketTestRunner()
+   test_runner.startService()
    reactor.run()
-
+   
 
 if __name__ == '__main__':
    run()
