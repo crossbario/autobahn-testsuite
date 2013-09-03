@@ -449,7 +449,8 @@ class HtmlReportGenerator(object):
 
 
     ### TODO: Move the creation of reports to a separate class.
-    def createReport(self, res, report_filename, readable_test_name):
+    def createReport(self, res, report_filename, readable_test_name, agent,
+                     description):
        """
        Create an HTML file called `report_filename` in the
        `report_dirname` directory with details about the test case.
@@ -461,13 +462,14 @@ class HtmlReportGenerator(object):
           print "Could not create file %s: %s." % (report_path, ex)
           return
        try:
-           f.write(self.formatResultAsHtml(res, readable_test_name))
+           f.write(self.formatResultAsHtml(res, readable_test_name, agent,
+                                           description))
        except Exception, ex:
            print "Could not write report: %s." % ex
        f.close()
 
 
-    def formatResultAsHtml(self, res, readable_test_name):
+    def formatResultAsHtml(self, res, readable_test_name, agent, description):
        """
        Create an HTML document with a table containing information about
        the test outcome.
@@ -476,9 +478,12 @@ class HtmlReportGenerator(object):
                                            test_name = readable_test_name,
                                            expected=res[1],
                                            observed=res[2],
-                                           outcome="Pass" if res[0] else "Fail")
+                                           outcome="Pass" if res[0] else "Fail",
+                                           agent=agent,
+                                           description=description)
        return html
 
+    
     def createIndex(self, reports):
         """
         Create an HTML document with a table containing an overview of all

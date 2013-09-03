@@ -357,29 +357,31 @@ function toggleClose() {
       </div>
       <table id="agent_case_results">
 	# for category in categories:
-        <tr class="case_category_row">
+        <tr class="case_category_row" colspan="5">
           <td class="case_category">
 	    {{category.cat_id}} {{category.name}}
 	  </td>
-	  # set server = "AutobahnPython"
-	  ## TODO: iterate over servers
-          <td class="agent close_flex" colspan="2">{{server}}</td>
         </tr>
 	# for subcategory in category.sub_categories:
         <tr class="case_subcategory_row">
-          <td class="case_subcategory" colspan="3">
-	    {{category.cat_id}}.{{subcategory.subcat_id}} {{subcategory.name}}
+          <td class="case_subcategory" colspan="5">
+	    {{category.cat_id}}.{{subcategory.subcat_id}} {{subcategory.name}} [{{category.name}}]
 	  </td>
         </tr>
-	# for (server, test_reports) in subcategory.test_cases:
+	<tr>
+	  <td class="agent close_flex">Test Case</td>
+	  # for agent in category.testees
+          <td class="agent close_flex" colspan="2">{{agent}}</td>
+	  # endfor
+	</tr>
+	# for (test_name, test_reports) in subcategory.test_cases:
         <tr class="agent_case_result_row">
-	  # set first_report = test_reports[0]
           <td class="case">
-	    <a href="#{{first_report.test_name}}">
-	      {{first_report.test_name}}
+	    <a href="#{{test_name}}">
+	      {{test_name}}
 	    </a>
 	  </td>
-	  # for report in test_reports:
+	  # for (agent, report) in test_reports:
 	  # set status="ok" if report.test_result == "Pass" else "failed"
           <td class="case_{{status}}">
 	    <a href="{{report.filename}}">{{report.test_result}}</a>
@@ -399,7 +401,7 @@ function toggleClose() {
 	<br/>
 	# for category in categories:
 	# for subcategory in category.sub_categories:
-	# for test_name, _ in subcategory.test_cases:
+	# for test_name, test_results in subcategory.test_cases:
 	<a name="{{test_name}}"></a>
 	<h2>{{test_name}}</h2>
 	<a class="up" href="#top">Up</a>
@@ -407,7 +409,7 @@ function toggleClose() {
 	  <b>Case Description</b>
 	  <br/>
 	  <br/>
-	  <em>TBD</em>
+	  <em>test_results[0][1].description</em>
 	</p>
       <p class="case_text_block case_expect">
 	<b>Case Expectation</b>
