@@ -39,13 +39,27 @@ CaseSubCategories = {"2.1": "Different payloads",
                      "2.5": "Pattern-based subscriptions",
                      "2.6": "Metaevents",
 
-                     "3.1": "Different argument and return types",
-                     "3.2": "Call timeouts",
-                     "3.2": "Cancel calls",
-                     "3.3": "Progressive results",
-                     "3.4": "Partitioned calls",
-                     "3.5": "Call results and errors",
-                     "3.6": "",
+                     ## Scalar values in RPC arguments/results
+                     "3.1": "Argument and return types (Number)",
+                     "3.2": "Argument and return types (String)",
+                     "3.3": "Argument and return types (Datetime)",
+                     "3.4": "Argument and return types (Boolean)",
+
+                     ## Composite values in RPC arguments/results
+                     "3.5": "Argument and return types (Composite)",
+
+                     ## Exceptions defined by WAMP
+                     "3.6": "Exceptions (Builtin)",
+
+                     ## User exceptions
+                     "3.7": "Exceptions (Custom)",
+
+                     #"3.2": "Call timeouts",
+                     #"3.2": "Cancel calls",
+                     #"3.3": "Progressive results",
+                     #"3.4": "Partitioned calls",
+                     #"3.5": "Call results and errors",
+                     #"3.6": "",
                          }
 
 
