@@ -135,7 +135,9 @@ class WsTestOptions(usage.Options):
          raise usage.UsageError, "a mode must be specified to run!"
 
       if self['mode'] not in WsTestOptions.MODES:
-         raise usage.UsageError, "invalid mode %s" % self['mode']
+         raise usage.UsageError, (
+            "Mode '%s' is invalid.\nAvailable modes:\n\t- %s" % (
+               self['mode'], "\n\t- ".join(sorted(WsTestOptions.MODES))))
 
       if self['mode'] in ['fuzzingclient',
                           'fuzzingserver',
