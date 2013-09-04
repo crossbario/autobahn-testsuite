@@ -5,19 +5,28 @@ import datetime
 
 
 class TestEchoService(unittest.TestCase):
-
+    """
+    This test case checks if the echo service behaves as expected.
+    """
     
     def setUp(self):
         self.echo_service = wamptestee.EchoService()
 
         
     def testEcho(self):
+        """
+        The echo service should echo received parameters correctly,
+        regardless of their type.
+        """
         for val in ["Hallo", 5, -1000, datetime.datetime.now(), True]:
             self.assertEquals(self.echo_service.echo(val), val)
 
 
             
 class TestStringService(unittest.TestCase):
+    """
+    This test case checks if the string service behaves as expected.
+    """
 
     
     def setUp(self):
@@ -25,25 +34,61 @@ class TestStringService(unittest.TestCase):
 
         
     def testConcat(self):
+        """
+        The string service should concatenate strings correctly.
+        """
         self.assertEquals(self.string_service.concat("a", "b"), "ab")
+        self.assertEquals(self.string_service.concat("", "xxx"), "xxx")
+        self.assertEquals(self.string_service.concat("", ""), "")
 
 
 class TestNumberService(unittest.TestCase):
+    """
+    This test case checks if the number service behaves as expected.
+    """
 
     def setUp(self):
         self.number_service = wamptestee.NumberService()
 
 
-    def testAddNumbers(self):
+    def testAddIntegers(self):
+        """
+        The number service should add integers correctly.
+        """
         self.assertEquals(self.number_service.add(1, 2, 3), 6)
         self.assertEquals(self.number_service.add(5, 0), 5)
+
+    def testAddFloats(self):
+        """
+        The number service should add floats correctly.
+        """
+        # Use assertAlmostEquals to handle the (inevitable) rounding error.
+        self.assertAlmostEquals(self.number_service.add(1.3, 2.9, 3.6), 7.8)
+        self.assertEquals(self.number_service.add(5.3, 0.0), 5.3)
+
+    def testAddingSingleNumber(self):
+        """
+        The number service should raise an assertion error if one
+        tries to add just one number.
+        """
         self.assertRaises(AssertionError, self.number_service.add, 5)
+
+    def testAddStringToNumber(self):
+        """
+        The number service should raise an assertion error if one
+        tries to add a string to a number.
+        """
         self.assertRaises(AssertionError, self.number_service.add,
                           1, "5")
 
+
 class TestTesteeWampServer(unittest.TestCase):
+    """
+    This test case checks if the testee WAMP server protocol behaves
+    as expected.
+    """
 
-
+    
     def setUp(self):
         self.testee = wamptestee.TesteeWampServerProtocol()
         self.testee.debugWamp = True # mock setup of debugWamp
