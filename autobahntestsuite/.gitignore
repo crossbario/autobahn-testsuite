@@ -2,3 +2,4 @@ keyvalue.dat
 autobahntestsuite/reports
 autobahntestsuite/*.json
 .*.db
+fuzzing*.json

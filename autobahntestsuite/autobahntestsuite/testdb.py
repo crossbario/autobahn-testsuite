@@ -26,6 +26,8 @@ from twisted.enterprise import adbapi
 
 from autobahn.util import utcnow, newid
 from autobahn.wamp import json_loads, json_dumps
+from twisted.internet.defer import Deferred
+
 
 
 class TestDb:
@@ -96,6 +98,27 @@ class TestDb:
          return id
 
       return self._dbpool.runInteraction(do)
+
+
+   def _saveResult_dstyle(self, runId, result):
+      """
+      Deferred style version of saveResult(). Just for checking
+      if inline deferreds trigger any issues together with ADBAPI.
+      """
+      dr = Deferred()
+      d1 = self._dbpool.runQuery("SELECT started, ended FROM testrun WHERE id = ?", [runId])
+
+      def found(res):
+         started, ended = res[0]
+         id = newid()
+         d2 = self._dbpool.runQuery("INSERT INTO testcase (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, json_dumps(result)])
+
+         def saved(res):
+            dr.callback(id)
+         d2.addCallback(saved)
+
+      d1.addCallback(found)
+      return dr
 
 
    def saveResult(self, runId, result):

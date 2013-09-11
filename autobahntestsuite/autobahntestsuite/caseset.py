@@ -157,17 +157,29 @@ class CaseSet:
       caseIds = self.parseSpecCases(spec)
       epats = self.parseExcludeAgentCases(spec)
       res = []
-      for server in spec['servers']:
-         agent = server['agent']
+      for server in spec['testees']:
+         agent = server['name']
          res2 = []
          for caseId in caseIds:
             if not self.checkAgentCaseExclude(epats, agent, caseId):
                res2.append(self.CasesById[caseId])
          if len(res2) > 0:
             o = {}
-            o['agent'] = str(server['agent'])
+            o['name'] = str(server['name'])
             o['url'] = str(server['url'])
             o['auth'] = server.get('auth', None)
             o['cases'] = res2
             res.append(o)
+      return res
+
+   def generateCasesByTestee(self, spec):
+      caseIds = self.parseSpecCases(spec)
+      epats = self.parseExcludeAgentCases(spec)
+      res = {}
+      for obj in spec['testees']:
+         testee = obj['name']
+         res[testee] = []
+         for caseId in caseIds:
+            if not self.checkAgentCaseExclude(epats, testee, caseId):
+               res[testee].append(self.CasesById[caseId])
       return res

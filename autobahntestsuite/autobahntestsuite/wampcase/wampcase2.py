@@ -37,9 +37,9 @@ Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"]
 
 class WampCase2_x_x_Base:
 
-   def __init__(self, url, auth, debugWs = False, debugWamp = False):
-      self.url = url
-      self.auth = auth
+   def __init__(self, testee, debugWs = False, debugWamp = False):
+      self.url = testee.url
+      self.auth = testee.auth
       self.debugWs = debugWs
       self.debugWamp = debugWamp
 
@@ -119,9 +119,7 @@ class WampCase2_x_x_Base:
       def connected(res):
          ## setup what we expected, and what we actually received
          ##
-         i = 0
          for c in self.clients:
-            print "**", i, c.proto.session_id
             self.expected[c.proto.session_id] = []
             self.received[c.proto.session_id] = []
 

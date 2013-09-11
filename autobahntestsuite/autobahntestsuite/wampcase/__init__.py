@@ -23,6 +23,7 @@ __all__ = ("WampCaseSet",
            "CaseBasename",)
 
 from caseset import CaseSet
+#from autobahntestsuite.caseset import CaseSet
 
 
 CaseBasename = "WampCase"

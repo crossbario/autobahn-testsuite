@@ -22,8 +22,7 @@ from twisted.python import log, usage
 from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.static import File
-from twisted.web.resource import Resource
-from twisted.internet.defer import Deferred, returnValue, inlineCallbacks
+from twisted.internet.defer import inlineCallbacks
 
 import autobahn
 import autobahntestsuite
@@ -44,7 +43,6 @@ from wamptestserver import WampTestServerFactory
 from wamptestee import TesteeWampServerProtocol
 from massconnect import MassConnectTest
 from testdb import TestDb
-from wampcase import WampCaseSet
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -149,7 +147,7 @@ class WsTestOptions(usage.Options):
                           'wsperfcontrol',
                           'massconnect']:
          if not self['spec']:
-          self.updateSpec()
+            self.updateSpec()
 
       if (self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and
           not self['wsuri']):
@@ -272,30 +270,14 @@ class WebSocketTestRunner(object):
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
 
-      elif self.mode == 'fuzzingwampclient':
+      elif self.mode == FuzzingWampClient.MODENAME:
 
          testDb = TestDb(spec.get('dbfile', None))
 
-         testSet = WampCaseSet()
-         agentsCases = testSet.getCasesByAgent(spec)
-
+         c = FuzzingWampClient(testDb)
+         res = yield c.run(spec)
          print
-         print "Autobahn Fuzzing WAMP Client"
-         print
-         print "Autobahn Version          : %s" % autobahn.version
-         print "AutobahnTestsuite Version : %s" % autobahntestsuite.version
-         print "WAMP Test Cases           : %d" % len(testSet.Cases)
-         print "WAMP Testees              : %d" % len(spec["servers"])
-         print
-         for agent in agentsCases:
-            print "%s @ %s : %d test cases prepared" % (agent['agent'], agent['url'], len(agent['cases']))
-         print
-
-         testClient = FuzzingWampClient(testDb, self.debug)
-
-         runId = yield testDb.newRun(self.mode, spec)
-
-         finished = yield testClient.run(runId, agentsCases)
+         print "total fails %d, test case result IDs %s " % res
 
          reactor.stop()
 
@@ -431,7 +413,8 @@ class WebSocketTestRunner(object):
    ## Helper methods
 
    def _loadSpec(self):
-      spec_filename = str(self.options['spec'])
+      spec_filename = os.path.abspath(self.options['spec'])
+      print "Loading spec from %s" % spec_filename
       spec = json.loads(open(spec_filename).read())
       return spec
 
