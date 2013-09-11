@@ -119,7 +119,9 @@ class WampCase2_x_x_Base:
       def connected(res):
          ## setup what we expected, and what we actually received
          ##
+         i = 0
          for c in self.clients:
+            print "**", i, c.proto.session_id
             self.expected[c.proto.session_id] = []
             self.received[c.proto.session_id] = []
 

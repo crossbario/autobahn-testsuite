@@ -23,6 +23,7 @@ import sys, collections, os, json
 
 from twisted.python import log
 from twisted.internet import reactor, defer
+from twisted.internet.defer import Deferred, returnValue, inlineCallbacks
 
 # for versions
 import autobahn
@@ -110,41 +111,47 @@ class TestResult(object):
 class FuzzingWampClient(object):
    """
    A test driver for WAMP test cases.
+
+   The test driver takes a test specification and orchestrates the execution of tests
+   against the set of testees (as specified in the test spec).
    """
 
+   def __init__(self, testDb, debug = False):
+      self._testDb = testDb
+      self._debug = debug
 
-   def __init__(self, spec, debug = False):
+
+   def run(self, runId, agentsCases):
+      finished = Deferred()
+
+      # runningTests = []
+
+      # for server in agentsCases:
+      #    for testCls in agent['cases']:
+      #       test = testCls(server["url"], server["auth"])
+      #       d = test.run()
+      #       d.addCallback(self.reportTestResult, test, server)
+      #       runningTests.append(d)
+
+
+      finished.callback(None)
+      return finished
+
+
+   def run2(self, runId, spec):
+      self._runId = runId
+      self._runFinished = Deferred()
       self.spec = spec
-      self.debug = debug
-      self.report_dir = self.spec["outdir"]
-      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories,
-                             CaseSubCategories)
+
+      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
-      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(
-         self.spec)
-
-      print (("Autobahn Fuzzing WAMP Client (Autobahn Version %s / "
-              "Autobahn Testsuite Version %s)") % (autobahntestsuite.version,
-                                                   autobahn.version))
-      print "Ok, will run %d test cases against %d servers" % (
-            len(self.specCases), len(spec["servers"]))
+      self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
+      print (("Autobahn Fuzzing WAMP Client (Autobahn Version %s / " "Autobahn Testsuite Version %s)") % (autobahntestsuite.version, autobahn.version))
+      print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
-      print "Servers = %s" % str(["%s@%s" % (x["url"], x["agent"])
-                                  for x in spec["servers"]])
+      print "Servers = %s" % str(["%s@%s" % (x["url"], x["agent"]) for x in spec["servers"]])
 
-      try:
-         self.urls = []
-         for server in spec["servers"]:
-            self.urls.append((server["agent"], server["url"], server["auth"]))
-      except KeyError, ex:
-         print "Problem with specification file: Key %s not found." % ex
-         reactor.stop()
-
-      # TODO Distinguish between debug modes (using the spec file?)
-      self.debugWs = debug
-      self.debugWamp = debug
-      #
       self.currentCaseIndex = -1 # The 0-based number of the current test case
       self.test = None
 
@@ -153,10 +160,12 @@ class FuzzingWampClient(object):
       self.categories = {}
 
       # TODO: Add a JSON report generator
-      self.report_generators = [report.HtmlReportGenerator(self.report_dir)]
+      self.report_generators = [report.HtmlReportGenerator(self.spec["outdir"])]
 
       # Start performing tests
       self.next()
+
+      return self._runFinished
 
 
    def readableTestName(self, test):
@@ -177,23 +186,26 @@ class FuzzingWampClient(object):
       Execute the next available test.
       """
       self.currentCaseIndex += 1
-      if self.currentCaseIndex < len(Cases):
+      if self.currentCaseIndex < len(self.specCases):
 
          # Fetch the next test case from wampcases.Cases. This list is
          # initialized in the wampcases.wampcases1.py and assigned to
          # `Cases` in wampcases' __init__.py.
+         print self.specCases
+         print self.specCases[self.currentCaseIndex] 
+         #testCls = self.specCases[self.currentCaseIndex] 
          testCls = Cases[self.currentCaseIndex] 
 
          # Run test case against all agents and gather the resulting
          # deferreds in a list.
          runningTests = []
          print "Running test %d/%d (%s)" % (self.currentCaseIndex + 1,
-                                            len(Cases),
+                                            len(self.specCases),
                                             testCls.__name__)
-         for agent, url, auth in self.urls:
-            test = testCls(url, auth, self.debugWs, self.debugWamp)
+         for server in self.spec["servers"]:
+            test = testCls(server["url"], server["auth"], debugWs = self.spec.get('debugWs', False), debugWamp = self.spec.get('debugWamp', False))
             d = test.run()
-            d.addCallback(self.reportTestResult, test, agent, url)
+            d.addCallback(self.reportTestResult, test, server)
             d.addErrback(self.printError)
             runningTests.append(d)
 
@@ -203,9 +215,20 @@ class FuzzingWampClient(object):
          d.addCallback(self.next)
       else:
          self.createIndexFile()
+         self._runFinished.callback(None)
+         self._runFinished = None
 
 
-   def reportTestResult(self, res, test, agent, url):
+   def reportTestResult(self, res, test, server):
+      print "reportTestResult"
+      print res
+      print test
+      print server
+      print self._testDb
+      if self._testDb:
+         self._testDb.saveResult(self._runId, res)
+
+   def reportTestResult2(self, res, test, agent, url):
       """
       Print a short informational message about test success or failure,
       create a file with detailed test result information.
@@ -254,7 +277,6 @@ class FuzzingWampClient(object):
          generator.createIndex([x[1] for x in
                                 sorted(self.categories.iteritems())])
       print "Done"
-      reactor.stop()
 
 
    def printError(self, err):

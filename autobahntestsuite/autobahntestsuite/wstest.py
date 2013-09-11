@@ -23,6 +23,7 @@ from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.web.resource import Resource
+from twisted.internet.defer import Deferred, returnValue, inlineCallbacks
 
 import autobahn
 import autobahntestsuite
@@ -42,7 +43,8 @@ from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
 from wamptestserver import WampTestServerFactory
 from wamptestee import TesteeWampServerProtocol
 from massconnect import MassConnectTest
-
+from testdb import TestDb
+from wampcase import WampCaseSet
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -237,6 +239,7 @@ class WebSocketTestRunner(object):
          raise Exception("logic error")
 
 
+   @inlineCallbacks
    def startFuzzingService(self):
       spec = self._loadSpec()
 
@@ -270,9 +273,31 @@ class WebSocketTestRunner(object):
          # FuzzingClientFactory automatically to orchestrate tests
 
       elif self.mode == 'fuzzingwampclient':
-         client = FuzzingWampClient(spec, self.debug)
-         # no connectWS done here, since this is done within
-         # FuzzingWampClient automatically to orchestrate tests
+
+         testDb = TestDb(spec.get('dbfile', None))
+
+         testSet = WampCaseSet()
+         agentsCases = testSet.getCasesByAgent(spec)
+
+         print
+         print "Autobahn Fuzzing WAMP Client"
+         print
+         print "Autobahn Version          : %s" % autobahn.version
+         print "AutobahnTestsuite Version : %s" % autobahntestsuite.version
+         print "WAMP Test Cases           : %d" % len(testSet.Cases)
+         print "WAMP Testees              : %d" % len(spec["servers"])
+         print
+         for agent in agentsCases:
+            print "%s @ %s : %d test cases prepared" % (agent['agent'], agent['url'], len(agent['cases']))
+         print
+
+         testClient = FuzzingWampClient(testDb, self.debug)
+
+         runId = yield testDb.newRun(self.mode, spec)
+
+         finished = yield testClient.run(runId, agentsCases)
+
+         reactor.stop()
 
       elif self.mode == 'fuzzingwampserver':
          raise Exception("not implemented")

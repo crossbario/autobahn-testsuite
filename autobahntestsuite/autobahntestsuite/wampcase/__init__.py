@@ -16,10 +16,14 @@
 ##
 ###############################################################################
 
-__all__ = ("Cases",
+__all__ = ("WampCaseSet",
+           "Cases",
            "CaseCategories",
            "CaseSubCategories",
            "CaseBasename",)
+
+from caseset import CaseSet
+
 
 CaseBasename = "WampCase"
 
@@ -69,3 +73,9 @@ from wampcase2 import *
 ##
 Cases = []
 Cases.extend(WampCase2_x_x)
+
+
+class WampCaseSet(CaseSet):
+
+   def __init__(self):
+      CaseSet.__init__(self, CaseBasename, Cases, CaseCategories, CaseSubCategories)
