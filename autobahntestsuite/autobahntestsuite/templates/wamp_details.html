@@ -242,28 +242,35 @@ pre.wirelog_tcp_closed_by_peer {color: #fff; margin: 0; background-color: #000; 
        <br/>
        <i>Expected:</i>
        <br/>
-       <span class="case_pickle">{{expected}}</span>
+       <span class="case_pickle">
+       # for session_key in expected.keys()|sort:
+       * Session {{session_key}}: 
+       <br>
+       # if expected[session_key]:
+       # for val in expected[session_key]:
+       &nbsp;&nbsp;- {{val}}<br>
+       # endfor
+       # else:
+       &nbsp;&nbsp;- no response<br>
+       # endif
+       # endfor
+       </span>
        <br/>
        <i>Observed:</i>
        <br/>
-       <span class="case_pickle">{{observed}}</span>
+       <span class="case_pickle">
+       # for session_key in expected.keys()|sort:
+       * Session {{session_key}}: 
+       <br>
+       # if expected[session_key]:
+       # for val in expected[session_key]:
+       &nbsp;&nbsp;- {{val}}<br>
+       # endfor
+       # else:
+       &nbsp;&nbsp;- no response<br>
+       # endif
+       # endfor
+       </span>
      </p>
-     <p class="case_text_block case_closing_beh">
-       <b>Closing Behaviour</b>
-       <br/>
-       <em>TBD</em>
-       <br/>
-     </p>
-     <hr/>
-     <h2>Wire Log</h2>
-     <div id="wirelog">
-     # set counter = 0
-     # for record in record_list:
-       # set direction = "tx" if record.direction == "TX" else "rx"
-       <pre class="wirelog_{{direction}}_frame">{{"%03d" % counter}} {{record.direction}} FRAME : SESSION-ID={{record.session_id}}, PAYLOAD={{record.payload}}, TIME={{record.time}}</pre>
-       # set counter = counter + 1
-     # endfor
-     <br/>
-     <hr/>
    </body>
 </html>      

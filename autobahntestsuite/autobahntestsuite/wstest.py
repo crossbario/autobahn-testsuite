@@ -30,6 +30,7 @@ import autobahntestsuite
 from autobahn.websocket import connectWS, listenWS
 from autobahn.utf8validator import Utf8Validator
 from autobahn.xormasker import XorMaskerNull
+from autobahn.wamp import WampServerFactory
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from wampfuzzing import FuzzingWampClient
@@ -39,6 +40,7 @@ from testee import TesteeClientFactory, TesteeServerFactory
 from wsperfcontrol import WsPerfControlFactory
 from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
 from wamptestserver import WampTestServerFactory
+from wamptestee import TesteeWampServerProtocol
 from massconnect import MassConnectTest
 
 
@@ -133,7 +135,9 @@ class WsTestOptions(usage.Options):
          raise usage.UsageError, "a mode must be specified to run!"
 
       if self['mode'] not in WsTestOptions.MODES:
-         raise usage.UsageError, "invalid mode %s" % self['mode']
+         raise usage.UsageError, (
+            "Mode '%s' is invalid.\nAvailable modes:\n\t- %s" % (
+               self['mode'], "\n\t- ".join(sorted(WsTestOptions.MODES))))
 
       if self['mode'] in ['fuzzingclient',
                           'fuzzingserver',
@@ -378,7 +382,9 @@ class WebSocketTestRunner(object):
          raise Exception("not yet implemented")
 
       elif self.mode == 'wamptesteeserver':
-         raise Exception("not yet implemented")
+         factory = WampServerFactory(wsuri, self.debug)
+         factory.protocol = TesteeWampServerProtocol
+         listenWS(factory, self._createWssContext(factory))
 
       else:
          raise Exception("logic error")

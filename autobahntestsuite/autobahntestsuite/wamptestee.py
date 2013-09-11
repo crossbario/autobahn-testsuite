@@ -92,6 +92,56 @@ def setupUri(case, ref=None):
         uri = "%s#%s" % (uri, ref)
     return uri
 
+class MyTopicService:
+
+   def __init__(self, allowedTopicIds):
+      self.allowedTopicIds = allowedTopicIds
+      self.serial = 0
+
+
+   @wamp.exportSub("foobar", True)
+   def subscribe(self, topicUriPrefix, topicUriSuffix):
+      """
+      Custom topic subscription handler.
+      """
+      print "client wants to subscribe to %s%s" % (topicUriPrefix, topicUriSuffix)
+      try:
+         i = int(topicUriSuffix)
+         if i in self.allowedTopicIds:
+            print "Subscribing client to topic Foobar %d" % i
+            return True
+         else:
+            print "Client not allowed to subscribe to topic Foobar %d" % i
+            return False
+      except:
+         print "illegal topic - skipped subscription"
+         return False
+
+
+   @wamp.exportPub("foobar", True)
+   def publish(self, topicUriPrefix, topicUriSuffix, event):
+      """
+      Custom topic publication handler.
+      """
+      print "client wants to publish to %s%s" % (topicUriPrefix, topicUriSuffix)
+      try:
+         i = int(topicUriSuffix)
+         if type(event) == dict and event.has_key("count"):
+            if event["count"] > 0:
+               self.serial += 1
+               event["serial"] = self.serial
+               print "ok, published enriched event"
+               return event
+            else:
+               print "event count attribute is negative"
+               return None
+         else:
+            print "event is not dict or misses count attribute"
+            return None
+      except:
+         print "illegal topic - skipped publication of event"
+         return None
+
 
 
 class TesteeWampServerProtocol(wamp.WampServerProtocol):
@@ -102,6 +152,7 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
     
     def onSessionOpen(self):
         self.initializeServices()
+        self.initializePubSub()
 
         
     def initializeServices(self):
@@ -130,3 +181,11 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
                                   self.number_service,
                                   self.number_service.add
                                   )
+
+    def initializePubSub(self):
+        self.registerForPubSub("http://example.com/simple")
+        self.registerForPubSub("http://example.com/event#", True)
+        self.registerForPubSub("http://example.com/event/simple")
+        self.topicservice = MyTopicService([1, 3, 7])
+        self.registerHandlerForPubSub(self.topicservice,
+                                    "http://example.com/event/")

@@ -8,13 +8,13 @@ body {
    color: #333;
    font-family: Segoe UI,Tahoma,Arial,Verdana,sans-serif;
 }
-   
+
 p#intro {
    font-family: Cambria,serif;
    font-size: 1.1em;
    color: #444;
 }
-   
+
 p#intro a {
    color: #444;
 }
@@ -286,29 +286,29 @@ function toggleClose() {
    </head>
    <body>
      <a href="#">
-       <div id="toggle_button" class="unselectable" 
-	    onclick="toggleClose();">Toggle Details</div>
+       <div id="toggle_button" class="unselectable"
+            onclick="toggleClose();">Toggle Details</div>
      </a>
      <a name="top"></a>
      <br/>
      # set static_image_dir = "http://autobahn.ws/static/img"
      <center>
-       <a href="http://autobahn.ws/testsuite" 
-	  title="Autobahn WebSockets Testsuite">
-	 <img src="{{static_image_dir}}/ws_protocol_test_report.png"
-	      border="0" width="820" height="46" 
-	      alt="Autobahn WebSockets Testsuite Report">
+       <a href="http://autobahn.ws/testsuite"
+          title="Autobahn WebSockets Testsuite">
+         <img src="{{static_image_dir}}/ws_protocol_test_report.png"
+              border="0" width="820" height="46"
+              alt="Autobahn WebSockets Testsuite Report">
          </img>
        </a>
      </center>
      <center>
-       <a href="http://autobahn.ws" title="Autobahn WebSockets">          
-	 <img src="{{static_image_dir}}/ws_protocol_test_report_autobahn.png"
-	      border="0" width="300" height="68" alt="Autobahn WebSockets">                 </img>
+       <a href="http://autobahn.ws" title="Autobahn WebSockets">
+         <img src="{{static_image_dir}}/ws_protocol_test_report_autobahn.png"
+              border="0" width="300" height="68" alt="Autobahn WebSockets">                 </img>
        </a>
      </center>
      <div id="master_report_header" class="block">
- 
+
      <h1>WAMP Implementation Test Report</h1>
       <table id="case_outcome_desc">
          <tr>
@@ -325,7 +325,7 @@ function toggleClose() {
             appears to be desirable but left open in the protocol
             specification.  An implementation with non-strict behavior
             is still conformant to the protocol specification.
-	    </td>
+            </td>
          </tr>
          <tr>
             <td class="case_failed">Fail</td>
@@ -334,7 +334,7 @@ function toggleClose() {
             than a performance/limits related one - is non-conforming
             to a MUST-behavior as described in the protocol
             specification.
-	    </td>
+            </td>
          </tr>
          <tr>
             <td class="case_info">Info</td>
@@ -342,7 +342,7 @@ function toggleClose() {
             detects certain implementation behavior left unspecified
             by the spec but nevertheless potentially interesting to
             implementors.
-	    </td>
+            </td>
          </tr>
          <tr>
             <td class="case_missing">Missing</td>
@@ -351,71 +351,72 @@ function toggleClose() {
             deactivated, i.e. because the implementation does not
             implement the tested feature or breaks during running the
             test case.
-	    </td>
+            </td>
          </tr>
       </table>
       </div>
       <table id="agent_case_results">
-	# for category in categories:
-        <tr class="case_category_row" colspan="5">
-          <td class="case_category">
-	    {{category.cat_id}} {{category.name}}
-	  </td>
+        # for category in categories:
+        <tr class="case_category_row">
+          <td class="case_category" colspan="{{1+2*category.testees|length}}">
+            {{category.cat_id}} {{category.name}}
+          </td>
         </tr>
-	# for subcategory in category.sub_categories:
+        # for subcategory in category.sub_categories:
         <tr class="case_subcategory_row">
-          <td class="case_subcategory" colspan="5">
-	    {{category.cat_id}}.{{subcategory.subcat_id}} {{subcategory.name}} [{{category.name}}]
-	  </td>
+          <td class="case_subcategory"
+              colspan="{{1+2*category.testees|length}}">
+            {{category.cat_id}}.{{subcategory.subcat_id}} {{subcategory.name}} [{{category.name}}]
+          </td>
         </tr>
-	<tr>
-	  <td class="agent close_flex">Test Case</td>
-	  # for agent in category.testees
+        <tr>
+          <td class="agent close_flex">Test Case</td>
+          # for agent in category.testees
           <td class="agent close_flex" colspan="2">{{agent}}</td>
-	  # endfor
-	</tr>
-	# for (test_name, test_reports) in subcategory.test_cases:
+          # endfor
+        </tr>
+        # for (test_name, test_reports) in subcategory.test_cases:
         <tr class="agent_case_result_row">
           <td class="case">
-	    <a href="#{{test_name}}">
-	      {{test_name}}
-	    </a>
-	  </td>
-	  # for (agent, report) in test_reports:
-	  # set status="ok" if report.test_result == "Pass" else "failed"
+            <a href="#{{test_name}}">
+              {{test_name}}
+            </a>
+          </td>
+          # for (agent, report) in test_reports:
+          # set status="ok" if report.test_result == "Pass" else "failed"
           <td class="case_{{status}}">
-	    <a href="{{report.filename}}">{{report.test_result}}</a>
-	  </td>
-	  <td class="close close_hide case_{{status}}">
-	    <span class="close_code">TBD</span>
-	  </td>
-	  # endfor
+            <a href="{{report.filename}}">{{report.test_result}}</a>
+          </td>
+          <td class="close close_hide case_{{status}}">
+            <span class="close_code">TBD</span>
+          </td>
+          # endfor
         </tr>
-	# endfor
-	# endfor
-	# endfor
+        # endfor
+        # endfor
+        # endfor
       </table>
       <br/>
       <hr/>
       <div id="test_case_descriptions">
-	<br/>
-	# for category in categories:
-	# for subcategory in category.sub_categories:
-	# for test_name, test_results in subcategory.test_cases:
-	<a name="{{test_name}}"></a>
-	<h2>{{test_name}}</h2>
-	<a class="up" href="#top">Up</a>
-	<p class="case_text_block case_desc">
-	  <b>Case Description</b>
-	  <br/>
-	  <br/>
-	  <em>test_results[0][1].description</em>
-	</p>
+        <br/>
+        # for category in categories:
+        # for subcategory in category.sub_categories:
+        # for test_name, test_results in subcategory.test_cases:
+        <a name="{{test_name}}"></a>
+        <h2>{{test_name}}</h2>
+        <a class="up" href="#top">Up</a>
+        <p class="case_text_block case_desc">
+          <b>Case Description</b>
+          <br/>
+          <br/>
+          <em>{{test_results[0][1].description}}</em>
+        </p>
       <p class="case_text_block case_expect">
-	<b>Case Expectation</b>
-	<br/>
-	<br/>
-	<em>TBD</em></p>
+        <b>Case Expectation</b>
+        <br/>
+        <br/>
+        <em>TBD</em></p>
       <br/>
       # endfor
       # endfor
@@ -424,4 +425,4 @@ function toggleClose() {
       <br/>
       <hr/>
    </body>
-</html>      
+</html>
