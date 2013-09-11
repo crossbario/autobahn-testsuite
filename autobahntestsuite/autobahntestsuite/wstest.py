@@ -90,7 +90,8 @@ class WsTestOptions(usage.Options):
                           'testeeserver',
                           'wsperfcontrol',
                           'wampserver',
-                          'wampclient']
+                          'wampclient',
+                          'wamptesteeserver']
 
    # Default content of specification files for various modes
    DEFAULT_SPECIFICATIONS = {'fuzzingclient':     SPEC_FUZZINGCLIENT,
