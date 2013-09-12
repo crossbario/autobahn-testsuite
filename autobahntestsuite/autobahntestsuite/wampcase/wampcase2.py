@@ -18,8 +18,8 @@
 
 __all__ = ['Cases']
 
-## the set of cases we construct and export from this module
-##
+## The set of cases we construct and export from this module.
+## Everything else is private.
 Cases = []
 
 
@@ -84,7 +84,7 @@ SETTINGS = SETTINGS1 + SETTINGS2
 PAYLOADS = [
    [None],
    [100],
-   [-0.248],
+   [-0.248], # value has exact representation in _binary_ float (JSON is IEEE binary)
    [-1000000],
    ["hello"],
    [True],
@@ -96,7 +96,10 @@ PAYLOADS = [
 
 #### END OF CONFIG
 
+
 import json, time
+
+from zope.interface import implementer
 
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
@@ -106,6 +109,8 @@ from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from testrun import TestResult
 from util import AttributeBag
+from interfaces import ITestCase
+
 
 # http://docs.python.org/dev/library/time.html#time.perf_counter
 # http://www.python.org/dev/peps/pep-0418/
@@ -203,7 +208,11 @@ class WampCase2_x_x_Params(AttributeBag):
 
 
 
+@implementer(ITestCase)
 class WampCase2_x_x_Base:
+
+   DESCRIPTION = "Undefined."
+   EXPECTATION = "Undefined."
 
    def __init__(self, testee):
       self.testee = testee
@@ -283,14 +292,18 @@ class WampCase2_x_x_Base:
 
          ## after having published everything the test had specified,
          ## we need to _wait_ for events on all our WAMP sessions to
-         ## compare with our expectation.
-         #shutdown()
+         ## compare with our expectation. by default, we wait 3x the
+         ## specified/default RTT
          wait = 3 * self.testee.options.get("rtt", 0.2)
          reactor.callLater(wait, shutdown)
 
 
       def launch(_):
-         #test()
+         ## FIXME: explain why the following needed, since
+         ## without the almost zero delay (which triggers a
+         ## reactor loop), the code will not work as expected!
+
+         #test() # <= does NOT work
          reactor.callLater(0.00001, test)
 
 
@@ -322,9 +335,9 @@ def generate_WampCase2_x_x_classes():
    ## dynamically create case classes
    ##
    res = []
-   j = 1
+   jc = 1
    for setting in SETTINGS:
-      i = 1
+      ic = 1
       for payload in PAYLOADS:
 
          params = WampCase2_x_x_Params(peers = setting[0],
@@ -335,15 +348,62 @@ def generate_WampCase2_x_x_classes():
                                        eventPayloads = payload,
                                        expectedReceivers = setting[5])
 
-         C = type("WampCase2_%d_%d" % (j, i),
-                  (object, WampCase2_x_x_Base, ),
-                  {"__init__": WampCase2_x_x_Base.__init__,
-                   "run": WampCase2_x_x_Base.run,
-                   "params": params})
+         pl = len(params.eventPayloads)
+         plc = "s" if pl else ""
 
-         res.append(C)
-         i += 1
-      j += 1
+         s = []
+         i = 0
+         for p in params.peers:
+            if len(p) > 0:
+               s.append("%d: %s" % (i, ' & '.join(p)))
+            else:
+               s.append("%d: %s" % (i, '-'))
+            i += 1
+         s = ', '.join(s)
+
+         o = []
+         if params.excludeMe is not None:
+            o.append("excludeMe = %s" % params.excludeMe)
+         if params.exclude is not None:
+            o.append("exclude = %s" % params.exclude)
+         if params.eligible is not None:
+            o.append("eligible = %s" % params.eligible)
+         if len(o) > 0:
+            o = ', '.join(o)
+         else:
+            o = "-"
+
+         description = """The test connects %d WAMP clients to the testee, subscribes \
+the sessions to topics %s and \
+then publishes %d event%s to the topic %s with payload%s %s from the first session. \
+The test sets the following publication options: %s.
+""" % (len(params.peers),
+       s,
+       pl,
+       plc,
+       params.publicationTopic,
+       plc,
+       ', '.join(['"' + str(x) + '"' for x in params.eventPayloads]),
+       o)
+
+         expectation = """We expect the testee to dispatch the events to us on \
+the sessions %s""" % (params.expectedReceivers,)
+
+         klassname = "WampCase2_%d_%d" % (jc, ic)
+
+         Klass = type(klassname,
+                      (object, WampCase2_x_x_Base, ),
+                      {
+                         "__init__": WampCase2_x_x_Base.__init__,
+                         "run": WampCase2_x_x_Base.run,
+                         "description": description,
+                         "expectation": expectation,
+                         "params": params
+                       })
+
+         res.append(Klass)
+         ic += 1
+      jc += 1
    return res
 
 

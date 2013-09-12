@@ -111,6 +111,8 @@ class FuzzingWampClient(object):
                ## run test case, let fire progress() callback and cumulate results
                ##
                testCase = TestCase(testRun.testee)
+               #print testCase.description
+               #print testCase.expectation
                result = yield testCase.run()
                if not result.passed:
                   fails += 1

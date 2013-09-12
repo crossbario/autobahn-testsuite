@@ -100,6 +100,8 @@ The list of implemented test modes.
 """
 
 
+#def computeLink(resultId)
+
 
 class IReportGenerator(Interface):
    """
@@ -108,9 +110,11 @@ class IReportGenerator(Interface):
    in a Test database.
    """
 
-   outputDirectory = Attribute("""Default output directory base path.""")
+   outputDirectory = Attribute("""Default output directory base path. (e.g. 'reports/wamp/servers')""")
 
-   fileExtension = Attribute("""Default file extension for report files.""")
+   fileExtension = Attribute("""Default file extension for report files (e.g. '.html').""")
+
+   mimeType = Attribute("""Default MIME type for generated reports (e.g. 'text/html').""")
 
 
    def writeReportIndexFile(runId, file = None):
@@ -193,6 +197,8 @@ class ITestRunObserver(Interface):
 class ITestCase(Interface):
    """
    """
+   description = Attribute("""Test case description.""")
+   expectation = Attribute("""Test case expectation.""")
 
    def run():
       """
