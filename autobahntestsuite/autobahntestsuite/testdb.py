@@ -28,8 +28,12 @@ from autobahn.util import utcnow, newid
 from autobahn.wamp import json_loads, json_dumps
 from twisted.internet.defer import Deferred
 
+from zope.interface import implementer
+from interfaces import ITestDb
+from testrun import TestResult
 
 
+@implementer(ITestDb)
 class TestDb:
 
    def __init__(self, dbfile = None):
@@ -69,7 +73,7 @@ class TestDb:
                   """)
 
       cur.execute("""
-                  CREATE TABLE testcase (
+                  CREATE TABLE testresult (
                      id                TEXT     PRIMARY KEY,
                      testrun_id        TEXT     NOT NULL,
                      result            TEXT     NOT NULL)
@@ -81,15 +85,6 @@ class TestDb:
 
 
    def newRun(self, mode, spec):
-      """
-      Create a new testsuite run.
-
-      :param mode: The testsuite mode.
-      :type mode: str
-      :param spec: The test specification.
-      :type spec: object (a JSON serializable test spec)
-      :returns str -- The testrun ID.
-      """
       now = utcnow()
       id = newid()
 
@@ -136,11 +131,44 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         txn.execute("INSERT INTO testcase (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, json_dumps(result)])
+         #res = Point._make(json.loads(s))
+         txn.execute("INSERT INTO testresult (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, result.serialize()])
          return id
 
       return self._dbpool.runInteraction(do)
 
 
    def closeRun(self, runId):
-      pass
+
+      def do(txn):
+         now = utcnow()
+
+         ## verify that testrun exists and is not closed already
+         ##
+         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test run")
+         if res[1] is not None:
+            raise Exception("test run already closed")
+
+         ## close test run
+         ##
+         txn.execute("UPDATE testrun SET ended = ? WHERE id = ?", [now, runId])
+
+      return self._dbpool.runInteraction(do)
+
+
+   def getResult(self, resultId):
+
+      def do(txn):
+         txn.execute("SELECT testrun_id, result FROM testresult WHERE id = ?", [resultId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test result")
+         runId, data = res
+         result = TestResult()
+         result.deserialize(data)
+         return result
+
+      return self._dbpool.runInteraction(do)

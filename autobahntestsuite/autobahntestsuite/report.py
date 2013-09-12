@@ -419,10 +419,16 @@ function toggleClose() {
 REPORT_DIR_PERMISSIONS = 0770
 
 
+from zope.interface import implementer
+from interfaces import IReportGenerator
+
+
+@implementer(IReportGenerator)
 class HtmlReportGenerator(object):
 
 
-    def __init__(self, report_dirname):
+    def __init__(self, test_db, report_dirname):
+        self.test_db = test_db
         self.report_dirname = report_dirname
         env = jinja2.Environment(
             loader=jinja2.PackageLoader("autobahntestsuite", "templates"),
@@ -435,7 +441,12 @@ class HtmlReportGenerator(object):
         if not os.path.isdir(report_dirname):
             self.createReportDirectory()
 
-
+    def generateReportIndexFile(self, testRunId):
+       raise Exception("implement me")
+       
+    def generateReportFile(self, testResultId):
+       raise Exception("implement me")
+       
     def createReportDirectory(self):
        """
        Create the directory for storing the reports. If this is not possible,

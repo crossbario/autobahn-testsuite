@@ -33,7 +33,10 @@ from autobahn.websocket import WebSocketClientProtocol, connectWS
 from autobahn.wamp import WampClientFactory, \
                           WampClientProtocol, WampCraClientProtocol
 
+from testrun import TestResult
+
 Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
+
 
 class WampCase2_x_x_Base:
 
@@ -43,17 +46,18 @@ class WampCase2_x_x_Base:
       self.debugWs = debugWs
       self.debugWamp = debugWamp
 
-      self.received = {}
-      self.expected = {}
-      self.wampLog = []
+      self.result = TestResult()
+      self.result.received = {}
+      self.result.expected = {}
+      self.result.log = []
 
       self.sentIndex = 0
 
 
    def done(self, _):
-      res = (json.dumps(self.received) == json.dumps(self.expected),
-             self.expected, self.received, self.wampLog)
-      self.finished.callback(res)
+      passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+      self.result.passed = passed
+      self.finished.callback(self.result)
 
 
    def shutdown(self):
@@ -62,8 +66,7 @@ class WampCase2_x_x_Base:
 
 
    def run(self):
-      debug = False
-      self.started = time.clock()
+      self.result.started = time.clock()
 
       self.clients = []
       fireOnConnected = []
@@ -141,6 +144,8 @@ class WampCase2_x_x_Base:
       self.finished = Deferred()
       return self.finished
 
+
+
 class TestProtocol(WampCraClientProtocol):
 
    def onSessionOpen(self):
@@ -160,14 +165,14 @@ class TestProtocol(WampCraClientProtocol):
       session_id = self.session_id if hasattr(self, 'session_id') else None
       now = round(1000000 * (time.clock() - self.factory.case.started))
       telegram = Telegram(now, session_id, "TX", payload)
-      self.factory.case.wampLog.append(telegram)
+      self.factory.case.result.log.append(telegram)
       WebSocketClientProtocol.sendMessage(self, payload, binary)
 
    def onMessage(self, payload, binary):
       session_id = self.session_id if hasattr(self, 'session_id') else None
       now = round(1000000 * (time.clock() - self.factory.case.started))
       telegram = Telegram(now, session_id, "RX", payload)
-      self.factory.case.wampLog.append(telegram)
+      self.factory.case.result.log.append(telegram)
       WampClientProtocol.onMessage(self, payload, binary)
 
    def onEvent(self, topic, event):

@@ -71,18 +71,19 @@ class FuzzingWampClient(object):
          print "%s @ %s : %d test cases prepared" % (testRun.testee.name, testRun.testee.url, testRun.remaining())
       print
 
-      def progress(runId, testRun, test, result):
+      def progress(runId, testRun, test, result, remaining):
          if test:
+            print "Test case finished, saving results. %d tests remaining." % remaining
             return self._testDb.saveResult(runId, result)
          else:
             print "Test run for testee '%s' finished." % testRun.testee.name
 
       if spec.get('parallel', False):
-         fails = yield self._runParallel(runId, testRuns, progress)
+         fails, resultIds = yield self._runParallel(runId, testRuns, progress)
       else:
-         fails = yield self._runSequential(runId, testRuns, progress)
+         fails, resultIds = yield self._runSequential(runId, testRuns, progress)
 
-      returnValue(fails)
+      returnValue((runId, fails, resultIds))
 
 
    @inlineCallbacks
@@ -100,14 +101,12 @@ class FuzzingWampClient(object):
             if Test:
                test = Test(testRun.testee)
                result = yield test.run()
-               if result[0] != True:
+               if not result.passed:
                   fails += 1
-                  progressResults.append(None)
-               else:
-                  pres = yield progress(runId, testRun, test, result)
-                  progressResults.append(pres)
+               pres = yield progress(runId, testRun, test, result, testRun.remaining())
+               progressResults.append(pres)
             else:
-               yield progress(runId, testRun, None, None)
+               yield progress(runId, testRun, None, None, 0)
                break
       returnValue((fails, progressResults))
 
