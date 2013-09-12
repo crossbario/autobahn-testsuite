@@ -426,7 +426,6 @@ from interfaces import IReportGenerator
 @implementer(IReportGenerator)
 class HtmlReportGenerator(object):
 
-
     def __init__(self, test_db, report_dirname):
         self.test_db = test_db
         self.report_dirname = report_dirname
@@ -441,10 +440,16 @@ class HtmlReportGenerator(object):
         if not os.path.isdir(report_dirname):
             self.createReportDirectory()
 
-    def generateReportIndexFile(self, testRunId):
+    def writeReportIndexFile(self, runId, file = None):
+       # return a Deferred that yields the automatically
+       # chose filename if no file-like objct was provided,
+       # and None otherwise
        raise Exception("implement me")
        
-    def generateReportFile(self, testResultId):
+    def writeReportFile(self, resultId, file = None):
+       # return a Deferred that yields the automatically
+       # chose filename if no file-like objct was provided,
+       # and None otherwise
        raise Exception("implement me")
        
     def createReportDirectory(self):

@@ -24,6 +24,9 @@ from collections import deque
 
 from twisted.python import log
 
+from zope.interface import implementer
+from interfaces import ITestRun
+
 
 class AttributeBag:
 
@@ -83,7 +86,7 @@ class TestResult(AttributeBag):
                  'ended']
 
 
-
+@implementer(ITestRun)
 class TestRun:
    """
    A TestRun contains an ordered sequence of test case classes.
@@ -97,6 +100,7 @@ class TestRun:
       if randomize:
          random.shuffle(_cases)
       _cases.reverse()
+      self._len = len(_cases)
       self._cases = deque(_cases)
 
    def next(self):
@@ -107,3 +111,6 @@ class TestRun:
 
    def remaining(self):
       return len(self._cases)
+
+   def __len__(self):
+      return self._len;

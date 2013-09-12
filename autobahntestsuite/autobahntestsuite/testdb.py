@@ -85,6 +85,8 @@ class TestDb:
 
 
    def newRun(self, mode, spec):
+      if not mode in ITestDb.TESTMODES:
+         raise Exception("mode '%s' invalid or not implemented" % mode)
       now = utcnow()
       id = newid()
 

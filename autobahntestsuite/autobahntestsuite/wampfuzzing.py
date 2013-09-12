@@ -23,11 +23,14 @@ from twisted.internet.defer import returnValue, inlineCallbacks
 import autobahn
 import autobahntestsuite
 
+from zope.interface import implementer
+
+from interfaces import ITestRunner
 from testrun import TestRun, Testee
-from wampcase import WampCaseSet
 
 
 
+@implementer(ITestRunner)
 class FuzzingWampClient(object):
    """
    A test driver for WAMP test cases.
@@ -39,16 +42,16 @@ class FuzzingWampClient(object):
    MODENAME = 'fuzzingwampclient'
 
 
-   def __init__(self, testDb, debug = False):
+   def __init__(self, testDb, caseSet, debug = False):
       self._testDb = testDb
+      self._caseSet = caseSet
       self._debug = debug
 
 
    @inlineCallbacks
-   def run(self, spec):
+   def run(self, spec, observers = []):
 
-      caseSet = WampCaseSet()
-      casesByTestee = caseSet.generateCasesByTestee(spec)
+      casesByTestee = self._caseSet.generateCasesByTestee(spec)
 
       testRuns = []
       for obj in spec['testees']:
@@ -64,7 +67,7 @@ class FuzzingWampClient(object):
       print
       print "Autobahn Version          : %s" % autobahn.version
       print "AutobahnTestsuite Version : %s" % autobahntestsuite.version
-      print "WAMP Test Cases           : %d" % len(caseSet.Cases)
+      print "WAMP Test Cases           : %d" % len(self._caseSet.Cases)
       print "WAMP Testees              : %d" % len(spec["testees"])
       print
       for testRun in testRuns:
@@ -83,7 +86,7 @@ class FuzzingWampClient(object):
       else:
          fails, resultIds = yield self._runSequential(runId, testRuns, progress)
 
-      returnValue((runId, fails, resultIds))
+      returnValue((runId, resultIds))
 
 
    @inlineCallbacks

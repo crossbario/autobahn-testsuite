@@ -44,6 +44,7 @@ from wamptestee import TesteeWampServerProtocol
 from massconnect import MassConnectTest
 from testdb import TestDb
 from interfaces import ITestDb
+from wampcase import WampCaseSet
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -271,14 +272,14 @@ class WebSocketTestRunner(object):
          # no connectWS done here, since this is done within
          # FuzzingClientFactory automatically to orchestrate tests
 
-      elif self.mode == ITestDb.MODE_FUZZING_WAMP_CLIENT:
+      elif self.mode == 'fuzzingwampclient':
 
          testDb = TestDb(spec.get('dbfile', None))
-
-         c = FuzzingWampClient(testDb)
-         runId, fails, resultIds = yield c.run(spec)
+         testSet = WampCaseSet()
+         testRunner = FuzzingWampClient(testDb, testSet)
+         runId, resultIds = yield testRunner.run(spec)
          print
-         print "run ID %s, total fails %d, test case result IDs %s " % (runId, fails, resultIds)
+         print "Tests finished: run ID %s, result IDs %s" % (runId, resultIds)
 
          reactor.stop()
 

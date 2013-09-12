@@ -16,19 +16,17 @@
 ##
 ###############################################################################
 
-__all__ = ('ITestDb',)
+__all__ = ('ITestDb', 'IReportGenerator', )
 
 import zope
 from zope.interface import Interface, Attribute
 
 
-class ITestee(Interface):
-
-   name = Attribute("""Testee name""")
-
-
-
 class ITestDb(Interface):
+   """
+   A Test database provides storage and query capabilities
+   for test cases, results and related data.
+   """
 
    def newRun(mode, spec):
       """
@@ -38,7 +36,7 @@ class ITestDb(Interface):
       :type mode: str
       :param spec: The test specification.
       :type spec: object (a JSON serializable test spec)
-      :returns Deferred -- The testrun ID.
+      :returns Deferred -- The test run ID.
       """
 
    def saveResult(runId, result):
@@ -63,28 +61,40 @@ class ITestDb(Interface):
 
    def getResult(resultId):
       """
-      Get result by ID.
+      Get a single test result by ID.
 
       :param resultId: The ID of the test result to retrieve.
       :type resultId: str
-      :returns Deferred -- The test result. An instance of TestResult.
+      :returns Deferred -- A single instance of TestResult.
       """
 
    def getResults(runId):
       """
+      Get all test results that were ran under the test
+      run with the given ID.
+
+      :param runId: The test run ID.
+      :type runId: str
+      :returns Deferred -- A list of TestResult instances.
       """
 
-ITestDb.MODE_FUZZING_WAMP_CLIENT = "fuzzingwampclient"
+ITestDb.TESTMODES = set(['fuzzingwampclient', 'fuzzingclient'])
+"""
+The list of implemented test modes.
+"""
 
 
 
-class IReportGenerator(zope.interface.Interface):
+class IReportGenerator(Interface):
    """
+   A Report generator is able to produce report files (in a
+   format the generator supports) from test results stored
+   in a Test database.
    """
 
-   outputDirectory = zope.interface.Attribute("""Default output directory base path.""")
+   outputDirectory = Attribute("""Default output directory base path.""")
 
-   fileExtension = zope.interface.Attribute("""Default file extension for report files.""")
+   fileExtension = Attribute("""Default file extension for report files.""")
 
 
    def writeReportIndexFile(runId, file = None):
@@ -114,3 +124,52 @@ class IReportGenerator(zope.interface.Interface):
       :returns -- None if file was provided, or the pathname
                   of the created report file (automatic).
       """
+
+
+class ITestRun(Interface):
+   """
+   """
+
+   def next():
+      """
+      Returns the next test case for this run or None when
+      the test run is finished.
+
+      :returns ICase -- The next test case or None.
+      """
+
+   def remaining():
+      """
+      Number of remaining test cases in this test run.
+
+      :returns int -- Number of remaining test cases.
+      """
+
+   def __len__():
+      """
+      The length of this test run (note that fetching
+      test cases does not change the length).
+      """
+
+
+
+
+class ITestRunner(Interface):
+   """
+   """
+
+   def run(spec, observers = []):
+      """
+      :param observers: An iterable of ITestRunObserver instances.
+      :type observers: iterable
+      """
+
+
+class ITestRunObserver(Interface):
+   """
+   """
+
+   def progress(runId, testRun, test, result, remaining):
+      """
+      """
+
