@@ -19,52 +19,13 @@
 __all__ = ("TestRun", "Testee", "TestResult",)
 
 
-import random, json
+import random
 from collections import deque
-
-from twisted.python import log
 
 from zope.interface import implementer
 from interfaces import ITestRun
 
-
-class AttributeBag:
-
-   def __init__(self, **args):
-
-      for attr in self.ATTRIBUTES:
-         setattr(self, attr, None)
-
-      self.set(args)
-
-
-   def serialize(self):
-      obj = {}
-      for attr in self.ATTRIBUTES:
-         obj[attr] = getattr(self, attr)
-      return json.dumps(obj)
-
-
-   def deserialize(self, data):
-      obj = json.loads(data)
-      self.set(obj)
-
-
-   def set(self, obj):
-      for attr in obj.keys():
-         if attr in self.ATTRIBUTES:
-            setattr(self, attr, obj[attr])
-         else:
-            if self.debug:
-               log.msg("Warning: skipping unknown attribute '%s'" % attr)
-
-
-   def __repr__(self):
-      s = []
-      for attr in self.ATTRIBUTES:
-         s.append("%s = %s" % (attr, getattr(self, attr)))
-      return self.__class__.__name__ + '(' + ', '.join(s) + ')'
-
+from util import AttributeBag
 
 
 class Testee(AttributeBag):

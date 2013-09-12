@@ -189,3 +189,11 @@ class ITestRunObserver(Interface):
       """
       """
 
+
+class ITestCase(Interface):
+   """
+   """
+
+   def run():
+      """
+      """

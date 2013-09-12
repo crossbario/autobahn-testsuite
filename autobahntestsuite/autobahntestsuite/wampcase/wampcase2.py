@@ -18,237 +18,10 @@
 
 __all__ = ["WampCase2_x_x"]
 
-
-import sys, pickle, json, time
-from pprint import pprint
-from collections import namedtuple
-
-from twisted.python import log
-from twisted.internet import reactor
-
-from twisted.internet.defer import Deferred, DeferredList
-
-from autobahn.websocket import WebSocketClientProtocol, connectWS
-
-from autobahn.wamp import WampClientFactory, \
-                          WampClientProtocol, WampCraClientProtocol
-
-from testrun import TestResult
-
-Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
-
-
-# http://docs.python.org/dev/library/time.html#time.perf_counter
-# http://www.python.org/dev/peps/pep-0418/
-# until time.perf_counter becomes available in Python 2 we do:
-import time
-if not hasattr(time, 'perf_counter'):
-   import os
-   if os.name == 'nt':
-      time.perf_counter = time.clock
-   else:
-      time.perf_counter = time.time
-
-
-class WampCase2_x_x_Base:
-
-   def __init__(self, testee, debugWs = False, debugWamp = False):
-      self.url = testee.url
-      self.auth = testee.auth
-      self.debugWs = debugWs
-      self.debugWamp = debugWamp
-
-      self.result = TestResult()
-      self.result.received = {}
-      self.result.expected = {}
-      self.result.log = []
-
-      self.sentIndex = 0
-
-
-   def done(self, _):
-      self.result.ended = time.perf_counter()
-      passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
-      if not passed:
-         print self.result.received
-         print self.result.expected
-      self.result.passed = passed
-      self.finished.callback(self.result)
-
-
-   def shutdown(self):
-      for c in self.clients:
-         c.proto.sendClose()
-
-
-   def run(self):
-      self.result.started = time.perf_counter()
-
-      self.clients = []
-      fireOnConnected = []
-      fireOnClosed = []
-      i = 1
-      for c in self.settings.PEERS:
-         d = Deferred()
-         g = Deferred()
-         c = TestFactory(self, d, g, subscribeTopics = c)
-         c.name = "Peer %d" % i
-         self.clients.append(c)
-         fireOnConnected.append(d)
-         fireOnClosed.append(g)
-         connectWS(c)
-         i += 1
-
-      def dotest():
-         if self.sentIndex < len(self.payloads):
-
-            publisher = self.clients[0]
-
-            ## map exclude indices to session IDs
-            ##
-            exclude = []
-            for i in self.settings.EXCLUDE:
-               exclude.append(self.clients[i].proto.session_id)
-
-            if self.settings.EXCLUDE_ME is None:
-               if len(exclude) > 0:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
-                                          self.payloads[self.sentIndex],
-                                          exclude = exclude)
-               else:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
-                                          self.payloads[self.sentIndex])
-            else:
-               if len(exclude) > 0:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
-                                          self.payloads[self.sentIndex],
-                                          excludeMe = self.settings.EXCLUDE_ME,
-                                          exclude = exclude)
-               else:
-                  publisher.proto.publish(self.settings.PUBLICATION_TOPIC,
-                                          self.payloads[self.sentIndex],
-                                          excludeMe = self.settings.EXCLUDE_ME)
-            self.sentIndex += 1
-            #reactor.callLater(0, dotest)
-            dotest()
-         else:
-            #self.shutdown()
-            reactor.callLater(0.5, self.shutdown)
-
-      def connected(res):
-         ## setup what we expected, and what we actually received
-         ##
-         for c in self.clients:
-            self.result.expected[c.proto.session_id] = []
-            self.result.received[c.proto.session_id] = []
-
-         receivers = [self.clients[i] for i in self.settings.RECEIVERS]
-
-         for c in receivers:
-            for d in self.payloads:
-               self.result.expected[c.proto.session_id].append(
-                  (self.settings.PUBLICATION_TOPIC, d))
-         reactor.callLater(0.1, dotest)
-         #dotest()
-
-      def error(err):
-         print err
-
-      DeferredList(fireOnConnected).addCallbacks(connected, error)
-      DeferredList(fireOnClosed).addCallbacks(self.done, error)
-
-      self.finished = Deferred()
-      return self.finished
-
-
-
-class TestProtocol(WampCraClientProtocol):
-
-   def onSessionOpen(self):
-      if self.factory.auth:
-         d = self.authenticate(**self.factory.auth)
-         d.addCallback(self.initializeSubscriptions)
-         d.addErrback(self.printError)
-      else:
-         self.initializeSubscriptions()
-
-   def initializeSubscriptions(self, res=None):
-      for topic in self.factory.subscribeTopics:
-         self.subscribe(topic, self.onEvent)
-      self.factory.onReady.callback(self.session_id)
-
-   def sendMessage(self, payload, binary = False):
-      session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.perf_counter() - self.factory.case.result.started))
-      telegram = Telegram(now, session_id, "TX", payload)
-      self.factory.case.result.log.append(telegram)
-      WebSocketClientProtocol.sendMessage(self, payload, binary)
-
-   def onMessage(self, payload, binary):
-      session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.perf_counter() - self.factory.case.result.started))
-      telegram = Telegram(now, session_id, "RX", payload)
-      self.factory.case.result.log.append(telegram)
-      WampClientProtocol.onMessage(self, payload, binary)
-
-   def onEvent(self, topic, event):
-      if not self.factory.case.result.received.has_key(self.session_id):
-         self.factory.case.result.received[self.session_id] = []
-      self.factory.case.result.received[self.session_id].append((topic, event))
-
-   def printError(self, err):
-      print err
-
-
-class TestFactory(WampClientFactory):
-
-   protocol_cls = TestProtocol
-
-   def __init__(self, case, onReady, onGone, subscribeTopics):
-      WampClientFactory.__init__(self, case.url, debug = case.debugWs, debugWamp = True)
-      self.case = case
-      self.auth = self.case.auth
-      self.onReady = onReady
-      self.onGone = onGone
-      self.subscribeTopics = subscribeTopics
-
-   def buildProtocol(self, addr):
-      self.proto = self.protocol_cls()
-      self.proto.factory = self
-      return self.proto
-
-   def clientConnectionLost(self, connector, reason):
-      self.onGone.callback(None)
-
-
-   def clientConnectionFailed(self, connector, reason):
-      self.onGone.callback(None)
-
-
-      
 ## the set of cases we construct and export from this module
 ##
 WampCase2_x_x = []
 
-class Settings:
-   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible, receivers):
-      self.PEERS = peers
-      self.PUBLICATION_TOPIC = publicationTopic
-      self.EXCLUDE_ME = excludeMe
-      self.EXCLUDE = exclude
-      self.ELIGIBLE = eligible
-      self.RECEIVERS = receivers
-
-   def __repr__(self):
-      repr = ["Peers: %s" % self.PEERS,
-              "Publication topic: %s" % self.PUBLICATION_TOPIC,
-              "Clients to exclude: %s" % self.EXCLUDE,
-              "Exclude me: %s" % self.EXCLUDE_ME,
-              "Eligible: %s" % self.ELIGIBLE,
-              "Receivers: %s" % self.RECEIVERS]
-
-      # TODO: Move HTML code to template
-      return "- " + "\n<br>- ".join(repr)
 
 ## the topic our test publisher will publish to
 ##
@@ -270,12 +43,13 @@ PEERSET1 = [
 ## these settings control the options the publisher uses
 ## during publishing
 ##
-SETTINGS1 = [Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
-             Settings(PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
-             Settings(PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
-             Settings(PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
-             Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
-             Settings(PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
+SETTINGS1 = [
+               (PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
+               (PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
+               (PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
+               (PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
+               (PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
+               (PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
             ]
 
 PEERSET2 = [
@@ -286,18 +60,17 @@ PEERSET2 = [
               []
            ]
 
-SETTINGS2 = [Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
-             Settings(PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
+SETTINGS2 = [
+               (PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
+               (PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
             ]
 
-SETTINGS = []
-for settings in [SETTINGS1, SETTINGS2]:
-   SETTINGS.extend(settings)
+SETTINGS = SETTINGS1 + SETTINGS2
 
 ## The event payloads the publisher sends in one session.
 ##
@@ -317,22 +90,255 @@ PAYLOADS = [
                [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
            ]
 
-## now dynamically create case classes
-##
-j = 1
-for s in SETTINGS:
-   i = 1
-   for d in PAYLOADS:
-      DESCRIPTION = "- Payload: %s\n<br>%s" % (d ,s)
-      EXPECTATION = ""
-      C = type("WampCase2_%d_%d" % (j, i),
-               (object, WampCase2_x_x_Base, ),
-               {"__init__": WampCase2_x_x_Base.__init__,
-                "run": WampCase2_x_x_Base.run,
-                "DESCRIPTION": """%s""" % DESCRIPTION,
-                "EXPECTATION": """%s""" % EXPECTATION,
-                "payloads": d,
-                "settings": s})
-      WampCase2_x_x.append(C)
-      i += 1
-   j += 1
+
+
+import json, time
+#from collections import namedtuple
+
+from twisted.internet import reactor
+from twisted.internet.defer import Deferred, DeferredList
+
+from autobahn.websocket import connectWS
+from autobahn.wamp import WampClientFactory, WampCraClientProtocol
+
+from testrun import TestResult
+from util import AttributeBag
+
+
+
+#Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
+
+
+# http://docs.python.org/dev/library/time.html#time.perf_counter
+# http://www.python.org/dev/peps/pep-0418/
+# until time.perf_counter becomes available in Python 2 we do:
+if not hasattr(time, 'perf_counter'):
+   import os
+   if os.name == 'nt':
+      time.perf_counter = time.clock
+   else:
+      time.perf_counter = time.time
+
+
+
+class WampCase2_x_x_Protocol(WampCraClientProtocol):
+
+
+   def onSessionOpen(self):
+      if self.test.testee.auth:
+         d = self.authenticate(**self.test.testee.auth)
+         d.addCallbacks(self.onAuthSuccess, self.onAuthError)
+      else:
+         self.main()
+
+
+   def onAuthSuccess(self, permissions):
+      self.main()
+
+
+   def onAuthError(self, e):
+      uri, desc, details = e.value.args
+      print "Authentication Error!", uri, desc, details
+
+
+   def main(self):
+      subscribeTopics = self.test.params.peers[self.factory.peerIndex]
+      for topic in subscribeTopics:
+         self.subscribe(topic, self.onEvent)
+      self.factory.onReady.callback(self.session_id)
+
+
+   def onEvent(self, topic, event):
+      if not self.test.result.received.has_key(self.session_id):
+         self.test.result.received[self.session_id] = []
+      self.test.result.received[self.session_id].append((topic, event))
+
+
+
+class WampCase2_x_x_Factory(WampClientFactory):
+
+   protocol = WampCase2_x_x_Protocol
+
+   def __init__(self, test, peerIndex, onReady, onGone):
+      WampClientFactory.__init__(self, test.testee.url)
+      self.test = test
+      self.peerIndex = peerIndex
+      self.onReady = onReady
+      self.onGone = onGone
+      self.proto = None
+
+   def buildProtocol(self, addr):
+      proto = self.protocol()
+      proto.factory = self
+      proto.test = self.test
+      self.proto = proto
+      return proto
+
+   def clientConnectionLost(self, connector, reason):
+      self.onGone.callback(None)
+
+   def clientConnectionFailed(self, connector, reason):
+      self.onGone.callback(None)
+
+
+
+class WampCase2_x_x_Params(AttributeBag):
+   """
+   Test parameter set for configuring instances of WampCase2_*_*.
+
+   peers: a list with one item per WAMP session run during the test, where each item contains a list of topics each peer _subscribes_ to. The publisher that publishes during the test is always the first item in the list.
+
+   publicationTopic, excludeMe, exclude, eligible: paramters controlling how events are published during the test.
+
+   eventPayloads: a list of payloads each tested as event payload to the test at hand.
+
+   expectedReceivers: a list of session indices, where each index references a WAMP session created for the list in `peers`.
+   """
+
+   ATTRIBUTES = ['peers',
+                 'publicationTopic',
+                 'excludeMe',
+                 'exclude',
+                 'eligible',
+                 'eventPayloads',
+                 'expectedReceivers']
+
+
+
+class WampCase2_x_x_Base:
+
+   def __init__(self, testee):
+      self.testee = testee
+      self.result = TestResult()
+      self.result.received = {}
+      self.result.expected = {}
+      self.result.log = []
+
+
+   def done(self, _):
+      self.result.ended = time.perf_counter()
+      passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+      if not passed:
+         print "EXPECTED", self.result.expected
+         print "RECEIVED", self.result.received
+      self.result.passed = passed
+      self.finished.callback(self.result)
+
+
+   def run(self):
+      self.result.started = time.perf_counter()
+
+      self.clients = []
+      peersready = []
+      peersgone = []
+      i = 1
+      for peerIndex in xrange(len(self.params.peers)):
+         ready = Deferred()
+         gone = Deferred()
+         client = WampCase2_x_x_Factory(self, peerIndex, ready, gone)
+         self.clients.append(client)
+         peersready.append(ready)
+         peersgone.append(gone)
+         connectWS(client)
+         i += 1
+
+
+      def test2():
+         publisher = self.clients[0]
+         topic = self.params.publicationTopic
+         payloads = self.params.eventPayloads
+         
+         ## map exclude indices to session IDs
+         ##
+         exclude = []
+         for i in self.params.exclude:
+            exclude.append(self.clients[i].proto.session_id)
+
+         if self.params.excludeMe is None:
+            if len(exclude) > 0:
+               for pl in payloads:
+                  publisher.proto.publish(topic,
+                                          pl,
+                                          exclude = exclude)
+            else:
+               for pl in payloads:
+                  publisher.proto.publish(topic, pl)
+         else:
+            if len(exclude) > 0:
+               for pl in payloads:
+                  publisher.proto.publish(topic,
+                                          pl,
+                                          excludeMe = self.params.excludeMe,
+                                          exclude = exclude)
+            else:
+               for pl in payloads:
+                  publisher.proto.publish(topic,
+                                          pl,
+                                          excludeMe = self.params.excludeMe)
+
+         def shutdown():
+            for c in self.clients:
+               c.proto.sendClose()
+
+         reactor.callLater(0.8, shutdown)
+
+
+      def test1(res):
+         ## setup what we expected, and what we actually received
+         ##
+         for c in self.clients:
+            self.result.expected[c.proto.session_id] = []
+            self.result.received[c.proto.session_id] = []
+
+         expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
+         for r in expectedReceivers:
+            for p in self.params.eventPayloads:
+               e = (self.params.publicationTopic, p)
+               self.result.expected[r.proto.session_id].append(e)
+
+         reactor.callLater(0.01, test2)
+         #test2()
+
+
+      def error(err):
+         print err
+
+      DeferredList(peersready).addCallbacks(test1, error)
+      DeferredList(peersgone).addCallbacks(self.done, error)
+
+      self.finished = Deferred()
+      return self.finished
+
+
+
+def generate_WampCase2_x_x_classes():
+   ## dynamically create case classes
+   ##
+   res = []
+   j = 1
+   for setting in SETTINGS:
+      i = 1
+      for payload in PAYLOADS:
+
+         params = WampCase2_x_x_Params(peers = setting[0],
+                                       publicationTopic = setting[1],
+                                       excludeMe = setting[2],
+                                       exclude = setting[3],
+                                       eligible = setting[4],
+                                       eventPayloads = payload,
+                                       expectedReceivers = setting[5])
+
+         C = type("WampCase2_%d_%d" % (j, i),
+                  (object, WampCase2_x_x_Base, ),
+                  {"__init__": WampCase2_x_x_Base.__init__,
+                   "run": WampCase2_x_x_Base.run,
+                   "params": params})
+
+         res.append(C)
+         i += 1
+      j += 1
+   return res
+
+
+
+WampCase2_x_x.extend(generate_WampCase2_x_x_classes())

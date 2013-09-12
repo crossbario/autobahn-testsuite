@@ -76,10 +76,10 @@ class FuzzingWampClient(object):
 
       def progress(runId, testRun, test, result, remaining):
          if test:
-            print "Test case %s %s, saving results. %d tests remaining ..." % (test.__class__.__name__, "passed" if result.passed else "failed", remaining)
+            print "%s%s (%d tests remaining)" % ("PASSED   : " if result.passed else "FAILED  : ", test.__class__.__name__, remaining)
             return self._testDb.saveResult(runId, result)
          else:
-            print "Test run for testee '%s' finished." % testRun.testee.name
+            print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
 
       if spec.get('parallel', False):
          fails, resultIds = yield self._runParallel(runId, testRuns, progress)
@@ -105,16 +105,16 @@ class FuzzingWampClient(object):
          while True:
             ## get next test case _class_ for test run
             ##
-            Test = testRun.next()
+            TestCase = testRun.next()
 
-            if Test:
+            if TestCase:
                ## run test case, let fire progress() callback and cumulate results
                ##
-               test = Test(testRun.testee)
-               result = yield test.run()
+               testCase = TestCase(testRun.testee)
+               result = yield testCase.run()
                if not result.passed:
                   fails += 1
-               pres = yield progress(runId, testRun, test, result, testRun.remaining())
+               pres = yield progress(runId, testRun, testCase, result, testRun.remaining())
                progressResults.append(pres)
             else:
                ## signal end of test run by firing progress() one last time ..
