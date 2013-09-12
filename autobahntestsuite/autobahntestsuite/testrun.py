@@ -78,7 +78,9 @@ class Testee(AttributeBag):
 
 class TestResult(AttributeBag):
 
-   ATTRIBUTES = ['passed',
+   ATTRIBUTES = ['id',
+                 'runId',
+                 'passed',
                  'expected',
                  'observed',
                  'log',

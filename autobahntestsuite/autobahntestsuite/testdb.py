@@ -133,7 +133,6 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         #res = Point._make(json.loads(s))
          txn.execute("INSERT INTO testresult (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, result.serialize()])
          return id
 
@@ -164,13 +163,14 @@ class TestDb:
    def getResult(self, resultId):
 
       def do(txn):
-         txn.execute("SELECT testrun_id, result FROM testresult WHERE id = ?", [resultId])
+         txn.execute("SELECT id, testrun_id, result FROM testresult WHERE id = ?", [resultId])
          res = txn.fetchone()
          if res is None:
             raise Exception("no such test result")
-         runId, data = res
+         id, runId, data = res
          result = TestResult()
          result.deserialize(data)
+         result.id, result.runId = id, runId
          return result
 
       return self._dbpool.runInteraction(do)

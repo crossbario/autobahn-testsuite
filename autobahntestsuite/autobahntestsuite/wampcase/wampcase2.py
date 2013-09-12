@@ -38,6 +38,18 @@ from testrun import TestResult
 Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
 
 
+# http://docs.python.org/dev/library/time.html#time.perf_counter
+# http://www.python.org/dev/peps/pep-0418/
+# until time.perf_counter becomes available in Python 2 we do:
+import time
+if not hasattr(time, 'perf_counter'):
+   import os
+   if os.name == 'nt':
+      time.perf_counter = time.clock
+   else:
+      time.perf_counter = time.time
+
+
 class WampCase2_x_x_Base:
 
    def __init__(self, testee, debugWs = False, debugWamp = False):
@@ -55,8 +67,11 @@ class WampCase2_x_x_Base:
 
 
    def done(self, _):
-      self.result.ended = time.clock()
+      self.result.ended = time.perf_counter()
       passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+      if not passed:
+         print self.result.received
+         print self.result.expected
       self.result.passed = passed
       self.finished.callback(self.result)
 
@@ -67,7 +82,7 @@ class WampCase2_x_x_Base:
 
 
    def run(self):
-      self.result.started = time.clock()
+      self.result.started = time.perf_counter()
 
       self.clients = []
       fireOnConnected = []
@@ -114,8 +129,8 @@ class WampCase2_x_x_Base:
                                           self.payloads[self.sentIndex],
                                           excludeMe = self.settings.EXCLUDE_ME)
             self.sentIndex += 1
-            reactor.callLater(0, dotest)
-            #dotest()
+            #reactor.callLater(0, dotest)
+            dotest()
          else:
             #self.shutdown()
             reactor.callLater(0.5, self.shutdown)
@@ -164,14 +179,14 @@ class TestProtocol(WampCraClientProtocol):
 
    def sendMessage(self, payload, binary = False):
       session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.clock() - self.factory.case.result.started))
+      now = round(1000000 * (time.perf_counter() - self.factory.case.result.started))
       telegram = Telegram(now, session_id, "TX", payload)
       self.factory.case.result.log.append(telegram)
       WebSocketClientProtocol.sendMessage(self, payload, binary)
 
    def onMessage(self, payload, binary):
       session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.clock() - self.factory.case.result.started))
+      now = round(1000000 * (time.perf_counter() - self.factory.case.result.started))
       telegram = Telegram(now, session_id, "RX", payload)
       self.factory.case.result.log.append(telegram)
       WampClientProtocol.onMessage(self, payload, binary)
@@ -190,8 +205,7 @@ class TestFactory(WampClientFactory):
    protocol_cls = TestProtocol
 
    def __init__(self, case, onReady, onGone, subscribeTopics):
-      WampClientFactory.__init__(self, case.url, debug = case.debugWs,
-                                 debugWamp = case.debugWamp)
+      WampClientFactory.__init__(self, case.url, debug = case.debugWs, debugWamp = True)
       self.case = case
       self.auth = self.case.auth
       self.onReady = onReady
@@ -217,8 +231,7 @@ class TestFactory(WampClientFactory):
 WampCase2_x_x = []
 
 class Settings:
-   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible,
-                receivers):
+   def __init__(self, peers, publicationTopic, excludeMe, exclude, eligible, receivers):
       self.PEERS = peers
       self.PUBLICATION_TOPIC = publicationTopic
       self.EXCLUDE_ME = excludeMe
@@ -286,21 +299,23 @@ SETTINGS = []
 for settings in [SETTINGS1, SETTINGS2]:
    SETTINGS.extend(settings)
 
-## the event payload the publisher sends in one session
+## The event payloads the publisher sends in one session.
 ##
-PAYLOADS = [[None],
-            [100],
-            [0.1234],
-            [-1000000],
-            ["hello"],
-            [True],
-            [False],
-            [666, 23, 999],
-            [{}],
-            [100, "hello", {u'foo': u'bar'},
-             [1, 2, 3],
-             ["hello", 20, {'baz': 'poo'}]]
-            ]
+## Note: be aware of JSON roundtripping "issues" like
+##    (ujson.loads(ujson.dumps(0.1234)) == 0.1234) => False
+##
+PAYLOADS = [
+               [None],
+               [100],
+               [-0.248],
+               [-1000000],
+               ["hello"],
+               [True],
+               [False],
+               [666, 23, 999],
+               [{}],
+               [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
+           ]
 
 ## now dynamically create case classes
 ##

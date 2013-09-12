@@ -17,6 +17,7 @@
 ###############################################################################
 
 import sys, os, json, pkg_resources
+from pprint import pprint
 
 from twisted.python import log, usage
 from twisted.internet import reactor
@@ -160,17 +161,16 @@ class WsTestOptions(usage.Options):
       Update the 'spec' option according to the chosen mode.
       Create a specification file if necessary.
       """
-
       self['spec'] = filename = "%s.json" % self['mode']
       content = WsTestOptions.DEFAULT_SPECIFICATIONS[self['mode']]
 
       if not os.path.isfile(filename):
-         print "Auto-generating spec file %s" % filename
+         print "Auto-generating spec file '%s'" % filename
          f = open(filename, 'w')
          f.write(content)
          f.close()
       else:
-         print "Using implicit spec file %s" % filename
+         print "Using implicit spec file '%s'" % filename
 
 
 
@@ -191,9 +191,17 @@ wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
 
 
 
-class WebSocketTestRunner(object):
+class WsTestRunner(object):
 
    def __init__(self):
+
+      print
+      print "Using Twisted reactor class %s" % str(reactor.__class__)
+      print "Using UTF8 Validator class %s" % str(Utf8Validator)
+      print "Using XOR Masker classes %s" % str(XorMaskerNull)
+      print "Using JSON processor module '%s'" % str(autobahn.wamp.json_lib.__name__)
+      print
+
       ws_test_options = WsTestOptions()
       try:
          ws_test_options.parseOptions()
@@ -208,10 +216,6 @@ class WebSocketTestRunner(object):
          log.startLogging(sys.stdout)
       self.mode = str(self.options['mode'])
       self.testData = self._loadTestData()
-
-      print "Using Twisted reactor class %s" % str(reactor.__class__)
-      print "Using UTF8 Validator class %s" % str(Utf8Validator)
-      print "Using XOR Masker classes %s" % str(XorMaskerNull)
 
       
    def startService(self):
@@ -280,6 +284,11 @@ class WebSocketTestRunner(object):
          runId, resultIds = yield testRunner.run(spec)
          print
          print "Tests finished: run ID %s, result IDs %s" % (runId, resultIds)
+         print
+         for rid in resultIds:
+            r = yield testDb.getResult(rid)
+            print r.runId, r.id, r.passed, r.started, r.ended, r.ended - r.started
+            #pprint(result)
 
          reactor.stop()
 
@@ -493,9 +502,10 @@ class WebSocketTestRunner(object):
 
       return test_data
 
+
 def run():
-   test_runner = WebSocketTestRunner()
-   test_runner.startService()
+   wstest = WsTestRunner()
+   wstest.startService()
    reactor.run()
    
 

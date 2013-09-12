@@ -75,9 +75,9 @@ SPEC_FUZZINGWAMPCLIENT = """
    "options": {},
    "outdir": "./reports/wampservers",
 
-   "servers": [
+   "testees": [
                   {
-                     "agent": "AutobahnPython",
+                     "name": "AutobahnPython",
                      "url": "ws://127.0.0.1:9001",
                      "options": {},
                      "auth": null

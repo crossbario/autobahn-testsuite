@@ -57,7 +57,7 @@ class FuzzingWampClient(object):
       for obj in spec['testees']:
          testee = Testee(**obj)
          cases = casesByTestee.get(testee.name, [])
-         testRun = TestRun(testee, cases, randomize = True)
+         testRun = TestRun(testee, cases, randomize = spec.get('randomize', False))
          testRuns.append(testRun)
 
       runId = yield self._testDb.newRun(self.MODENAME, spec)
@@ -76,7 +76,7 @@ class FuzzingWampClient(object):
 
       def progress(runId, testRun, test, result, remaining):
          if test:
-            print "Test case finished, saving results. %d tests remaining." % remaining
+            print "Test case %s %s, saving results. %d tests remaining ..." % (test.__class__.__name__, "passed" if result.passed else "failed", remaining)
             return self._testDb.saveResult(runId, result)
          else:
             print "Test run for testee '%s' finished." % testRun.testee.name
@@ -96,12 +96,20 @@ class FuzzingWampClient(object):
       testee (one after another), run the testee's set of
       test cases sequentially.
       """
+      ## we cumulate number of test fails and progress() return values
+      ##
       fails = 0
       progressResults = []
+
       for testRun in testRuns:
          while True:
+            ## get next test case _class_ for test run
+            ##
             Test = testRun.next()
+
             if Test:
+               ## run test case, let fire progress() callback and cumulate results
+               ##
                test = Test(testRun.testee)
                result = yield test.run()
                if not result.passed:
@@ -109,8 +117,11 @@ class FuzzingWampClient(object):
                pres = yield progress(runId, testRun, test, result, testRun.remaining())
                progressResults.append(pres)
             else:
+               ## signal end of test run by firing progress() one last time ..
+               ##
                yield progress(runId, testRun, None, None, 0)
                break
+
       returnValue((fails, progressResults))
 
 
