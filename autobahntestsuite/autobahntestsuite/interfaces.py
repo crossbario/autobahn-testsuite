@@ -78,6 +78,22 @@ class ITestDb(Interface):
       :returns Deferred -- A list of TestResult instances.
       """
 
+   def registerResultFile(resultId, type, sha1, path):
+      """
+      When a report file generator has produced it's output
+      and created (or recreated/modified) a file, it should
+      register the file location via this function.
+
+      :param resultId: The ID of the test result this file was generated for.
+      :type resultId: str
+      :param type: The type of file produced (FIXME: ['html', 'json'] ??)
+      :type type: FIXME
+      :param sha1: The SHA-1 computed over the generated octet stream.
+      :type sha1 str
+      :param path: The filesystem path to the generated file.
+      :type path: str
+      """
+
 ITestDb.TESTMODES = set(['fuzzingwampclient', 'fuzzingclient'])
 """
 The list of implemented test modes.
