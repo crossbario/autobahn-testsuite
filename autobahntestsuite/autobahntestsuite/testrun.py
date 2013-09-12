@@ -33,6 +33,7 @@ class Testee(AttributeBag):
    ATTRIBUTES = ['name',
                  'url',
                  'auth',
+                 'options',
                  'debug']
 
 

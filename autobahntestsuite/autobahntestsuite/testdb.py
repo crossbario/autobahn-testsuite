@@ -18,14 +18,14 @@
 
 __all__ = ("TestDb",)
 
-import os, sys
+import os
 import sqlite3
 
 from twisted.python import log
 from twisted.enterprise import adbapi
 
 from autobahn.util import utcnow, newid
-from autobahn.wamp import json_loads, json_dumps
+from autobahn.wamp import json_dumps
 from twisted.internet.defer import Deferred
 
 from zope.interface import implementer
@@ -35,6 +35,12 @@ from testrun import TestResult
 
 @implementer(ITestDb)
 class TestDb:
+   """
+   sqlite3 based test database implementing ITestDb. Usually, a single
+   instance exists application wide (singleton). Test runners store their
+   test results in the database and report generators fetch test results
+   from the database. This allows to decouple application parts.
+   """
 
    def __init__(self, dbfile = None):
 
@@ -57,12 +63,6 @@ class TestDb:
       log.msg("creating test database at %s .." % self._dbfile)
       db = sqlite3.connect(self._dbfile)
       cur = db.cursor()
-      cur.execute("""
-                  CREATE TABLE kvstore (
-                     key               TEXT     PRIMARY KEY,
-                     value             TEXT     NOT NULL)
-                  """)
-
       cur.execute("""
                   CREATE TABLE testrun (
                      id                TEXT     PRIMARY KEY,

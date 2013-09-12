@@ -68,12 +68,12 @@ CaseSubCategories = {"2.1": "Different payloads",
                          }
 
 
-from wampcase2 import *
+import wampcase2
 
 ## all WAMP test cases
 ##
 Cases = []
-Cases.extend(WampCase2_x_x)
+Cases.extend(wampcase2.Cases)
 
 
 class WampCaseSet(CaseSet):

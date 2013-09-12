@@ -16,12 +16,14 @@
 ##
 ###############################################################################
 
-__all__ = ["WampCase2_x_x"]
+__all__ = ['Cases']
 
 ## the set of cases we construct and export from this module
 ##
-WampCase2_x_x = []
+Cases = []
 
+
+#### BEGIN OF CONFIG
 
 ## the topic our test publisher will publish to
 ##
@@ -36,39 +38,41 @@ TOPIC_NOT_PUBLISHED_TO = "http://example.com/foobar"
 ## the publisher is always the first peer in this list
 ##
 PEERSET1 = [
-              [TOPIC_PUBLISHED_TO],
-              [TOPIC_PUBLISHED_TO]
-           ]
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO]
+]
 
 ## these settings control the options the publisher uses
-## during publishing
+## during publishing - see WampCase2_x_x_Params
+## and what the test case expects for success
 ##
 SETTINGS1 = [
-               (PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
-               (PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
-               (PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
-               (PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
-               (PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
-               (PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
-            ]
+# (peers, publicationTopic, excludeMe, exclude, eligible, expectedReceivers)
+   (PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
+]
 
 PEERSET2 = [
-              [TOPIC_PUBLISHED_TO],
-              [TOPIC_PUBLISHED_TO],
-              [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
-              [TOPIC_NOT_PUBLISHED_TO],
-              []
-           ]
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
+   [TOPIC_NOT_PUBLISHED_TO],
+   []
+]
 
 SETTINGS2 = [
-               (PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
-               (PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
-            ]
+   (PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
+   (PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
+]
 
 SETTINGS = SETTINGS1 + SETTINGS2
 
@@ -78,22 +82,21 @@ SETTINGS = SETTINGS1 + SETTINGS2
 ##    (ujson.loads(ujson.dumps(0.1234)) == 0.1234) => False
 ##
 PAYLOADS = [
-               [None],
-               [100],
-               [-0.248],
-               [-1000000],
-               ["hello"],
-               [True],
-               [False],
-               [666, 23, 999],
-               [{}],
-               [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
-           ]
+   [None],
+   [100],
+   [-0.248],
+   [-1000000],
+   ["hello"],
+   [True],
+   [False],
+   [666, 23, 999],
+   [{}],
+   [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
+]
 
-
+#### END OF CONFIG
 
 import json, time
-#from collections import namedtuple
 
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
@@ -103,11 +106,6 @@ from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from testrun import TestResult
 from util import AttributeBag
-
-
-
-#Telegram = namedtuple("Telegram", ["time", "session_id", "direction", "payload"])
-
 
 # http://docs.python.org/dev/library/time.html#time.perf_counter
 # http://www.python.org/dev/peps/pep-0418/
@@ -215,16 +213,6 @@ class WampCase2_x_x_Base:
       self.result.log = []
 
 
-   def done(self, _):
-      self.result.ended = time.perf_counter()
-      passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
-      if not passed:
-         print "EXPECTED", self.result.expected
-         print "RECEIVED", self.result.received
-      self.result.passed = passed
-      self.finished.callback(self.result)
-
-
    def run(self):
       self.result.started = time.perf_counter()
 
@@ -243,7 +231,24 @@ class WampCase2_x_x_Base:
          i += 1
 
 
-      def test2():
+      def shutdown():
+         for c in self.clients:
+            c.proto.sendClose()
+
+
+      def test():
+         ## setup what we expected, and what we actually received
+         ##
+         for c in self.clients:
+            self.result.expected[c.proto.session_id] = []
+            self.result.received[c.proto.session_id] = []
+
+         expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
+         for r in expectedReceivers:
+            for p in self.params.eventPayloads:
+               e = (self.params.publicationTopic, p)
+               self.result.expected[r.proto.session_id].append(e)
+
          publisher = self.clients[0]
          topic = self.params.publicationTopic
          payloads = self.params.eventPayloads
@@ -276,35 +281,37 @@ class WampCase2_x_x_Base:
                                           pl,
                                           excludeMe = self.params.excludeMe)
 
-         def shutdown():
-            for c in self.clients:
-               c.proto.sendClose()
+         ## after having published everything the test had specified,
+         ## we need to _wait_ for events on all our WAMP sessions to
+         ## compare with our expectation.
+         #shutdown()
+         wait = 3 * self.testee.options.get("rtt", 0.2)
+         reactor.callLater(wait, shutdown)
 
-         reactor.callLater(0.8, shutdown)
 
-
-      def test1(res):
-         ## setup what we expected, and what we actually received
-         ##
-         for c in self.clients:
-            self.result.expected[c.proto.session_id] = []
-            self.result.received[c.proto.session_id] = []
-
-         expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
-         for r in expectedReceivers:
-            for p in self.params.eventPayloads:
-               e = (self.params.publicationTopic, p)
-               self.result.expected[r.proto.session_id].append(e)
-
-         reactor.callLater(0.01, test2)
-         #test2()
+      def launch(_):
+         #test()
+         reactor.callLater(0.00001, test)
 
 
       def error(err):
-         print err
+         ## FIXME
+         print "ERROR", err
+         shutdown()
+         self.finished.errback(err)
 
-      DeferredList(peersready).addCallbacks(test1, error)
-      DeferredList(peersgone).addCallbacks(self.done, error)
+
+      def done(_):
+         self.result.ended = time.perf_counter()
+         passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+         if not passed:
+            print "EXPECTED", self.result.expected
+            print "RECEIVED", self.result.received
+         self.result.passed = passed
+         self.finished.callback(self.result)
+
+      DeferredList(peersready).addCallbacks(launch, error)
+      DeferredList(peersgone).addCallbacks(done, error)
 
       self.finished = Deferred()
       return self.finished
@@ -341,4 +348,4 @@ def generate_WampCase2_x_x_classes():
 
 
 
-WampCase2_x_x.extend(generate_WampCase2_x_x_classes())
+Cases.extend(generate_WampCase2_x_x_classes())
