@@ -55,6 +55,7 @@ class WampCase2_x_x_Base:
 
 
    def done(self, _):
+      self.result.ended = time.clock()
       passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
       self.result.passed = passed
       self.finished.callback(self.result)
@@ -123,14 +124,14 @@ class WampCase2_x_x_Base:
          ## setup what we expected, and what we actually received
          ##
          for c in self.clients:
-            self.expected[c.proto.session_id] = []
-            self.received[c.proto.session_id] = []
+            self.result.expected[c.proto.session_id] = []
+            self.result.received[c.proto.session_id] = []
 
          receivers = [self.clients[i] for i in self.settings.RECEIVERS]
 
          for c in receivers:
             for d in self.payloads:
-               self.expected[c.proto.session_id].append(
+               self.result.expected[c.proto.session_id].append(
                   (self.settings.PUBLICATION_TOPIC, d))
          reactor.callLater(0.1, dotest)
          #dotest()
@@ -163,22 +164,22 @@ class TestProtocol(WampCraClientProtocol):
 
    def sendMessage(self, payload, binary = False):
       session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.clock() - self.factory.case.started))
+      now = round(1000000 * (time.clock() - self.factory.case.result.started))
       telegram = Telegram(now, session_id, "TX", payload)
       self.factory.case.result.log.append(telegram)
       WebSocketClientProtocol.sendMessage(self, payload, binary)
 
    def onMessage(self, payload, binary):
       session_id = self.session_id if hasattr(self, 'session_id') else None
-      now = round(1000000 * (time.clock() - self.factory.case.started))
+      now = round(1000000 * (time.clock() - self.factory.case.result.started))
       telegram = Telegram(now, session_id, "RX", payload)
       self.factory.case.result.log.append(telegram)
       WampClientProtocol.onMessage(self, payload, binary)
 
    def onEvent(self, topic, event):
-      if not self.factory.case.received.has_key(self.session_id):
-         self.factory.case.received[self.session_id] = []
-      self.factory.case.received[self.session_id].append((topic, event))
+      if not self.factory.case.result.received.has_key(self.session_id):
+         self.factory.case.result.received[self.session_id] = []
+      self.factory.case.result.received[self.session_id].append((topic, event))
 
    def printError(self, err):
       print err
