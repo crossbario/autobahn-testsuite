@@ -147,8 +147,8 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
 
     
     def onSessionOpen(self):
-        self.initializeServices()
         self.initializePubSub()
+        self.initializeServices()
 
         
     def initializeServices(self):
@@ -180,8 +180,8 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
 
     def initializePubSub(self):
         self.registerForPubSub("http://example.com/simple")
-        self.registerForPubSub("http://example.com/event#", True)
-        self.registerForPubSub("http://example.com/event/simple")
-        self.topicservice = MyTopicService([1, 3, 7])
-        self.registerHandlerForPubSub(self.topicservice,
-                                    "http://example.com/event/")
+        self.registerForPubSub("http://example.com/foobar")
+        #self.registerForPubSub("http://example.com/event#", True)
+        #self.registerForPubSub("http://example.com/event/simple")
+        #self.topicservice = MyTopicService([1, 3, 7])
+        #self.registerHandlerForPubSub(self.topicservice, "http://example.com/event/")

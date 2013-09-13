@@ -68,7 +68,7 @@ import wampcase3_1_x_x
 ##
 Cases = []
 Cases.extend(wampcase2_2_x_x.Cases)
-Cases.extend(wampcase3_1_x_x.Cases)
+#Cases.extend(wampcase3_1_x_x.Cases)
 
 
 class WampCaseSet(CaseSet):

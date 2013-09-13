@@ -114,6 +114,9 @@ class FuzzingWampClient(object):
                #print testCase.description
                #print testCase.expectation
                result = yield testCase.run()
+               if True:
+                  for time, sid, msg in result.log:
+                     print time, sid, msg
                if not result.passed:
                   fails += 1
                pres = yield progress(runId, testRun, testCase, result, testRun.remaining())

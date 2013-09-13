@@ -133,7 +133,7 @@ class WampCase3_1_x_x_Base:
 
 
    def run(self):
-      self.result.started = time.perf_counter()
+      self.result.started = perf_counter()
 
       def shutdown():
          if self.client:
@@ -187,7 +187,7 @@ class WampCase3_1_x_x_Base:
 
 
       def done(proto):
-         self.result.ended = time.perf_counter()
+         self.result.ended = perf_counter()
          passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
          if not passed:
             print "EXPECTED", self.result.expected

@@ -97,7 +97,7 @@ PAYLOADS = [
 #### END OF CONFIG
 
 
-import json, time
+import json
 
 from zope.interface import implementer
 
@@ -117,6 +117,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
+      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session opened."))
       if self.test.testee.auth:
          d = self.authenticate(**self.test.testee.auth)
          d.addCallbacks(self.onAuthSuccess, self.onAuthError)
@@ -125,11 +126,13 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onAuthSuccess(self, permissions):
+      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session %s authenticated with credentials: %s" % (self.session_id, self.test.testee.auth)))
       self.main()
 
 
    def onAuthError(self, e):
       uri, desc, details = e.value.args
+      self.test.result.log.append((perf_counter(), self.session_id, "WAMP authentication error: %s" % details))
       print "Authentication Error!", uri, desc, details
 
 
@@ -137,10 +140,12 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
       subscribeTopics = self.test.params.peers[self.factory.peerIndex]
       for topic in subscribeTopics:
          self.subscribe(topic, self.onEvent)
+      self.test.result.log.append((perf_counter(), self.session_id, "Subscribed to %s" % (', '.join(subscribeTopics))))
       self.factory.onReady.callback(self.session_id)
 
 
    def onEvent(self, topic, event):
+      self.test.result.log.append((perf_counter(), self.session_id, "Received event for topic %s: %s" % (topic, event)))
       if not self.test.result.received.has_key(self.session_id):
          self.test.result.received[self.session_id] = []
       self.test.result.received[self.session_id].append((topic, event))
@@ -167,10 +172,18 @@ class WampCase2_2_x_x_Factory(WampClientFactory):
       return proto
 
    def clientConnectionLost(self, connector, reason):
+      reason = str(reason.value)
+      if self.proto and hasattr(self.proto, 'session_id'):
+         sid = self.proto.session_id
+      else:
+         sid = None
+      self.test.result.log.append((perf_counter(), sid, "Client connection lost: %s" % reason))
       self.onGone.callback(None)
 
    def clientConnectionFailed(self, connector, reason):
-      self.onGone.callback(None)
+      reason = str(reason.value)
+      self.test.result.log.append((perf_counter(), None, "Client connection failed: %s" % reason))
+      self.onGone.callback(reason)
 
 
 
@@ -206,6 +219,7 @@ class WampCase2_2_x_x_Base:
    def __init__(self, testee):
       self.testee = testee
       self.result = TestResult()
+      self.result.passed = False
       self.result.received = {}
       self.result.expected = {}
       self.result.log = []
@@ -213,6 +227,7 @@ class WampCase2_2_x_x_Base:
 
    def run(self):
       self.result.started = perf_counter()
+      self.result.log.append((self.result.started, None, "Test started."))
 
       self.clients = []
       peersready = []
@@ -263,9 +278,12 @@ class WampCase2_2_x_x_Base:
                   publisher.proto.publish(topic,
                                           pl,
                                           exclude = exclude)
+                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
             else:
                for pl in payloads:
-                  publisher.proto.publish(topic, pl)
+                  publisher.proto.publish(topic,
+                                          pl)
+                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
          else:
             if len(exclude) > 0:
                for pl in payloads:
@@ -273,27 +291,43 @@ class WampCase2_2_x_x_Base:
                                           pl,
                                           excludeMe = self.params.excludeMe,
                                           exclude = exclude)
+                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
             else:
                for pl in payloads:
                   publisher.proto.publish(topic,
                                           pl,
                                           excludeMe = self.params.excludeMe)
+                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
 
-         ## after having published everything the test had specified,
-         ## we need to _wait_ for events on all our WAMP sessions to
-         ## compare with our expectation. by default, we wait 3x the
-         ## specified/default RTT
+         ## After having published everything the test had specified,
+         ## we need to _wait_ to receive events on all our WAMP sessions
+         ## to compare with our expectation. By default, we wait 3x the
+         ## specified/default RTT.
+         ##
          wait = 3 * self.testee.options.get("rtt", 0.2)
-         reactor.callLater(wait, shutdown)
+         def afterwait():
+            self.result.log.append((perf_counter(), None, "Continuing test .."))
+            shutdown()
+         self.result.log.append((perf_counter(), None, "Sleeping for %s ms ..." % (1000. * wait)))
+         reactor.callLater(wait, afterwait)
 
 
       def launch(_):
-         ## FIXME: explain why the following needed, since
-         ## without the almost zero delay (which triggers a
-         ## reactor loop), the code will not work as expected!
-
-         #test() # <= does NOT work
-         reactor.callLater(0.00001, test)
+         ## After all our clients have signaled "peersready", these
+         ## clients will just have sent their subscribe WAMP messages,
+         ## and since with WAMPv1, there is no reply (to wait on), the
+         ## clients immediately signal readiness and we need to _wait_
+         ## here to give the testee time to receive and actually subscribe
+         ## the clients. When we don't wait, we might publish test events
+         ## before the testee has subscribed all clients as needed.
+         ## We need acknowledgement of subscribe for WAMPv2!
+         ##
+         wait = 3 * self.testee.options.get("rtt", 0.2)
+         def afterwait():
+            self.result.log.append((perf_counter(), None, "Continuing test .."))
+            test()
+         self.result.log.append((perf_counter(), None, "Waiting %s ms ..." % (1000. * wait)))
+         reactor.callLater(wait, afterwait)
 
 
       def error(err):
@@ -303,12 +337,28 @@ class WampCase2_2_x_x_Base:
          self.finished.errback(err)
 
 
-      def done(_):
+      def done(res):
          self.result.ended = perf_counter()
-         passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
-         if not passed:
-            print "EXPECTED", self.result.expected
-            print "RECEIVED", self.result.received
+         self.result.log.append((self.result.ended, None, "Test ended."))
+
+         clientErrors = []
+         for r in res:
+            if not r[0]:
+               clientErrors.append(str(r[1].value))
+
+         if len(clientErrors) > 0:
+            passed = False
+            print "Client errors", clientErrors
+         else:
+            passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+            if not passed:
+               print
+               print "RECEIVED"
+               print self.result.received
+               print "EXPECTED"
+               print self.result.expected
+               print
+
          self.result.passed = passed
          self.finished.callback(self.result)
 
@@ -363,9 +413,10 @@ def generate_WampCase2_2_x_x_classes():
             o = "-"
 
          description = """The test connects %d WAMP clients to the testee, subscribes \
-the sessions to topics %s and \
+the sessions to topics %s, waits 3x <RTT> seconds and \
 then publishes %d event%s to the topic %s with payload%s %s from the first session. \
-The test sets the following publication options: %s.
+The test then waits 3x <RTT> seconds to receive events dispatched from the testee.
+For publishing of test events, the following publication options are used: %s.
 """ % (len(params.peers),
        s,
        pl,
