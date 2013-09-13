@@ -16,13 +16,26 @@
 ##
 ###############################################################################
 
-__all__ = ("AttributeBag", )
+__all__ = ("AttributeBag", "Tabify", "perf_counter", )
 
 
 import json
 
 from twisted.python import log
 
+
+# http://docs.python.org/dev/library/time.html#time.perf_counter
+# http://www.python.org/dev/peps/pep-0418/
+# until time.perf_counter becomes available in Python 2 we do:
+import time
+if not hasattr(time, 'perf_counter'):
+   import os
+   if os.name == 'nt':
+      perf_counter = time.clock
+   else:
+      perf_counter = time.time
+else:
+   perf_counter = time.perf_counter
 
 
 class AttributeBag:

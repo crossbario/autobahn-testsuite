@@ -108,19 +108,8 @@ from autobahn.websocket import connectWS
 from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from testrun import TestResult
-from util import AttributeBag
+from util import AttributeBag, perf_counter
 from interfaces import ITestCase
-
-
-# http://docs.python.org/dev/library/time.html#time.perf_counter
-# http://www.python.org/dev/peps/pep-0418/
-# until time.perf_counter becomes available in Python 2 we do:
-if not hasattr(time, 'perf_counter'):
-   import os
-   if os.name == 'nt':
-      time.perf_counter = time.clock
-   else:
-      time.perf_counter = time.time
 
 
 
@@ -223,7 +212,7 @@ class WampCase2_2_x_x_Base:
 
 
    def run(self):
-      self.result.started = time.perf_counter()
+      self.result.started = perf_counter()
 
       self.clients = []
       peersready = []
@@ -315,7 +304,7 @@ class WampCase2_2_x_x_Base:
 
 
       def done(_):
-         self.result.ended = time.perf_counter()
+         self.result.ended = perf_counter()
          passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
          if not passed:
             print "EXPECTED", self.result.expected
