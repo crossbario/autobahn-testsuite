@@ -16,12 +16,8 @@
 ##
 ###############################################################################
 
-try:
-   import pkg_resources
-   version = pkg_resources.require("AutobahnTestSuite")[0].version
-except:
-   ## i.e. no setuptools or no package installed ..
-   version = "?.?.?"
+from _version import __version__
+version = __version__ # backward compat.
 
 import choosereactor # This MUST BE the FIRST file imported here! Do NOT touch.
 import wstest

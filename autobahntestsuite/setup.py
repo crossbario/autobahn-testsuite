@@ -56,9 +56,24 @@ More information:
    * http://wamp.ws
 """
 
+
+## get version string from "autobahntestsuite/_version.py"
+## See: http://stackoverflow.com/a/7071358/884770
+##
+import re
+VERSIONFILE="autobahntestsuite/_version.py"
+verstrline = open(VERSIONFILE, "rt").read()
+VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
+mo = re.search(VSRE, verstrline, re.M)
+if mo:
+   verstr = mo.group(1)
+else:
+   raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+
+
 setup (
    name = 'autobahntestsuite',
-   version = '0.6.0',
+   version = verstr,
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
