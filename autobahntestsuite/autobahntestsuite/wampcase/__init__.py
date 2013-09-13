@@ -37,43 +37,36 @@ CaseCategories = {"0": "Message format",
                   "5": "Reflection",
                   "6": "Performance"}
 
-CaseSubCategories = {"2.1": "Different payloads",
-                     "2.2": "Exclude and eligible",
-                     "2.3": "Publisher identification",
-                     "2.4": "Unsubscribe",
-                     "2.5": "Pattern-based subscriptions",
-                     "2.6": "Metaevents",
+CaseSubCategories = {
 
-                     ## Scalar values in RPC arguments/results
-                     "3.1": "Argument and return types (Number)",
-                     "3.2": "Argument and return types (String)",
-                     "3.3": "Argument and return types (Datetime)",
-                     "3.4": "Argument and return types (Boolean)",
+   ## Publish and Subscribe
+   ##
+   "2.1": "Topics and payloads",
+   "2.2": "Exclude and eligible",
+   "2.3": "Unsubscribe",
+   "2.4": "Peer initiated events",
+   "2.5": "Publisher identification (WAMPv2)",
+   "2.6": "Pattern-based subscriptions (WAMPv2)",
+   "2.7": "Metaevents (WAMPv2)",
 
-                     ## Composite values in RPC arguments/results
-                     "3.5": "Argument and return types (Composite)",
-
-                     ## Exceptions defined by WAMP
-                     "3.6": "Exceptions (Builtin)",
-
-                     ## User exceptions
-                     "3.7": "Exceptions (Custom)",
-
-                     #"3.2": "Call timeouts",
-                     #"3.2": "Cancel calls",
-                     #"3.3": "Progressive results",
-                     #"3.4": "Partitioned calls",
-                     #"3.5": "Call results and errors",
-                     #"3.6": "",
-                         }
+   ## Remote Procedure Calls
+   ##
+   "3.1": "Argument and return types",
+   "3.2": "Exceptions",
+   "3.3": "Reverse calls",
+   "3.3": "Call timeouts (WAMPv2)",
+   "3.4": "Cancel calls (WAMPv2)",
+   "3.5": "Progressive results (WAMPv2)",
+   "3.6": "Partitioned calls (WAMPv2)",
+}
 
 
-import wampcase2
+import wampcase2_2_x_x
 
 ## all WAMP test cases
 ##
 Cases = []
-Cases.extend(wampcase2.Cases)
+Cases.extend(wampcase2_2_x_x.Cases)
 
 
 class WampCaseSet(CaseSet):

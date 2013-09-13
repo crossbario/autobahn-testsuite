@@ -43,7 +43,7 @@ PEERSET1 = [
 ]
 
 ## these settings control the options the publisher uses
-## during publishing - see WampCase2_x_x_Params
+## during publishing - see WampCase2_2_x_x_Params
 ## and what the test case expects for success
 ##
 SETTINGS1 = [
@@ -124,7 +124,7 @@ if not hasattr(time, 'perf_counter'):
 
 
 
-class WampCase2_x_x_Protocol(WampCraClientProtocol):
+class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
@@ -158,9 +158,9 @@ class WampCase2_x_x_Protocol(WampCraClientProtocol):
 
 
 
-class WampCase2_x_x_Factory(WampClientFactory):
+class WampCase2_2_x_x_Factory(WampClientFactory):
 
-   protocol = WampCase2_x_x_Protocol
+   protocol = WampCase2_2_x_x_Protocol
 
    def __init__(self, test, peerIndex, onReady, onGone):
       WampClientFactory.__init__(self, test.testee.url)
@@ -185,7 +185,7 @@ class WampCase2_x_x_Factory(WampClientFactory):
 
 
 
-class WampCase2_x_x_Params(AttributeBag):
+class WampCase2_2_x_x_Params(AttributeBag):
    """
    Test parameter set for configuring instances of WampCase2_*_*.
 
@@ -209,7 +209,7 @@ class WampCase2_x_x_Params(AttributeBag):
 
 
 @implementer(ITestCase)
-class WampCase2_x_x_Base:
+class WampCase2_2_x_x_Base:
 
    DESCRIPTION = "Undefined."
    EXPECTATION = "Undefined."
@@ -232,7 +232,7 @@ class WampCase2_x_x_Base:
       for peerIndex in xrange(len(self.params.peers)):
          ready = Deferred()
          gone = Deferred()
-         client = WampCase2_x_x_Factory(self, peerIndex, ready, gone)
+         client = WampCase2_2_x_x_Factory(self, peerIndex, ready, gone)
          self.clients.append(client)
          peersready.append(ready)
          peersgone.append(gone)
@@ -331,7 +331,7 @@ class WampCase2_x_x_Base:
 
 
 
-def generate_WampCase2_x_x_classes():
+def generate_WampCase2_2_x_x_classes():
    ## dynamically create case classes
    ##
    res = []
@@ -340,7 +340,7 @@ def generate_WampCase2_x_x_classes():
       ic = 1
       for payload in PAYLOADS:
 
-         params = WampCase2_x_x_Params(peers = setting[0],
+         params = WampCase2_2_x_x_Params(peers = setting[0],
                                        publicationTopic = setting[1],
                                        excludeMe = setting[2],
                                        exclude = setting[3],
@@ -389,13 +389,13 @@ The test sets the following publication options: %s.
          expectation = """We expect the testee to dispatch the events to us on \
 the sessions %s""" % (params.expectedReceivers,)
 
-         klassname = "WampCase2_%d_%d" % (jc, ic)
+         klassname = "WampCase2_2_%d_%d" % (jc, ic)
 
          Klass = type(klassname,
-                      (object, WampCase2_x_x_Base, ),
+                      (object, WampCase2_2_x_x_Base, ),
                       {
-                         "__init__": WampCase2_x_x_Base.__init__,
-                         "run": WampCase2_x_x_Base.run,
+                         "__init__": WampCase2_2_x_x_Base.__init__,
+                         "run": WampCase2_2_x_x_Base.run,
                          "description": description,
                          "expectation": expectation,
                          "params": params
@@ -408,4 +408,4 @@ the sessions %s""" % (params.expectedReceivers,)
 
 
 
-Cases.extend(generate_WampCase2_x_x_classes())
+Cases.extend(generate_WampCase2_2_x_x_classes())
