@@ -1,3 +1,8 @@
+# When on Windows and starting GNU make from Git bash, we need to set this:
+#ifdef COMSPEC
+#   SHELL=C:/Windows/System32/cmd.exe
+#endif
+
 all: clean build upload
 
 install:
@@ -20,3 +25,6 @@ publish:
 	python setup.py sdist upload
 	python setup.py bdist_egg upload
 	python setup.py bdist_wininst upload
+
+test:
+	echo "select count(*) from testresult;" | sqlite3 .wstest.db

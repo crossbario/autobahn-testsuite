@@ -77,7 +77,7 @@ class FuzzingWampClient(object):
       def progress(runId, testRun, test, result, remaining):
          if test:
             print "%s%s (%d tests remaining)" % ("PASSED   : " if result.passed else "FAILED  : ", test.__class__.__name__, remaining)
-            return self._testDb.saveResult(runId, result)
+            return self._testDb.saveResult(runId, testRun, result)
          else:
             print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
 

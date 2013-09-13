@@ -46,6 +46,7 @@ from massconnect import MassConnectTest
 from testdb import TestDb
 from interfaces import ITestDb
 from wampcase import WampCaseSet
+from util import Tabify
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -279,16 +280,28 @@ class WsTestRunner(object):
       elif self.mode == 'fuzzingwampclient':
 
          testDb = TestDb(spec.get('dbfile', None))
+
          testSet = WampCaseSet()
          testRunner = FuzzingWampClient(testDb, testSet)
          runId, resultIds = yield testRunner.run(spec)
+
          print
-         print "Tests finished: run ID %s, result IDs %s" % (runId, resultIds)
+         print "Tests finished: run ID %s, result IDs %d" % (runId, len(resultIds))
          print
-         for rid in resultIds:
-            r = yield testDb.getResult(rid)
-            print r.runId, r.id, r.passed, r.started, r.ended, r.ended - r.started
-            #pprint(result)
+
+         summary = yield testDb.getTestRunSummary(runId)
+         tab = Tabify(['l32', 'r5', 'r5'])
+         print
+         print tab.tabify(['Testee', 'Pass', 'Fail'])
+         print tab.tabify()
+         for t in sorted(summary.keys()):
+            print tab.tabify([t, summary[t]['passed'], summary[t]['failed']])
+         print
+
+         #for rid in resultIds:
+         #   res = yield testDb.getResult(rid)
+         #   print r.runId, r.id, r.passed, r.started, r.ended, r.ended - r.started
+         #   #pprint(result)
 
          reactor.stop()
 

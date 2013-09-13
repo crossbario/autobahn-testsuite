@@ -61,3 +61,77 @@ class AttributeBag:
       for attr in self.ATTRIBUTES:
          s.append("%s = %s" % (attr, getattr(self, attr)))
       return self.__class__.__name__ + '(' + ', '.join(s) + ')'
+
+
+class Tabify:
+
+   def __init__(self, formats, truncate = 120, filler = ['-', '+']):
+      self._formats = formats
+      self._truncate = truncate
+      self._filler = filler
+
+
+   def tabify(self, fields = None):
+      """
+      Tabified output formatting.
+      """
+
+      ## compute total length of all fields
+      ##
+      totalLen = 0
+      flexIndicators = 0
+      flexIndicatorIndex = None
+      for i in xrange(len(self._formats)):
+         ffmt = self._formats[i][1:]
+         if ffmt != "*":
+            totalLen += int(ffmt)
+         else:
+            flexIndicators += 1
+            flexIndicatorIndex = i
+
+      if flexIndicators > 1:
+         raise Exception("more than 1 flex field indicator")
+
+      ## reserve space for column separators (" | " or " + ")
+      ##
+      totalLen += 3 * (len(self._formats) - 1)
+
+      if totalLen > self._truncate:
+         raise Exception("cannot fit content in truncate length %d" % self._truncate)
+
+      r = []
+      for i in xrange(len(self._formats)):
+
+         if i == flexIndicatorIndex:
+            N = self._truncate - totalLen
+         else:
+            N = int(self._formats[i][1:]) 
+
+         if fields:
+            s = str(fields[i])
+            if len(s) > N:
+               s = s[:N-2] + ".."
+            l = N - len(s)
+            m = self._formats[i][0]
+         else:
+            s = ''
+            l = N
+            m = '+'
+
+         if m == 'l':
+            r.append(s + ' ' * l)
+         elif m == 'r':
+            r.append(' ' * l + s)
+         elif m == 'c':
+            c1 = l / 2
+            c2 = l - c1
+            r.append(' ' * c1 + s + ' ' * c2)
+         elif m == '+':
+            r.append(self._filler[0] * l)
+         else:
+            raise Exception("invalid field format")
+
+      if m == '+':
+         return (self._filler[0] + self._filler[1] + self._filler[0]).join(r)
+      else:
+         return ' | '.join(r)

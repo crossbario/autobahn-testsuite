@@ -76,6 +76,8 @@ class TestDb:
                   CREATE TABLE testresult (
                      id                TEXT     PRIMARY KEY,
                      testrun_id        TEXT     NOT NULL,
+                     testee_name       TEXT     NOT NULL,
+                     passed            INTEGER  NOT NULL,
                      result            TEXT     NOT NULL)
                   """)
 
@@ -118,7 +120,7 @@ class TestDb:
       return dr
 
 
-   def saveResult(self, runId, result):
+   def saveResult(self, runId, testRun, result):
 
       def do(txn):
          ## verify that testrun exists and is not closed already
@@ -133,7 +135,7 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         txn.execute("INSERT INTO testresult (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, result.serialize()])
+         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, passed, result) VALUES (?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, result.passed, result.serialize()])
          return id
 
       return self._dbpool.runInteraction(do)
@@ -172,5 +174,34 @@ class TestDb:
          result.deserialize(data)
          result.id, result.runId = id, runId
          return result
+
+      return self._dbpool.runInteraction(do)
+
+
+   def getTestRunSummary(self, runId):
+
+      def do(txn):
+
+         ## verify that testrun exists and is not closed already
+         ##
+         txn.execute("SELECT mode, started, ended, spec FROM testrun WHERE id = ?", [runId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test run")
+         if res[1] is None:
+            print "Warning: test run not closed yet"
+
+         txn.execute("SELECT testee_name, passed, COUNT(*) FROM testresult WHERE testrun_id = ? GROUP BY testee_name, passed", [runId])
+         res = txn.fetchall()
+         r = {}
+         for row in res:
+            testee_name, passed, cnt = row
+            if not r.has_key(testee_name):
+               r[testee_name] = {'passed': 0, 'failed': 0}
+            if passed:
+               r[testee_name]['passed'] = cnt
+            else:
+               r[testee_name]['failed'] = cnt
+         return r
 
       return self._dbpool.runInteraction(do)
