@@ -31,7 +31,6 @@ class EchoService(object):
     Provides a simple 'echo' service: returns whatever it receives.
     """
 
-    @wamp.exportRpc
     def echo(self, val):
         return val
 
@@ -45,7 +44,6 @@ class StringService(object):
     Provides basic string services.
     """
 
-    @wamp.exportRpc
     def concat(self, str_1, str_2):
         """
         Concatenates two strings and returns the resulting string.
@@ -65,8 +63,6 @@ class NumberService(object):
     Provides a simple service for calculating with numbers.
     """
 
-    
-    @wamp.exportRpc
     def add(self, *numbers):
         """
         Adds an unspecified number of numbers and returns the result.
@@ -166,20 +162,20 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
             for idx in range(1, 5):
                 self.registerMethodForRpc(setupUri(case_id, idx),
                                           self.echo_service,
-                                          self.echo_service.echo
+                                          EchoService.echo
                                           )
         self.registerMethodForRpc(setupUri(ECHO_DATE_ID),
                                   self.echo_service,
-                                  self.echo_service.echo
+                                  EchoService.echo
                                   )
         self.registerMethodForRpc(setupUri(CONCAT_STRINGS_ID),
                                   self.string_service,
-                                  self.string_service.concat
+                                  StringService.concat
                                   )
         for case_id in [ADD_TWO_NUMBERS_ID, ADD_THREE_NUMBERS_ID]:
             self.registerMethodForRpc(setupUri(case_id),
                                   self.number_service,
-                                  self.number_service.add
+                                  NumberService.add
                                   )
 
     def initializePubSub(self):
