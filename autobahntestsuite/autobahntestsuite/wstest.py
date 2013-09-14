@@ -16,14 +16,17 @@
 ##
 ###############################################################################
 
-import sys, os, json, pkg_resources
+import sys, os, json, pkg_resources, uuid
 from pprint import pprint
 
 from twisted.python import log, usage
 from twisted.internet import reactor
+from twisted.internet.defer import inlineCallbacks, Deferred, returnValue
 from twisted.web.server import Site
 from twisted.web.static import File
-from twisted.internet.defer import inlineCallbacks
+from twisted.web.wsgi import WSGIResource
+
+from flask import Flask, render_template
 
 import autobahn
 import autobahntestsuite
@@ -47,6 +50,10 @@ from testdb import TestDb
 from interfaces import ITestDb
 from wampcase import WampCaseSet
 from util import Tabify
+
+import jinja2
+import klein
+
 
 from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
@@ -77,7 +84,8 @@ class WsTestOptions(usage.Options):
             'wampserver',
             'wamptesteeserver',
             'wampclient',
-            'massconnect']
+            'massconnect',
+            'web']
 
    # Modes that need a specification file
    MODES_NEEDING_SPEC = ['fuzzingclient',
@@ -236,13 +244,87 @@ class WsTestRunner(object):
          wampclient        = self.startWampService,
          wampserver        = self.startWampService,
          wamptesteeserver  = self.startWampService,
-         massconnect       = self.startMassConnect
+         massconnect       = self.startMassConnect,
+         web               = self.startWeb
          )
       try:
          methodMapping[self.mode]()
       except KeyError:
          raise Exception("logic error")
 
+
+   def startWeb(self):
+
+      if self.debug:
+         log.startLogging(sys.stdout)
+
+      app = klein.Klein()
+      app.debug = self.debug
+      app.db = TestDb()
+      app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
+
+      @app.route('/testrun/<path:runid>')
+      @inlineCallbacks
+      def page_show_testrun(*args, **kwargs):
+         runid = kwargs.get('runid', None)
+         res = yield app.db.getTestRunSummary(runid)
+         page = app.templates.get_template('testrun.html')
+         returnValue(page.render(testees = res))
+
+      @app.route('/')
+      @inlineCallbacks
+      def page_home(request):
+         res = []
+         rows = yield app.db.getTestRuns()
+         for row in rows:
+            obj = {}
+            obj['id'] = row[0]
+            obj['mode'] = row[1]
+            obj['started'] = row[2]
+            obj['ended'] = row[3]
+            res.append(obj)
+         page = app.templates.get_template('index.html')
+         returnValue(page.render(testruns = res))
+
+      @app.route('/home')
+      def page_home_deferred_style(request):
+         d1 = Deferred()
+         db = TestDb()
+         d2 = db.getTestRuns()
+         def process(result):
+            res = []
+            for row in result:
+               obj = {}
+               obj['runId'] = row[0]
+               obj['mode'] = row[1]
+               obj['started'] = row[2]
+               obj['ended'] = row[3]
+               res.append(obj)
+            d1.callback(json.dumps(res))
+         d2.addCallback(process)
+         return d1
+
+      reactor.listenTCP(8090, Site(app.resource()), interface = "localhost")
+      reactor.run()
+
+   def startWeb2(self):
+      if self.debug:
+         log.startLogging(sys.stdout)
+      app = Flask(__name__)
+      app.debug = self.debug
+      app.secret_key = str(uuid.uuid4())
+
+      db = TestDb()
+
+      @app.route('/')
+      def page_home():
+         #res = yield db.getTestRuns()
+         #print res
+         return render_template('index.html')
+
+      flaskResource = WSGIResource(reactor, reactor.getThreadPool(), app)
+      site = Site(flaskResource)
+      reactor.listenTCP(8090, site)
 
    @inlineCallbacks
    def startFuzzingService(self):
@@ -294,8 +376,9 @@ class WsTestRunner(object):
          print
          print tab.tabify(['Testee', 'Pass', 'Fail'])
          print tab.tabify()
-         for t in sorted(summary.keys()):
-            print tab.tabify([t, summary[t]['passed'], summary[t]['failed']])
+         #for t in sorted(summary.keys()):
+         for t in summary:
+            print tab.tabify([t['name'], t['passed'], t['failed']])
          print
 
          #for rid in resultIds:

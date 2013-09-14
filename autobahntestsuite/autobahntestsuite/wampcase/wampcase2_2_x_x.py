@@ -117,7 +117,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
-      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session opened."))
+      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session opened to %s at %s." % (self.session_server ,self.peerstr)))
       if self.test.testee.auth:
          d = self.authenticate(**self.test.testee.auth)
          d.addCallbacks(self.onAuthSuccess, self.onAuthError)

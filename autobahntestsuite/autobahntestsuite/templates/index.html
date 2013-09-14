@@ -1,0 +1,20 @@
+<!doctype html>
+<html>
+   <head>
+   </head>
+   <body>
+      <h1>Testruns</h1>
+      <ul>
+      {% for testrun in testruns %}
+        <li>
+            <a href="/testrun/{{ testrun.id }}">
+               {{ testrun.mode }}
+               {{ testrun.started }}
+               {{ testrun.ended }}
+               {{ testrun.id }}
+            </a>
+         </li>
+      {% endfor %}
+      </ul>
+   </body>
+</html>

@@ -197,11 +197,22 @@ class TestDb:
          for row in res:
             testee_name, passed, cnt = row
             if not r.has_key(testee_name):
-               r[testee_name] = {'passed': 0, 'failed': 0}
+               r[testee_name] = {'name': testee_name, 'passed': 0, 'failed': 0}
             if passed:
                r[testee_name]['passed'] = cnt
             else:
                r[testee_name]['failed'] = cnt
-         return r
+         return [r[k] for k in sorted(r.keys())]
+
+      return self._dbpool.runInteraction(do)
+
+
+   def getTestRuns(self, limit = 10):
+
+      def do(txn):
+
+         txn.execute("SELECT id, mode, started, ended FROM testrun ORDER BY started DESC LIMIT ?", [limit])
+         res = txn.fetchall()
+         return res
 
       return self._dbpool.runInteraction(do)
