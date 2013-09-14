@@ -12,7 +12,7 @@
 
       <ul>
          {% for result in testresults %}
-         <li><a href="/testresult/{{ result.id }}">{{ result.id }}</a></li>
+         <li><a href="/testresult/{{ result.id }}">{{ result.testee }} {{ result.case }}</a></li>
          {% endfor %}
       </ul>
    </body>

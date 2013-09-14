@@ -265,6 +265,7 @@ class WsTestRunner(object):
       app.db = TestDb()
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
+
       @app.route('/')
       @inlineCallbacks
       def page_home(request):
@@ -280,15 +281,16 @@ class WsTestRunner(object):
          page = app.templates.get_template('index.html')
          returnValue(page.render(testruns = res))
 
+
       @app.route('/testrun/<path:runid>')
       @inlineCallbacks
       def page_show_testrun(*args, **kwargs):
          runid = kwargs.get('runid', None)
          res = yield app.db.getTestRunSummary(runid)
          res2 = yield app.db.getTestRunIndex(runid)
-         print res2
          page = app.templates.get_template('testrun.html')
          returnValue(page.render(testees = res, testresults = res2))
+
 
       @app.route('/testresult/<path:resultid>')
       @inlineCallbacks
@@ -296,7 +298,6 @@ class WsTestRunner(object):
          resultid = kwargs.get('resultid', None)
          testresult = yield app.db.getTestResult(resultid)
          testresult.duration = 1000. * (testresult.ended - testresult.started)
-         print testresult.duration
          page = app.templates.get_template('testresult.html')
          returnValue(page.render(testresult = testresult))
 

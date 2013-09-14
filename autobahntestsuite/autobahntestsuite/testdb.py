@@ -77,6 +77,7 @@ class TestDb:
                      id                TEXT     PRIMARY KEY,
                      testrun_id        TEXT     NOT NULL,
                      testee_name       TEXT     NOT NULL,
+                     case_name         TEXT     NOT NULL,
                      passed            INTEGER  NOT NULL,
                      duration          REAL     NOT NULL,
                      result            TEXT     NOT NULL)
@@ -164,7 +165,7 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, passed, duration, result) VALUES (?, ?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, result.passed, result.ended - result.started, result.serialize()])
+         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, case_name, passed, duration, result) VALUES (?, ?, ?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, test.name, result.passed, result.ended - result.started, result.serialize()])
 
          ## save test case log with foreign key to test result
          ##
@@ -202,15 +203,15 @@ class TestDb:
    def getTestResult(self, resultId):
 
       def do(txn):
-         txn.execute("SELECT id, testrun_id, result FROM testresult WHERE id = ?", [resultId])
+         txn.execute("SELECT id, testrun_id, testee_name, case_name, passed, duration, result FROM testresult WHERE id = ?", [resultId])
          res = txn.fetchone()
          if res is None:
             raise Exception("no such test result")
-         id, runId, data = res
+         id, runId, testeeName, caseName, passed, duration, data = res
 
          result = TestResult()
          result.deserialize(data)
-         result.id, result.runId = id, runId
+         result.id, result.runId, result.testeeName, result.caseName = id, runId, testeeName, caseName
 
          result.log = []
          txn.execute("SELECT timestamp, session_index, session_id, msg FROM testlog WHERE testresult_id = ? ORDER BY seq ASC", [result.id])
@@ -225,12 +226,13 @@ class TestDb:
    def getTestRunIndex(self, runId):
 
       def do(txn):
-         txn.execute("SELECT id, testee_name, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
+         txn.execute("SELECT id, testee_name, case_name, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
          res = txn.fetchall()
          return [{'id': row[0],
                   'testee': row[1],
-                  'passed': row[2] != 0,
-                  'duration': row[3]} for row in res]
+                  'case': row[2],
+                  'passed': row[3] != 0,
+                  'duration': row[4]} for row in res]
 
       return self._dbpool.runInteraction(do)
 
