@@ -81,6 +81,8 @@ class TestDb:
                      result            TEXT     NOT NULL)
                   """)
 
+      ## add: testee, testlog, testcase?, testspec?
+
 
    def _checkDb(self):
       pass
@@ -178,6 +180,16 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
+   def getTestRunIndex(self, runId):
+
+      def do(txn):
+         txn.execute("SELECT id, testee_name, passed FROM testresult WHERE testrun_id = ?", [runId])
+         res = txn.fetchall()
+         return [{'id': row[0], 'passed': row[1] != 0} for row in res]
+
+      return self._dbpool.runInteraction(do)
+
+
    def getTestRunSummary(self, runId):
 
       def do(txn):
@@ -207,6 +219,7 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
+   #@exportRpc => FIXME: add WAMP API
    def getTestRuns(self, limit = 10):
 
       def do(txn):

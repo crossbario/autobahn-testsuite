@@ -30,7 +30,8 @@ from util import AttributeBag
 
 class Testee(AttributeBag):
 
-   ATTRIBUTES = ['name',
+   ATTRIBUTES = ['id',
+                 'name',
                  'url',
                  'auth',
                  'options',
