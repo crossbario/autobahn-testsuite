@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block inner %}
+
+   <h1>Test Result</h1>
+
+<!--
+   <h2>{{ testresult.id }}</h2>
+   <h2>{{ testresult.runId }}</h2>
+   <h2>{{ testresult.passed }}</h2>
+   <h2>{{ testresult.started }}</h2>
+   <h2>{{ testresult.ended }}</h2>
+-->
+
+   {% if testresult.passed %}
+      <p class="pass">Pass ({{ testresult.duration | round(1) }} ms)</p>
+   {% else %}
+      <p class="fail">Fail</p>
+   {% endif %}
+
+   <hr>
+
+
+<!--
+   <h3>Expected</h3>
+
+      <p>This is what we expected to receive:</p>
+
+      {% for sid in testresult.expected %}
+      <h4>{{ sid }}</h4>
+         {% if testresult.expected[sid]|length > 0 %}
+            <table>
+               <tr>
+                  <td>Topic</td>
+                  <td>Payload</td>
+               </tr>
+               {% for event in testresult.expected[sid] %}
+               <tr>
+                  <td>{{ event[0] }}</td>
+                  <td>{{ event[1] }}</td>
+               </tr>
+               {% endfor %}
+            </table>
+         {% else %}
+            Nothing.
+         {% endif %}
+      {% endfor %}
+
+   <hr>
+
+   <h3>Observed</h3>
+
+      <p>This is what we actually received:</p>
+
+      {% for sid in testresult.observed %}
+      <h4>{{ sid }}</h4>
+         {% if testresult.observed[sid]|length > 0 %}
+            <table>
+               <tr>
+                  <td>Topic</td>
+                  <td>Payload</td>
+               </tr>
+               {% for event in testresult.observed[sid] %}
+               <tr>
+                  <td>{{ event[0] }}</td>
+                  <td>{{ event[1] }}</td>
+               </tr>
+               {% endfor %}
+            </table>
+         {% else %}
+            Nothing.
+         {% endif %}
+      {% endfor %}
+
+   <hr>
+-->
+
+   <h2>Log</h2>
+
+      <table class="wamplog">
+         <tr>
+            <td style="min-width: 4em;">Timestamp</td>
+            <td style="min-width: 6em;">Session Index</td>
+            <td style="min-width: 10em;">Session ID</td>
+            <td style="width: 100%;">Message</td>
+         </tr>
+         {% for line in testresult.log %}
+         <tr>
+            <td>{{ line[0] | round(6) }}</td>
+            <td><b>{% if line[1] is none %}&nbsp;{% else %}{{ line[1] }}{% endif %}</b></td>
+            <td class="pre">
+                  {% if line[2] is none %}&nbsp;{% else %}{{ line[2] }}{% endif %}
+            </td>
+            <td style="width: 100%;">{{ line[3] }}</td>
+         </tr>
+         {% endfor %}
+      </table>
+
+{% endblock %}

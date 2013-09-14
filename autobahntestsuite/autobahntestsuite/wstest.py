@@ -25,6 +25,7 @@ from twisted.internet.defer import inlineCallbacks, Deferred, returnValue
 from twisted.web.server import Site
 from twisted.web.static import File
 from twisted.web.wsgi import WSGIResource
+from twisted.web.resource import Resource
 
 from flask import Flask, render_template
 
@@ -35,6 +36,7 @@ from autobahn.websocket import connectWS, listenWS
 from autobahn.utf8validator import Utf8Validator
 from autobahn.xormasker import XorMaskerNull
 from autobahn.wamp import WampServerFactory
+from autobahn.resource import WSGIRootResource
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from wampfuzzing import FuzzingWampClient
@@ -263,14 +265,6 @@ class WsTestRunner(object):
       app.db = TestDb()
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
-      @app.route('/testrun/<path:runid>')
-      @inlineCallbacks
-      def page_show_testrun(*args, **kwargs):
-         runid = kwargs.get('runid', None)
-         res = yield app.db.getTestRunSummary(runid)
-         page = app.templates.get_template('testrun.html')
-         returnValue(page.render(testees = res))
-
       @app.route('/')
       @inlineCallbacks
       def page_home(request):
@@ -285,6 +279,27 @@ class WsTestRunner(object):
             res.append(obj)
          page = app.templates.get_template('index.html')
          returnValue(page.render(testruns = res))
+
+      @app.route('/testrun/<path:runid>')
+      @inlineCallbacks
+      def page_show_testrun(*args, **kwargs):
+         runid = kwargs.get('runid', None)
+         res = yield app.db.getTestRunSummary(runid)
+         res2 = yield app.db.getTestRunIndex(runid)
+         print res2
+         page = app.templates.get_template('testrun.html')
+         returnValue(page.render(testees = res, testresults = res2))
+
+      @app.route('/testresult/<path:resultid>')
+      @inlineCallbacks
+      def page_show_testresult(*args, **kwargs):
+         resultid = kwargs.get('resultid', None)
+         testresult = yield app.db.getTestResult(resultid)
+         testresult.duration = 1000. * (testresult.ended - testresult.started)
+         print testresult.duration
+         page = app.templates.get_template('testresult.html')
+         returnValue(page.render(testresult = testresult))
+
 
       @app.route('/home')
       def page_home_deferred_style(request):
@@ -304,7 +319,18 @@ class WsTestRunner(object):
          d2.addCallback(process)
          return d1
 
-      reactor.listenTCP(8090, Site(app.resource()), interface = "localhost")
+      ## serve statuc stuff from a standard File resource
+      ##
+      static = File("autobahntestsuite/static")
+
+      ## we need to wrap stuff, since the Klein Twisted Web resource
+      ## does not seem to support putChild()
+      ##
+      resource = WSGIRootResource(app.resource(), {'static': static})
+
+      ## serve everything from one port
+      ##
+      reactor.listenTCP(8090, Site(resource), interface = "0.0.0.0")
       reactor.run()
 
    def startWeb2(self):

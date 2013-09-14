@@ -78,10 +78,22 @@ class TestDb:
                      testrun_id        TEXT     NOT NULL,
                      testee_name       TEXT     NOT NULL,
                      passed            INTEGER  NOT NULL,
+                     duration          REAL     NOT NULL,
                      result            TEXT     NOT NULL)
                   """)
 
-      ## add: testee, testlog, testcase?, testspec?
+      cur.execute("""
+                  CREATE TABLE testlog (
+                     testresult_id     TEXT     NOT NULL,
+                     seq               INTEGER  NOT NULL,
+                     timestamp         REAL     NOT NULL,
+                     session_index     INTEGER,
+                     session_id        TEXT,
+                     msg               TEXT     NOT NULL,
+                     PRIMARY KEY (testresult_id, seq))
+                  """)
+
+      ## add: testee, testcase, testspec?
 
 
    def _checkDb(self):
@@ -122,7 +134,22 @@ class TestDb:
       return dr
 
 
-   def saveResult(self, runId, testRun, result):
+   def saveResult(self, runId, testRun, test, result):
+
+      if False:
+         print
+         print result.passed
+         print result.expected
+         print result.observed
+         print result.started
+         print result.ended
+         print result.log
+         print
+         print test.name
+         print test.description
+         print test.expectation
+         print test.testee
+         print
 
       def do(txn):
          ## verify that testrun exists and is not closed already
@@ -137,7 +164,15 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, passed, result) VALUES (?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, result.passed, result.serialize()])
+         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, passed, duration, result) VALUES (?, ?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, result.passed, result.ended - result.started, result.serialize()])
+
+         ## save test case log with foreign key to test result
+         ##
+         seq = 1
+         for l in result.log:
+            txn.execute("INSERT INTO testlog (testresult_id, seq, timestamp, session_index, session_id, msg) VALUES (?, ?, ?, ?, ?, ?)", [id, seq, l[0], l[1], l[2], l[3]])
+            seq += 1
+
          return id
 
       return self._dbpool.runInteraction(do)
@@ -164,7 +199,7 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   def getResult(self, resultId):
+   def getTestResult(self, resultId):
 
       def do(txn):
          txn.execute("SELECT id, testrun_id, result FROM testresult WHERE id = ?", [resultId])
@@ -172,9 +207,16 @@ class TestDb:
          if res is None:
             raise Exception("no such test result")
          id, runId, data = res
+
          result = TestResult()
          result.deserialize(data)
          result.id, result.runId = id, runId
+
+         result.log = []
+         txn.execute("SELECT timestamp, session_index, session_id, msg FROM testlog WHERE testresult_id = ? ORDER BY seq ASC", [result.id])
+         for l in txn.fetchall():
+            result.log.append(l)
+
          return result
 
       return self._dbpool.runInteraction(do)
@@ -183,9 +225,12 @@ class TestDb:
    def getTestRunIndex(self, runId):
 
       def do(txn):
-         txn.execute("SELECT id, testee_name, passed FROM testresult WHERE testrun_id = ?", [runId])
+         txn.execute("SELECT id, testee_name, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
          res = txn.fetchall()
-         return [{'id': row[0], 'passed': row[1] != 0} for row in res]
+         return [{'id': row[0],
+                  'testee': row[1],
+                  'passed': row[2] != 0,
+                  'duration': row[3]} for row in res]
 
       return self._dbpool.runInteraction(do)
 

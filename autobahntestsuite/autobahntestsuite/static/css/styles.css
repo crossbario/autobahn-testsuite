@@ -1,0 +1,70 @@
+body {
+   background-color: #f4f4f4;
+   font-family: "Segoe UI", sans-serif;
+}
+
+h1, h2, h3, h4 {
+   font-family: "Segoe UI Light", sans-serif;   
+}
+
+.pre {
+   font-family: "Consolas", monospace;
+}
+
+p.pass {
+   display: block;
+   width: 12em;
+   background-color: #0a0;
+   padding: 0.5em;
+   text-align: center;
+   color: #fff;
+   font-size: 20px;
+}
+
+/*
+ * WAMP Test Logs
+ */
+table.wamplog {
+   font-size: 14px;
+   color: #333;
+   background-color: #fff;
+   border-collapse: collapse;
+   border: 1px solid #027eae;
+   margin: 2em;
+   width: 90%;
+}
+
+table.wamplog pre {
+   display: inline;
+   color: #ff6600;
+/*   
+   padding-left: 1em;
+   padding-right: 1em;
+*/   
+   font-weight: bold;
+}
+
+table.wamplog strong {
+   color: #027eae;
+   font-weight: bold;
+}
+
+table.wamplog td {
+   padding: 0.3em 1em 0.3em 1em;
+}
+
+table.wamplog tr:nth-child(odd) {
+   background-color: #fff;
+   color: #000;
+}
+
+table.wamplog tr:nth-child(even) {
+   background-color: #ddd;
+   color: #000;
+}
+
+table.wamplog tr:nth-child(1) {
+   background-color: #027eae;
+   color: #fff;
+}
+

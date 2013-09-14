@@ -117,7 +117,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
-      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session opened to %s at %s." % (self.session_server ,self.peerstr)))
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server ,self.peerstr)))
       if self.test.testee.auth:
          d = self.authenticate(**self.test.testee.auth)
          d.addCallbacks(self.onAuthSuccess, self.onAuthError)
@@ -126,13 +126,13 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onAuthSuccess(self, permissions):
-      self.test.result.log.append((perf_counter(), self.session_id, "WAMP session %s authenticated with credentials: %s" % (self.session_id, self.test.testee.auth)))
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP session %s authenticated with credentials: <pre>%s</pre>" % (self.session_id, self.test.testee.auth)))
       self.main()
 
 
    def onAuthError(self, e):
       uri, desc, details = e.value.args
-      self.test.result.log.append((perf_counter(), self.session_id, "WAMP authentication error: %s" % details))
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP authentication error: %s" % details))
       print "Authentication Error!", uri, desc, details
 
 
@@ -140,15 +140,15 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
       subscribeTopics = self.test.params.peers[self.factory.peerIndex]
       for topic in subscribeTopics:
          self.subscribe(topic, self.onEvent)
-      self.test.result.log.append((perf_counter(), self.session_id, "Subscribed to %s" % (', '.join(subscribeTopics))))
+         self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "Subscribed to <pre>%s</pre>" % topic))
       self.factory.onReady.callback(self.session_id)
 
 
    def onEvent(self, topic, event):
-      self.test.result.log.append((perf_counter(), self.session_id, "Received event for topic %s: %s" % (topic, event)))
-      if not self.test.result.received.has_key(self.session_id):
-         self.test.result.received[self.session_id] = []
-      self.test.result.received[self.session_id].append((topic, event))
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "Received event for topic <pre>%s</pre> and payload <pre>%s</pre>" % (topic, event)))
+      if not self.test.result.observed.has_key(self.session_id):
+         self.test.result.observed[self.session_id] = []
+      self.test.result.observed[self.session_id].append((topic, event))
 
 
 
@@ -177,12 +177,12 @@ class WampCase2_2_x_x_Factory(WampClientFactory):
          sid = self.proto.session_id
       else:
          sid = None
-      self.test.result.log.append((perf_counter(), sid, "Client connection lost: %s" % reason))
+      self.test.result.log.append((perf_counter(), self.peerIndex, sid, "Client connection lost: %s" % reason))
       self.onGone.callback(None)
 
    def clientConnectionFailed(self, connector, reason):
       reason = str(reason.value)
-      self.test.result.log.append((perf_counter(), None, "Client connection failed: %s" % reason))
+      self.test.result.log.append((perf_counter(), self.peerIndex, None, "Client connection failed: %s" % reason))
       self.onGone.callback(reason)
 
 
@@ -213,21 +213,18 @@ class WampCase2_2_x_x_Params(AttributeBag):
 @implementer(ITestCase)
 class WampCase2_2_x_x_Base:
 
-   DESCRIPTION = "Undefined."
-   EXPECTATION = "Undefined."
-
    def __init__(self, testee):
       self.testee = testee
       self.result = TestResult()
       self.result.passed = False
-      self.result.received = {}
+      self.result.observed = {}
       self.result.expected = {}
       self.result.log = []
 
 
    def run(self):
       self.result.started = perf_counter()
-      self.result.log.append((self.result.started, None, "Test started."))
+      self.result.log.append((self.result.started, None, None, "Test started."))
 
       self.clients = []
       peersready = []
@@ -254,7 +251,7 @@ class WampCase2_2_x_x_Base:
          ##
          for c in self.clients:
             self.result.expected[c.proto.session_id] = []
-            self.result.received[c.proto.session_id] = []
+            self.result.observed[c.proto.session_id] = []
 
          expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
          for r in expectedReceivers:
@@ -262,7 +259,8 @@ class WampCase2_2_x_x_Base:
                e = (self.params.publicationTopic, p)
                self.result.expected[r.proto.session_id].append(e)
 
-         publisher = self.clients[0]
+         publisherPeerIndex = 0
+         publisher = self.clients[publisherPeerIndex]
          topic = self.params.publicationTopic
          payloads = self.params.eventPayloads
          
@@ -272,18 +270,30 @@ class WampCase2_2_x_x_Base:
          for i in self.params.exclude:
             exclude.append(self.clients[i].proto.session_id)
 
+         def plog(topic, pl, opts = None):
+            if opts:
+               self.result.log.append((perf_counter(),
+                                       publisherPeerIndex,
+                                       publisher.proto.session_id,
+                                       "Published event to topic <pre>%s</pre> with options <pre>%s</pre> and payload <pre>%s</pre>" % (topic, ', '.join(opts), pl)))
+            else:
+               self.result.log.append((perf_counter(),
+                                       publisherPeerIndex,
+                                       publisher.proto.session_id,
+                                       "Published event to topic <pre>%s</pre> and payload <pre>%s</pre>" % (topic, pl)))
+
          if self.params.excludeMe is None:
             if len(exclude) > 0:
                for pl in payloads:
                   publisher.proto.publish(topic,
                                           pl,
                                           exclude = exclude)
-                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
+                  plog(topic, pl, ["exclude=%s" % exclude])
             else:
                for pl in payloads:
                   publisher.proto.publish(topic,
                                           pl)
-                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
+                  plog(topic, pl)
          else:
             if len(exclude) > 0:
                for pl in payloads:
@@ -291,13 +301,13 @@ class WampCase2_2_x_x_Base:
                                           pl,
                                           excludeMe = self.params.excludeMe,
                                           exclude = exclude)
-                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
+                  plog(topic, pl, ["exclude=%s" % exclude, "excludeMe=%s" % self.params.excludeMe])
             else:
                for pl in payloads:
                   publisher.proto.publish(topic,
                                           pl,
                                           excludeMe = self.params.excludeMe)
-                  self.result.log.append((perf_counter(), publisher.proto.session_id, "Sent event for topic %s: %s" % (topic, pl)))
+                  plog(topic, pl, ["excludeMe=%s" % self.params.excludeMe])
 
          ## After having published everything the test had specified,
          ## we need to _wait_ to receive events on all our WAMP sessions
@@ -306,9 +316,9 @@ class WampCase2_2_x_x_Base:
          ##
          wait = 3 * self.testee.options.get("rtt", 0.2)
          def afterwait():
-            self.result.log.append((perf_counter(), None, "Continuing test .."))
+            self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             shutdown()
-         self.result.log.append((perf_counter(), None, "Sleeping for %s ms ..." % (1000. * wait)))
+         self.result.log.append((perf_counter(), None, None, "Sleeping for <strong>%s ms</strong> ..." % (1000. * wait)))
          reactor.callLater(wait, afterwait)
 
 
@@ -324,9 +334,9 @@ class WampCase2_2_x_x_Base:
          ##
          wait = 3 * self.testee.options.get("rtt", 0.2)
          def afterwait():
-            self.result.log.append((perf_counter(), None, "Continuing test .."))
+            self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             test()
-         self.result.log.append((perf_counter(), None, "Waiting %s ms ..." % (1000. * wait)))
+         self.result.log.append((perf_counter(), None, None, "Sleeping for  <strong>%s ms</strong> ..." % (1000. * wait)))
          reactor.callLater(wait, afterwait)
 
 
@@ -339,7 +349,7 @@ class WampCase2_2_x_x_Base:
 
       def done(res):
          self.result.ended = perf_counter()
-         self.result.log.append((self.result.ended, None, "Test ended."))
+         self.result.log.append((self.result.ended, None, None, "Test ended."))
 
          clientErrors = []
          for r in res:
@@ -350,13 +360,13 @@ class WampCase2_2_x_x_Base:
             passed = False
             print "Client errors", clientErrors
          else:
-            passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
+            passed = json.dumps(self.result.observed) == json.dumps(self.result.expected)
             if not passed:
                print
-               print "RECEIVED"
-               print self.result.received
                print "EXPECTED"
                print self.result.expected
+               print "OBSERVED"
+               print self.result.observed
                print
 
          self.result.passed = passed
@@ -380,12 +390,12 @@ def generate_WampCase2_2_x_x_classes():
       for payload in PAYLOADS:
 
          params = WampCase2_2_x_x_Params(peers = setting[0],
-                                       publicationTopic = setting[1],
-                                       excludeMe = setting[2],
-                                       exclude = setting[3],
-                                       eligible = setting[4],
-                                       eventPayloads = payload,
-                                       expectedReceivers = setting[5])
+                                         publicationTopic = setting[1],
+                                         excludeMe = setting[2],
+                                         exclude = setting[3],
+                                         eligible = setting[4],
+                                         eventPayloads = payload,
+                                         expectedReceivers = setting[5])
 
          pl = len(params.eventPayloads)
          plc = "s" if pl else ""
@@ -436,6 +446,7 @@ the sessions %s""" % (params.expectedReceivers,)
                       {
                          "__init__": WampCase2_2_x_x_Base.__init__,
                          "run": WampCase2_2_x_x_Base.run,
+                         "name": klassname,
                          "description": description,
                          "expectation": expectation,
                          "params": params

@@ -197,6 +197,7 @@ class ITestRunObserver(Interface):
 class ITestCase(Interface):
    """
    """
+   name = Attribute("""Test case name.""")
    description = Attribute("""Test case description.""")
    expectation = Attribute("""Test case expectation.""")
 
