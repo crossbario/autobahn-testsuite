@@ -440,13 +440,14 @@ For publishing of test events, the following publication options are used: %s.
 the sessions %s""" % (params.expectedReceivers,)
 
          klassname = "WampCase2_2_%d_%d" % (jc, ic)
+         index = (2, 2, jc, ic)
 
          Klass = type(klassname,
                       (object, WampCase2_2_x_x_Base, ),
                       {
                          "__init__": WampCase2_2_x_x_Base.__init__,
                          "run": WampCase2_2_x_x_Base.run,
-                         "name": klassname,
+                         "index": index,
                          "description": description,
                          "expectation": expectation,
                          "params": params

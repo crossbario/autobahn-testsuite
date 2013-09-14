@@ -25,6 +25,7 @@ __all__ = ("WampCaseSet",
 from caseset import CaseSet
 #from autobahntestsuite.caseset import CaseSet
 
+CaseSetname = "wamp"
 
 CaseBasename = "WampCase"
 
@@ -74,4 +75,4 @@ Cases.extend(wampcase2_2_x_x.Cases)
 class WampCaseSet(CaseSet):
 
    def __init__(self):
-      CaseSet.__init__(self, CaseBasename, Cases, CaseCategories, CaseSubCategories)
+      CaseSet.__init__(self, CaseSetname, CaseBasename, Cases, CaseCategories, CaseSubCategories)

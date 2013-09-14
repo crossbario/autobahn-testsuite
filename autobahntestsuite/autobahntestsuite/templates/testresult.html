@@ -1,18 +1,7 @@
 {% extends "base.html" %}
 {% block inner %}
 
-   <h1>Test Result</h1>
-
-   <h2>{{ testresult.testeeName }}</h2>
-   <h2>{{ testresult.caseName }}</h2>
-
-<!--
-   <h2>{{ testresult.id }}</h2>
-   <h2>{{ testresult.runId }}</h2>
-   <h2>{{ testresult.passed }}</h2>
-   <h2>{{ testresult.started }}</h2>
-   <h2>{{ testresult.ended }}</h2>
--->
+   <h1>
 
    {% if testresult.passed %}
       <p class="pass">Pass ({{ testresult.duration | round(1) }} ms)</p>
@@ -20,62 +9,76 @@
       <p class="fail">Fail</p>
    {% endif %}
 
+      {{ testresult.testeeName }} - Test Case {{ testresult.caseName }}
+   </h1>
+
    <hr>
 
+   <h2>Expected</h2>
 
-<!--
-   <h3>Expected</h3>
-
-      <p>This is what we expected to receive:</p>
-
-      {% for sid in testresult.expected %}
-      <h4>{{ sid }}</h4>
-         {% if testresult.expected[sid]|length > 0 %}
-            <table>
-               <tr>
-                  <td>Topic</td>
-                  <td>Payload</td>
-               </tr>
-               {% for event in testresult.expected[sid] %}
-               <tr>
-                  <td>{{ event[0] }}</td>
-                  <td>{{ event[1] }}</td>
-               </tr>
-               {% endfor %}
-            </table>
+      <table class="wamplog" style="width: 80%">
+         <tr>
+            <td style="min-width: 6em;">Session Index</td>
+            <td style="min-width: 10em;">Session ID</td>
+            <td style="min-width: 10em;">Topic</td>
+            <td style="width: 100%;">Payload</td>
+         </tr>
+         {% if testresult.expected %}
+            {% for sid in testresult.expected %}
+               {% if testresult.expected[sid]|length > 0 %}
+                  {% for event in testresult.expected[sid] %}
+                  <tr>
+                     <td><b>0</b></td>
+                     <td class="pre">{{ sid }}</td>
+                     <td><pre>{{ event[0] }}</pre></td>
+                     <td><pre>{{ event[1] }}</pre></td>
+                  </tr>
+                  {% endfor %}
+               {% else %}
+               {% endif %}
+            {% endfor %}
          {% else %}
-            Nothing.
+         <tr>
+            <td colspan="4">Nothing.</td>
+         </tr>
          {% endif %}
-      {% endfor %}
+      </table>
 
    <hr>
 
-   <h3>Observed</h3>
 
-      <p>This is what we actually received:</p>
+   <h2>Observed</h2>
 
-      {% for sid in testresult.observed %}
-      <h4>{{ sid }}</h4>
-         {% if testresult.observed[sid]|length > 0 %}
-            <table>
-               <tr>
-                  <td>Topic</td>
-                  <td>Payload</td>
-               </tr>
-               {% for event in testresult.observed[sid] %}
-               <tr>
-                  <td>{{ event[0] }}</td>
-                  <td>{{ event[1] }}</td>
-               </tr>
-               {% endfor %}
-            </table>
+      <table class="wamplog" style="width: 80%">
+         <tr>
+            <td style="min-width: 6em;">Session Index</td>
+            <td style="min-width: 10em;">Session ID</td>
+            <td style="min-width: 10em;">Topic</td>
+            <td style="width: 100%;">Payload</td>
+         </tr>
+         {% if testresult.observed %}
+            {% for sid in testresult.observed %}
+               {% if testresult.observed[sid]|length > 0 %}
+                  {% for event in testresult.observed[sid] %}
+                  <tr>
+                     <td><b>0</b></td>
+                     <td class="pre">{{ sid }}</td>
+                     <td><pre>{{ event[0] }}</pre></td>
+                     <td><pre>{{ event[1] }}</pre></td>
+                  </tr>
+                  {% endfor %}
+               {% else %}
+               {% endif %}
+            {% endfor %}
          {% else %}
-            Nothing.
+         <tr>
+            <td colspan="4">Nothing.</td>
+         </tr>
          {% endif %}
-      {% endfor %}
+      </table>
 
    <hr>
--->
+
 
    <h2>Log</h2>
 
@@ -97,5 +100,7 @@
          </tr>
          {% endfor %}
       </table>
+
+   <hr>
 
 {% endblock %}

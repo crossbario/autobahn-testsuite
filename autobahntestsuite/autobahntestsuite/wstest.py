@@ -262,7 +262,11 @@ class WsTestRunner(object):
 
       app = klein.Klein()
       app.debug = self.debug
-      app.db = TestDb()
+
+      testSet = WampCaseSet()
+      app.db = TestDb([testSet])
+      print app.db.getTestCaseIndices(testSet.CaseSetName)
+
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
 
@@ -288,6 +292,7 @@ class WsTestRunner(object):
          runid = kwargs.get('runid', None)
          res = yield app.db.getTestRunSummary(runid)
          res2 = yield app.db.getTestRunIndex(runid)
+         print res2
          page = app.templates.get_template('testrun.html')
          returnValue(page.render(testees = res, testresults = res2))
 
@@ -297,6 +302,19 @@ class WsTestRunner(object):
       def page_show_testresult(*args, **kwargs):
          resultid = kwargs.get('resultid', None)
          testresult = yield app.db.getTestResult(resultid)
+
+         n = 0
+         for k in testresult.expected:
+            n += len(testresult.expected[k])
+         if n == 0:
+            testresult.expected = None
+
+         n = 0
+         for k in testresult.observed:
+            n += len(testresult.observed[k])
+         if n == 0:
+            testresult.observed = None
+
          testresult.duration = 1000. * (testresult.ended - testresult.started)
          page = app.templates.get_template('testresult.html')
          returnValue(page.render(testresult = testresult))
@@ -388,9 +406,10 @@ class WsTestRunner(object):
 
       elif self.mode == 'fuzzingwampclient':
 
-         testDb = TestDb(spec.get('dbfile', None))
-
          testSet = WampCaseSet()
+
+         testDb = TestDb([testSet], spec.get('dbfile', None))
+
          testRunner = FuzzingWampClient(testDb, testSet)
          runId, resultIds = yield testRunner.run(spec)
 

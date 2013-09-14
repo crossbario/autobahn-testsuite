@@ -1,10 +1,28 @@
 body {
    background-color: #f4f4f4;
    font-family: "Segoe UI", sans-serif;
+   width: 100%;
+   margin: 0;
+   padding: 0;
+}
+
+#wrapper {
+   width: 90%;
+   margin: auto;
 }
 
 h1, h2, h3, h4 {
    font-family: "Segoe UI Light", sans-serif;   
+}
+
+h2 {
+   margin-left: 1em;
+}
+
+hr {
+   margin-top: 40px;
+   visibility: hidden;
+
 }
 
 .pre {
@@ -12,10 +30,12 @@ h1, h2, h3, h4 {
 }
 
 p.pass {
-   display: block;
+   display: inline;
    width: 12em;
    background-color: #0a0;
-   padding: 0.5em;
+   padding: 0.5em 1em 0.5em 1em;
+   margin-right: 1em;
+   margin-left: 2em;
    text-align: center;
    color: #fff;
    font-size: 20px;
@@ -30,8 +50,8 @@ table.wamplog {
    background-color: #fff;
    border-collapse: collapse;
    border: 1px solid #027eae;
-   margin: 2em;
-   width: 90%;
+   margin: 0;
+   width: 100%;
 }
 
 table.wamplog pre {
@@ -50,7 +70,7 @@ table.wamplog strong {
 }
 
 table.wamplog td {
-   padding: 0.3em 1em 0.3em 1em;
+   padding: 0.4em 1em 0.4em 1em;
 }
 
 table.wamplog tr:nth-child(odd) {
@@ -59,7 +79,7 @@ table.wamplog tr:nth-child(odd) {
 }
 
 table.wamplog tr:nth-child(even) {
-   background-color: #ddd;
+   background-color: #eee;
    color: #000;
 }
 

@@ -42,7 +42,7 @@ class TestDb:
    from the database. This allows to decouple application parts.
    """
 
-   def __init__(self, dbfile = None):
+   def __init__(self, caseSets, dbfile = None):
 
       if not dbfile:
          dbfile = ".wstest.db"
@@ -58,11 +58,45 @@ class TestDb:
                                            check_same_thread = False # http://twistedmatrix.com/trac/ticket/3629
                                           )
 
+      self._caseSets = caseSets
+      self._initCaseSets()
+
+
+   def _initCaseSets(self):
+      self._cs = {}
+      for cs in self._caseSets:
+         if not self._cs.has_key(cs.CaseSetName):
+            self._cs[cs.CaseSetName] = {}
+         else:
+            raise Exception("duplicate case set name")
+         for c in cs.Cases:
+            idx = tuple(c.index)
+            if not self._cs[cs.CaseSetName].has_key(idx):
+               self._cs[cs.CaseSetName][idx] = c
+            else:
+               raise Exception("duplicate case index")
+
+# casesetname -> [{header: {}, children: [{header: {}, children: []}]}]
+
+   def getTestCase(self, caseSetName, caseIndex):
+      if self._cs.has_key(caseSetName):
+         if self._cs[caseSetName].has_key(caseIndex):
+            return self._cs[caseSetName][caseIndex]
+      return None
+
+
+   def getTestCaseIndices(self, caseSetName):
+      if self._cs.has_key(caseSetName):
+         return sorted(self._cs[caseSetName].keys())
+      else:
+         return None
+
 
    def _createDb(self):
       log.msg("creating test database at %s .." % self._dbfile)
       db = sqlite3.connect(self._dbfile)
       cur = db.cursor()
+
       cur.execute("""
                   CREATE TABLE testrun (
                      id                TEXT     PRIMARY KEY,
@@ -79,6 +113,7 @@ class TestDb:
                      testee_name       TEXT     NOT NULL,
                      case_name         TEXT     NOT NULL,
                      passed            INTEGER  NOT NULL,
+                     failed            INTEGER  NOT NULL,
                      duration          REAL     NOT NULL,
                      result            TEXT     NOT NULL)
                   """)
@@ -94,11 +129,39 @@ class TestDb:
                      PRIMARY KEY (testresult_id, seq))
                   """)
 
+      cur.execute("""
+                  CREATE TABLE testee (
+                     id                TEXT     PRIMARY KEY,
+                     name              TEXT     NOT NULL,
+                     url               TEXT     NOT NULL,
+                     auth              TEXT,
+                     options           TEXT
+                  """)
+
+      cur.execute("""
+                  CREATE UNIQUE INDEX idx_testee_name ON testee (name)
+                  """)
+
       ## add: testee, testcase, testspec?
 
+   ## Cases are identified by "caseSetName", a string, e.g. "wamp"
+   ## and a "caseIndex", e.g. [2, 2, 5, 11].
+   ##
+   ## Testees are identified by
+   ##
+   ## hostname, IP, port
+   ## WAMP ident
+   ## specname
 
    def _checkDb(self):
       pass
+
+
+   def getTestCaseCategories(self, caseSet = "wamp"):
+      if caseSet == "wamp":
+         pass
+      else:
+         raise Exception("no such case set")
 
 
    def newRun(self, mode, spec):
@@ -146,7 +209,7 @@ class TestDb:
          print result.ended
          print result.log
          print
-         print test.name
+         print test.index
          print test.description
          print test.expectation
          print test.testee
@@ -165,7 +228,8 @@ class TestDb:
          ## save test case results with foreign key to test run
          ##
          id = newid()
-         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, case_name, passed, duration, result) VALUES (?, ?, ?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, test.name, result.passed, result.ended - result.started, result.serialize()])
+         caseName = '.'.join([str(x) for x in test.index])
+         txn.execute("INSERT INTO testresult (id, testrun_id, testee_name, case_name, passed, failed, duration, result) VALUES (?, ?, ?, ?, ?, ?, ?)", [id, runId, testRun.testee.name, caseName, int(result.passed), 1 - int(result.passed), result.ended - result.started, result.serialize()])
 
          ## save test case log with foreign key to test result
          ##

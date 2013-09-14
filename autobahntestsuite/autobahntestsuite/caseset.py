@@ -24,8 +24,9 @@ import re
 
 class CaseSet:
 
-   def __init__(self, CaseBasename, Cases, CaseCategories, CaseSubCategories):
-      self.CaseBasename = CaseBasename
+   def __init__(self, CaseSetName, CaseBaseName, Cases, CaseCategories, CaseSubCategories):
+      self.CaseSetName = CaseSetName
+      self.CaseBaseName = CaseBaseName
       self.Cases = Cases
       self.CaseCategories = CaseCategories
       self.CaseSubCategories = CaseSubCategories
@@ -51,7 +52,7 @@ class CaseSet:
       """
       Class1_2_3 => '1.2.3'
       """
-      l = len(self.CaseBasename)
+      l = len(self.CaseBaseName)
       return '.'.join(klass.__name__[l:].split("_"))
 
 
@@ -59,7 +60,7 @@ class CaseSet:
       """
       Class1_2_3 => (1, 2, 3)
       """
-      l = len(self.CaseBasename)
+      l = len(self.CaseBaseName)
       return tuple([int(x) for x in klass.__name__[l:].split("_")])
 
 
