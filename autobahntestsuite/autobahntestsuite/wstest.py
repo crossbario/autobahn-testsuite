@@ -87,13 +87,17 @@ class WsTestOptions(usage.Options):
             'wamptesteeserver',
             'wampclient',
             'massconnect',
-            'web']
+            'web',
+            'import']
 
    # Modes that need a specification file
    MODES_NEEDING_SPEC = ['fuzzingclient',
                          'fuzzingserver',
+                         'fuzzingwampserver',
+                         'fuzzingwampclient',
                          'wsperfcontrol',
-                         'massconnect']
+                         'massconnect',
+                         'import']
 
    # Modes that need a Websocket URI
    MODES_NEEDING_WSURI = ['echoclient',
@@ -113,9 +117,7 @@ class WsTestOptions(usage.Options):
                              'wsperfcontrol':     SPEC_WSPERFCONTROL,
                              'massconnect':       SPEC_MASSCONNECT,
                              'fuzzingwampclient': SPEC_FUZZINGWAMPCLIENT,
-                             'fuzzingwampserver': SPEC_FUZZINGWAMPSERVER
-                             }
-
+                             'fuzzingwampserver': SPEC_FUZZINGWAMPSERVER}
 
    optParameters = [
       ['mode', 'm', None, 'Test mode, one of: %s [required]' %
@@ -154,12 +156,7 @@ class WsTestOptions(usage.Options):
             "Mode '%s' is invalid.\nAvailable modes:\n\t- %s" % (
                self['mode'], "\n\t- ".join(sorted(WsTestOptions.MODES))))
 
-      if self['mode'] in ['fuzzingclient',
-                          'fuzzingserver',
-                          'fuzzingwampclient',
-                          'fuzzingwampserver',
-                          'wsperfcontrol',
-                          'massconnect']:
+      if self['mode'] in WsTestOptions.MODES_NEEDING_SPEC:
          if not self['spec']:
             self.updateSpec()
 
@@ -230,29 +227,62 @@ class WsTestRunner(object):
 
       
    def startService(self):
-      methodMapping = dict(
-         fuzzingclient     = self.startFuzzingService,
-         fuzzingserver     = self.startFuzzingService,
-         fuzzingwampclient = self.startFuzzingService,
-         fuzzingwampserver = self.startFuzzingService,
-         testeeclient      = self.startTesteeService,
-         testeeserver      = self.startTesteeService,
-         echoclient        = self.startEchoService,
-         echoserver        = self.startEchoService,
-         broadcastclient   = self.startBroadcastingService,
-         broadcastserver   = self.startBroadcastingService,
-         wsperfcontrol     = self.startWsPerfControl,
-         wsperfmaster      = self.startWsPerfMaster,
-         wampclient        = self.startWampService,
-         wampserver        = self.startWampService,
-         wamptesteeserver  = self.startWampService,
-         massconnect       = self.startMassConnect,
-         web               = self.startWeb
-         )
+      methodMapping = {
+         'fuzzingclient'     : self.startFuzzingService,
+         'fuzzingserver'     : self.startFuzzingService,
+         'fuzzingwampclient' : self.startFuzzingService,
+         'fuzzingwampserver' : self.startFuzzingService,
+         'testeeclient'      : self.startTesteeService,
+         'testeeserver'      : self.startTesteeService,
+         'echoclient'        : self.startEchoService,
+         'echoserver'        : self.startEchoService,
+         'broadcastclient'   : self.startBroadcastingService,
+         'broadcastserver'   : self.startBroadcastingService,
+         'wsperfcontrol'     : self.startWsPerfControl,
+         'wsperfmaster'      : self.startWsPerfMaster,
+         'wampclient'        : self.startWampService,
+         'wampserver'        : self.startWampService,
+         'wamptesteeserver'  : self.startWampService,
+         'massconnect'       : self.startMassConnect,
+         'web'               : self.startWeb,
+         'import'            : self.startImport
+         }
       try:
          methodMapping[self.mode]()
       except KeyError:
          raise Exception("logic error")
+
+
+   def startImport(self):
+      """
+      Import a test specification into the test database.
+      """
+      if self.debug:
+         log.startLogging(sys.stdout)
+
+      ## FIXME: this should allow to import not only WAMP test specs,
+      ## but WebSocket test specs as well ..
+      testSet = WampCaseSet()
+
+      db = TestDb([testSet])
+      spec = self._loadSpec()
+
+      def done(res):
+         op, specId = res
+         if op is None:
+            print "Spec under name '%s' already imported and unchanged: object ID %s" % (spec['name'], specId)
+         elif op == 'U':
+            print "Updated spec under name '%s': object ID %s" % (spec['name'], specId)
+         elif op == 'I':
+            print "Imported spec under new name '%s': object ID %s" % (spec['name'], specId)
+         reactor.stop()
+
+      def failed(failure):
+         print "Spec import failed (%s)" % failure.value
+         reactor.stop()
+
+      d = db.importSpec(spec)
+      d.addCallbacks(done, failed)
 
 
    def startWeb(self):
@@ -350,7 +380,7 @@ class WsTestRunner(object):
       ## serve everything from one port
       ##
       reactor.listenTCP(8090, Site(resource), interface = "0.0.0.0")
-      reactor.run()
+
 
    def startWeb2(self):
       if self.debug:

@@ -98,48 +98,56 @@ class TestDb:
       cur = db.cursor()
 
       cur.execute("""
+                  CREATE TABLE testspec (
+                     id                TEXT     PRIMARY KEY,
+                     before_id         TEXT,
+                     valid_from        TEXT     NOT NULL,
+                     valid_to          TEXT,
+                     name              TEXT     NOT NULL,
+                     mode              TEXT     NOT NULL,
+                     spec              TEXT     NOT NULL)
+                  """)
+
+      cur.execute("""
+                  CREATE UNIQUE INDEX
+                     idx_testspec_name_valid_to
+                        ON testspec (name, valid_to)
+                  """)
+
+      cur.execute("""
                   CREATE TABLE testrun (
                      id                TEXT     PRIMARY KEY,
-                     mode              TEXT     NOT NULL,
+                     testspec_id       TEXT     NOT NULL,
+                     env               TEXT     NOT NULL,
                      started           TEXT     NOT NULL,
-                     ended             TEXT,
-                     spec              TEXT     NOT NULL)
+                     ended             TEXT)
                   """)
 
       cur.execute("""
                   CREATE TABLE testresult (
                      id                TEXT     PRIMARY KEY,
                      testrun_id        TEXT     NOT NULL,
-                     testee_name       TEXT     NOT NULL,
-                     case_name         TEXT     NOT NULL,
-                     passed            INTEGER  NOT NULL,
-                     failed            INTEGER  NOT NULL,
+                     inserted          TEXT     NOT NULL,
+                     testee            TEXT     NOT NULL,
+                     c1                INTEGER  NOT NULL,
+                     c2                INTEGER  NOT NULL,
+                     c3                INTEGER  NOT NULL,
+                     c4                INTEGER  NOT NULL,
+                     c5                INTEGER  NOT NULL,
                      duration          REAL     NOT NULL,
+                     grade             INTEGER  NOT NULL,
                      result            TEXT     NOT NULL)
                   """)
 
       cur.execute("""
                   CREATE TABLE testlog (
                      testresult_id     TEXT     NOT NULL,
-                     seq               INTEGER  NOT NULL,
+                     lineno            INTEGER  NOT NULL,
                      timestamp         REAL     NOT NULL,
-                     session_index     INTEGER,
-                     session_id        TEXT,
-                     msg               TEXT     NOT NULL,
-                     PRIMARY KEY (testresult_id, seq))
-                  """)
-
-      cur.execute("""
-                  CREATE TABLE testee (
-                     id                TEXT     PRIMARY KEY,
-                     name              TEXT     NOT NULL,
-                     url               TEXT     NOT NULL,
-                     auth              TEXT,
-                     options           TEXT
-                  """)
-
-      cur.execute("""
-                  CREATE UNIQUE INDEX idx_testee_name ON testee (name)
+                     sessionidx        INTEGER,
+                     sessionid         TEXT,
+                     line              TEXT     NOT NULL,
+                     PRIMARY KEY (testresult_id, lineno))
                   """)
 
       ## add: testee, testcase, testspec?
@@ -162,6 +170,57 @@ class TestDb:
          pass
       else:
          raise Exception("no such case set")
+
+
+   def importSpec(self, spec):
+      """
+      Import a test specification into the test database.
+
+      Returns a pair (op, id), where op specifies the 
+      operation that actually was carried out:
+
+          - None: unchanged
+          - 'U': updated
+          - 'I': inserted
+
+      The id is the new (or existing) database object ID for
+      the spec.
+      """
+
+      if not spec.has_key('name'):
+         raise Exception("missing 'name' attribute in spec")
+      name = spec['name']
+
+      if not spec.has_key('mode'):
+         raise Exception("missing 'mode' attribute in spec")
+      mode = spec['mode']
+
+      def do(txn):
+         data = json_dumps(spec)
+
+         now = utcnow()
+         id = newid()
+
+         txn.execute("SELECT id, spec FROM testspec WHERE name = ?", [name])
+         res = txn.fetchone()
+         op = None
+
+         if res is not None:
+            currId, currSpec = res
+            if currSpec == data:
+               return (op, currId)
+            else:
+               beforeId = currId
+               op = 'U'
+               txn.execute("UPDATE testspec SET valid_to = ? WHERE id = ?", [now, currId])
+         else:
+            beforeId = None
+            op = 'I'
+            
+         txn.execute("INSERT INTO testspec (id, before_id, valid_from, name, mode, spec) VALUES (?, ?, ?, ?, ?, ?)", [id, beforeId, now, name, mode, data])
+         return (op, id)
+
+      return self._dbpool.runInteraction(do)
 
 
    def newRun(self, mode, spec):
