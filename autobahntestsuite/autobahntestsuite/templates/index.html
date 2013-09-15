@@ -1,20 +1,33 @@
-<!doctype html>
-<html>
-   <head>
-   </head>
-   <body>
-      <h1>Testruns</h1>
-      <ul>
+{% extends "base.html" %}
+{% block inner %}
+
+   <h1>Testruns</h1>
+
+   <table class="wamplog" style="width: 80%">
+      <tr>
+         <td style="">&nbsp;</td>
+         <td style="">Started</td>
+         <td style="">Run Mode</td>
+         <td style="">Case Set</td>
+         <td style="">Spec</td>
+         <td style="">Testees</td>
+         <td style="">Tests Passed</td>
+         <td style="">Tests Failed</td>
+      </tr>
       {% for testrun in testruns %}
-        <li>
-            <a href="/testrun/{{ testrun.id }}">
-               {{ testrun.mode }}
-               {{ testrun.started }}
-               {{ testrun.ended }}
-               {{ testrun.id }}
-            </a>
-         </li>
+      <tr>
+         <td><a href="/testrun/{{ testrun.id }}">Goto test run</a></td>
+         <td>{{ testrun.started }} </td>
+         <td>{{ testrun.runMode }}</td>
+         <td>{{ testrun.caseSetName }}</td>
+         <td><a href="/testspec/{{ testrun.specId }}">{{ testrun.specName }}</a></td>
+         <td>{{ testrun.testeeCount }}</td>
+         <td>{{ testrun.passed }} passed</td>
+         <td>{{ testrun.total - testrun.passed }} failed</td>
+      </tr>
       {% endfor %}
-      </ul>
-   </body>
-</html>
+   </table>
+
+   <hr>
+
+{% endblock %}

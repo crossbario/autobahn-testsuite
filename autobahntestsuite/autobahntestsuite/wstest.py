@@ -35,8 +35,13 @@ import autobahntestsuite
 from autobahn.websocket import connectWS, listenWS
 from autobahn.utf8validator import Utf8Validator
 from autobahn.xormasker import XorMaskerNull
-from autobahn.wamp import WampServerFactory
-from autobahn.resource import WSGIRootResource
+
+from autobahn.wamp import exportRpc, \
+                          WampServerFactory, \
+                          WampServerProtocol
+
+from autobahn.resource import WSGIRootResource, WebSocketResource
+from autobahn.util import parseutc
 
 from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from wampfuzzing import FuzzingWampClient
@@ -51,7 +56,7 @@ from massconnect import MassConnectTest
 from testdb import TestDb
 from interfaces import ITestDb
 from wampcase import WampCaseSet
-from util import Tabify, envinfo
+from util import Tabify, envinfo, pprint_timeago
 
 import jinja2
 import klein
@@ -193,6 +198,20 @@ Then start wstest:
 
 wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
 """
+
+class WsTestWampProtocol(WampServerProtocol):
+
+   def onSessionOpen(self):
+      self.registerForRpc(self.factory._testDb, "http://api.testsuite.autobahn.ws/testdb/")
+
+
+class WsTestWampFactory(WampServerFactory):
+
+   protocol = WsTestWampProtocol
+
+   #def __init__(self, testDb, url):
+   #   WampServerFactory.__init__(self, url)
+   #   self._testDb = testDb
 
 
 
@@ -373,15 +392,10 @@ class WsTestRunner(object):
       @app.route('/')
       @inlineCallbacks
       def page_home(request):
-         testruns = []
-         rows = yield app.db.getTestRuns()
-         for row in rows:
-            obj = {}
-            obj['id'] = row[0]
-            obj['mode'] = row[1]
-            obj['started'] = row[2]
-            obj['ended'] = row[3]
-            testruns.append(obj)
+         testruns = yield app.db.getTestRuns()
+         for tr in testruns:
+            tr['started'] = pprint_timeago(parseutc(tr['started']))
+            tr['ended'] = pprint_timeago(parseutc(tr['ended']))
          page = app.templates.get_template('index.html')
          returnValue(page.render(testruns = testruns))
 
@@ -439,16 +453,25 @@ class WsTestRunner(object):
 
       ## serve statuc stuff from a standard File resource
       ##
-      static = File("autobahntestsuite/static")
+      static_resource = File("autobahntestsuite/static")
+
+      #wamp_factory = WsTestWampFactory(app.db, "ws://localhost:%d" % port)
+      wamp_factory = WampServerFactory("ws://localhost:%d" % port, debugWamp = True)
+      wamp_factory.startFactory()
+      wamp_factory.protocol = WsTestWampProtocol
+      wamp_factory._testDb = app.db
+      wamp_resource = WebSocketResource(wamp_factory)
 
       ## we need to wrap stuff, since the Klein Twisted Web resource
       ## does not seem to support putChild()
       ##
-      resource = WSGIRootResource(app.resource(), {'static': static})
+      root_resource = WSGIRootResource(app.resource(),
+         {'static': static_resource,
+          'ws': wamp_resource})
 
       ## serve everything from one port
       ##
-      reactor.listenTCP(port, Site(resource), interface = "0.0.0.0")
+      reactor.listenTCP(port, Site(root_resource), interface = "0.0.0.0")
 
       return True
 
@@ -730,6 +753,7 @@ class WsTestRunner(object):
       return test_data
 
 
+
 def run():
    wstest = WsTestRunner()
    res = wstest.startService()
@@ -739,6 +763,7 @@ def run():
             reactor.stop()
          res.addBoth(shutdown)
       reactor.run()
+
 
 
 if __name__ == '__main__':

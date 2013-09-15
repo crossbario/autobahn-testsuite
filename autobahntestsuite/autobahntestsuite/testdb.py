@@ -30,6 +30,7 @@ from twisted.enterprise import adbapi
 from twisted.internet.defer import Deferred
 
 from autobahn.util import utcnow, newid
+from autobahn.wamp import exportRpc
 
 from interfaces import ITestDb
 from testrun import TestResult
@@ -531,16 +532,39 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   #@exportRpc => FIXME: add WAMP API
+   @exportRpc
    def getTestRuns(self, limit = 10):
 
       def do(txn):
 
          txn.execute("""
-            SELECT r.id, s.mode, r.started, r.ended
-               FROM testrun r INNER JOIN testspec s ON r.testspec_id = s.id
-                  ORDER BY r.started DESC LIMIT ?""", [limit])
-         res = txn.fetchall()
+            SELECT r.id, s.id, s.name, s.mode, s.caseset, r.started, r.ended, e.testee_count, e.passed, e.total
+               FROM testrun r
+                  INNER JOIN testspec s ON r.testspec_id = s.id
+                     LEFT JOIN (
+                        SELECT testrun_id,
+                               COUNT(DISTINCT testee) testee_count,
+                               SUM(passed) AS passed,
+                               COUNT(*) AS total
+                           FROM testresult
+                              GROUP BY testrun_id) e ON r.id = e.testrun_id
+               ORDER BY r.started DESC LIMIT ?""", [limit])
+
+         res = []
+         for row in txn.fetchall():
+            o = {'id': row[0],
+                 'specId':row[1],
+                 'specName':row[2],
+                 'runMode': row[3],
+                 'caseSetName': row[4],
+                 'started': row[5],
+                 'ended': row[6],
+                 'testeeCount': row[7],
+                 'passed': row[8],
+                 'total': row[9]
+                 }
+            res.append(o)
+
          return res
 
       return self._dbpool.runInteraction(do)

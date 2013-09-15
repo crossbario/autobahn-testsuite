@@ -1,0 +1,37 @@
+{
+   "name": "Local WAMP Dual",
+   "desc": "Quick test case set targeting 2 locally running AutobahnPython based WAMP servers.",
+
+   "mode": "fuzzingwampclient",  
+
+   "caseset": "wamp",
+   "cases": ["*"],
+   "exclude": [],
+
+   "options": {
+      "rtt": 0.05,
+      "randomize": true,
+      "parallel": false
+   },
+
+   "testees": [
+      {
+         "name": "AutobahnPython I",
+         "desc": "This runs 'testeewampserver' from wstest.",
+         "url": "ws://127.0.0.1:9001",
+         "exclude": ["3.*"],
+         "options":  {
+            "rtt": 0.01
+         }
+      },
+      {
+         "name": "AutobahnPython II",
+         "desc": "This runs 'testeewampserver' from wstest.",
+         "url": "ws://127.0.0.1:9002",
+         "exclude": ["3.*"],
+         "options":  {
+            "rtt": 0.01
+         }
+      }
+   ]
+}

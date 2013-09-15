@@ -28,3 +28,12 @@ publish:
 
 test:
 	echo "select count(*) from testresult;" | sqlite3 .wstest.db
+
+test_import:
+	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
+
+test_run:
+	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP 1'
+
+test_web:
+	python autobahntestsuite/wstest.py -m web
