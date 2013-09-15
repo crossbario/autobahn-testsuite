@@ -88,7 +88,8 @@ class WsTestOptions(usage.Options):
             'wampclient',
             'massconnect',
             'web',
-            'import']
+            'import',
+            'export']
 
    # Modes that need a specification file
    MODES_NEEDING_SPEC = ['fuzzingclient',
@@ -120,22 +121,18 @@ class WsTestOptions(usage.Options):
                              'fuzzingwampserver': SPEC_FUZZINGWAMPSERVER}
 
    optParameters = [
-      ['mode', 'm', None, 'Test mode, one of: %s [required]' %
-       ', '.join(MODES)],
+      ['mode', 'm', None, 'Test mode, one of: %s [required]' % ', '.join(MODES)],
+      ['testset', 't', None, 'Run a test set from an import test spec.'],
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
-      ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) '
-                          '[required in server modes for WSS].')],
-      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) '
-                           '[required in server modes for WSS].')],
-      ['ident', 'i', None,
-       'Override client or server identifier for testee modes.']
+      ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) ' '[required in server modes for WSS].')],
+      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) ' '[required in server modes for WSS].')],
+      ['ident', 'i', None, 'Override client or server identifier for testee modes.']
    ]
 
    optFlags = [
       ['debug', 'd', 'Debug output [default: off].'],
-      ['autobahnversion', 'a',
-       'Print version information for Autobahn and AutobahnTestSuite.']
+      ['autobahnversion', 'a', 'Print version information for Autobahn and AutobahnTestSuite.']
    ]
 
    def postOptions(self):
@@ -219,14 +216,33 @@ class WsTestRunner(object):
          sys.exit(1)
 
       self.options = ws_test_options.opts
+
       self.debug = self.options['debug']
       if self.debug:
          log.startLogging(sys.stdout)
+
       self.mode = str(self.options['mode'])
       self.testData = self._loadTestData()
 
       
    def startService(self):
+
+      if self.mode == "import":
+         return self.startImportSpec(self.options['spec'])
+
+      elif self.mode == "export":
+         return self.startExportSpec(self.options['testset'], self.options.get('spec', None))
+
+      elif self.mode == "fuzzingwampclient":
+         return self.startFuzzingWampClient(self.options['testset'])
+
+      elif self.mode == "web":
+         return self.startWeb()
+
+      else:
+         return None
+
+
       methodMapping = {
          'fuzzingclient'     : self.startFuzzingService,
          'fuzzingserver'     : self.startFuzzingService,
@@ -245,65 +261,118 @@ class WsTestRunner(object):
          'wamptesteeserver'  : self.startWampService,
          'massconnect'       : self.startMassConnect,
          'web'               : self.startWeb,
-         'import'            : self.startImport
+         'import'            : self.startImportSpec,
+         'export'            : self.startExportSpec
          }
-      try:
-         methodMapping[self.mode]()
-      except KeyError:
-         raise Exception("logic error")
+
+      methodMapping[self.mode]()
 
 
-   def startImport(self):
+   @inlineCallbacks
+   def startFuzzingWampClient(self, specName):
+      """
+      Start a WAMP fuzzing client test run using a spec previously imported.
+      """
+
+      testSet = WampCaseSet()
+      testDb = TestDb([testSet])
+      testRunner = FuzzingWampClient(testDb, testSet)
+
+      runId, resultIds = yield testRunner.run(specName)
+
+      print
+      print "Tests finished: run ID %s, result IDs %d" % (runId, len(resultIds))
+      print
+
+      summary = yield testDb.getTestRunSummary(runId)
+      tab = Tabify(['l32', 'r5', 'r5'])
+      print
+      print tab.tabify(['Testee', 'Pass', 'Fail'])
+      print tab.tabify()
+      for t in summary:
+         print tab.tabify([t['name'], t['passed'], t['failed']])
+      print
+
+
+   def startImportSpec(self, specFilename):
       """
       Import a test specification into the test database.
       """
-      if self.debug:
-         log.startLogging(sys.stdout)
+      specFilename = os.path.abspath(specFilename)
+      print "Importing spec from %s ..." % specFilename
+      specData = open(specFilename).read()
 
       ## FIXME: this should allow to import not only WAMP test specs,
       ## but WebSocket test specs as well ..
       testSet = WampCaseSet()
-
       db = TestDb([testSet])
-      spec = self._loadSpec()
 
       def done(res):
-         op, specId = res
+         op, id, name = res
          if op is None:
-            print "Spec under name '%s' already imported and unchanged: object ID %s" % (spec['name'], specId)
+            print "Spec under name '%s' already imported and unchanged (Object ID %s)." % (name, id)
          elif op == 'U':
-            print "Updated spec under name '%s': object ID %s" % (spec['name'], specId)
+            print "Updated spec under name '%s' (Object ID %s)." % (name, id)
          elif op == 'I':
-            print "Imported spec under new name '%s': object ID %s" % (spec['name'], specId)
-         reactor.stop()
+            print "Imported spec under new name '%s' (Object ID %s)." % (name, id)
+         print
 
       def failed(failure):
-         print "Spec import failed (%s)" % failure.value
-         reactor.stop()
+         print "Error: spec import failed - %s." % failure.value
 
-      d = db.importSpec(spec)
+      d = db.importSpec(specData)
       d.addCallbacks(done, failed)
+      return d
 
 
-   def startWeb(self):
+   def startExportSpec(self, specName, specFilename = None):
+      """
+      Export a (currently active, if any) test specification from the test database by name.
+      """
+      if specFilename:
+         specFilename = os.path.abspath(specFilename)
+         fout = open(specFilename, 'w')
+      else:
+         fout = sys.stdout
 
-      if self.debug:
-         log.startLogging(sys.stdout)
+      testSet = WampCaseSet()
+      db = TestDb([testSet])
+
+      def done(res):
+         id, spec = res
+         data = json.dumps(spec, sort_keys = True, indent = 3, separators = (',', ': '))
+         fout.write(data)
+         fout.write('\n')
+         if specFilename:
+            print "Exported spec '%s' to %s." % (specName, specFilename)
+            print
+
+      def failed(failure):
+         print "Error: spec export failed - %s" % failure.value
+         print
+
+      d = db.getSpecByName(specName)
+      d.addCallbacks(done, failed)
+      return d
+
+
+   def startWeb(self, port = 8090):
+      """
+      Start Web service for test database.
+      """
 
       app = klein.Klein()
-      app.debug = self.debug
+      #app.debug = True
 
       testSet = WampCaseSet()
       app.db = TestDb([testSet])
-      print app.db.getTestCaseIndices(testSet.CaseSetName)
-
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
 
       @app.route('/')
       @inlineCallbacks
       def page_home(request):
-         res = []
+         testruns = []
          rows = yield app.db.getTestRuns()
          for row in rows:
             obj = {}
@@ -311,20 +380,19 @@ class WsTestRunner(object):
             obj['mode'] = row[1]
             obj['started'] = row[2]
             obj['ended'] = row[3]
-            res.append(obj)
+            testruns.append(obj)
          page = app.templates.get_template('index.html')
-         returnValue(page.render(testruns = res))
+         returnValue(page.render(testruns = testruns))
 
 
       @app.route('/testrun/<path:runid>')
       @inlineCallbacks
       def page_show_testrun(*args, **kwargs):
          runid = kwargs.get('runid', None)
-         res = yield app.db.getTestRunSummary(runid)
-         res2 = yield app.db.getTestRunIndex(runid)
-         print res2
+         testees = yield app.db.getTestRunSummary(runid)
+         testresults = yield app.db.getTestRunIndex(runid)
          page = app.templates.get_template('testrun.html')
-         returnValue(page.render(testees = res, testresults = res2))
+         returnValue(page.render(testees = testees, testresults = testresults))
 
 
       @app.route('/testresult/<path:resultid>')
@@ -379,27 +447,12 @@ class WsTestRunner(object):
 
       ## serve everything from one port
       ##
-      reactor.listenTCP(8090, Site(resource), interface = "0.0.0.0")
+      reactor.listenTCP(port, Site(resource), interface = "0.0.0.0")
+
+      return True
 
 
-   def startWeb2(self):
-      if self.debug:
-         log.startLogging(sys.stdout)
-      app = Flask(__name__)
-      app.debug = self.debug
-      app.secret_key = str(uuid.uuid4())
 
-      db = TestDb()
-
-      @app.route('/')
-      def page_home():
-         #res = yield db.getTestRuns()
-         #print res
-         return render_template('index.html')
-
-      flaskResource = WSGIResource(reactor, reactor.getThreadPool(), app)
-      site = Site(flaskResource)
-      reactor.listenTCP(8090, site)
 
    @inlineCallbacks
    def startFuzzingService(self):
@@ -437,10 +490,9 @@ class WsTestRunner(object):
       elif self.mode == 'fuzzingwampclient':
 
          testSet = WampCaseSet()
-
-         testDb = TestDb([testSet], spec.get('dbfile', None))
-
+         testDb = TestDb([testSet])
          testRunner = FuzzingWampClient(testDb, testSet)
+
          runId, resultIds = yield testRunner.run(spec)
 
          print
@@ -677,9 +729,14 @@ class WsTestRunner(object):
 
 def run():
    wstest = WsTestRunner()
-   wstest.startService()
-   reactor.run()
-   
+   res = wstest.startService()
+   if res:
+      if isinstance(res, Deferred):
+         def shutdown(_):
+            reactor.stop()
+         res.addBoth(shutdown)
+      reactor.run()
+
 
 if __name__ == '__main__':
    run()

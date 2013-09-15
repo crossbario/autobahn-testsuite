@@ -110,6 +110,7 @@ class CaseSet:
       """
       Return list of test cases that match against case patterns, minus exclude patterns.
       """
+      print spec
       specCases = self.resolveCasePatternList(spec["cases"])
       if spec.has_key("exclude-cases"):
          excludeCases = self.resolveCasePatternList(spec["exclude-cases"])

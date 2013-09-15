@@ -49,8 +49,9 @@ class FuzzingWampClient(object):
 
 
    @inlineCallbacks
-   def run(self, spec, observers = []):
+   def run(self, specName, observers = []):
 
+      specId, spec = yield self._testDb.getSpecByName(specName)
       casesByTestee = self._caseSet.generateCasesByTestee(spec)
 
       testRuns = []
@@ -60,7 +61,7 @@ class FuzzingWampClient(object):
          testRun = TestRun(testee, cases, randomize = spec.get('randomize', False))
          testRuns.append(testRun)
 
-      runId = yield self._testDb.newRun(self.MODENAME, spec)
+      runId = yield self._testDb.newRun(specId)
 
       print
       print "Autobahn Fuzzing WAMP Client"

@@ -28,6 +28,27 @@ class ITestDb(Interface):
    for test cases, results and related data.
    """
 
+   def importSpec(spec):
+      """
+      Import a test specification into the test database.
+
+      Returns a pair `(op, id)`, where `op` specifies the operation that
+      actually was carried out:
+
+          - None: unchanged
+          - 'U': updated
+          - 'I': inserted
+
+      The `id` is the new (or existing) database object ID for the spec.
+      """
+
+
+   def getSpecByName(name):
+      """
+      Find a (currently active, if any) test specification by name.
+      """
+
+
    def newRun(mode, spec):
       """
       Create a new testsuite run.
