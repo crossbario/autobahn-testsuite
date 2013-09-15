@@ -51,7 +51,7 @@ from massconnect import MassConnectTest
 from testdb import TestDb
 from interfaces import ITestDb
 from wampcase import WampCaseSet
-from util import Tabify
+from util import Tabify, envinfo
 
 import jinja2
 import klein
@@ -240,7 +240,7 @@ class WsTestRunner(object):
          return self.startWeb()
 
       else:
-         return None
+         pass
 
 
       methodMapping = {
@@ -265,7 +265,7 @@ class WsTestRunner(object):
          'export'            : self.startExportSpec
          }
 
-      methodMapping[self.mode]()
+      return methodMapping[self.mode]()
 
 
    @inlineCallbacks
@@ -368,6 +368,7 @@ class WsTestRunner(object):
       app.db = TestDb([testSet])
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
+      print envinfo()
 
       @app.route('/')
       @inlineCallbacks
@@ -631,6 +632,8 @@ class WsTestRunner(object):
 
       else:
          raise Exception("logic error")
+
+      return True
 
 
    def startMassConnect(self):

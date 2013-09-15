@@ -9,7 +9,7 @@
    "exclude": [],
 
    "options": {
-      "rtt": 0.2,
+      "rtt": 0.01,
       "randomize": true,
       "parallel": false
    },
@@ -21,7 +21,7 @@
          "url": "ws://127.0.0.1:9001",
          "exclude": ["3.*"],
          "options":  {
-            "rtt": 0.01
+            "rtt": 0.005
          }
       },
       {

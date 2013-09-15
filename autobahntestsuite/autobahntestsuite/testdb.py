@@ -18,20 +18,23 @@
 
 __all__ = ("TestDb",)
 
-import os
+import os, sys
 import types
 import sqlite3
 import json
 
+from zope.interface import implementer
+
 from twisted.python import log
 from twisted.enterprise import adbapi
-
-from autobahn.util import utcnow, newid
 from twisted.internet.defer import Deferred
 
-from zope.interface import implementer
+from autobahn.util import utcnow, newid
+
 from interfaces import ITestDb
 from testrun import TestResult
+from util import envinfo
+
 
 
 @implementer(ITestDb)
@@ -330,7 +333,7 @@ class TestDb:
 
          id = newid()
          now = utcnow()
-         env = {}         
+         env = envinfo()
          txn.execute("INSERT INTO testrun (id, testspec_id, env, started) VALUES (?, ?, ?, ?)", [id, specId, json.dumps(env), now])
          return id
 
@@ -541,3 +544,4 @@ class TestDb:
          return res
 
       return self._dbpool.runInteraction(do)
+

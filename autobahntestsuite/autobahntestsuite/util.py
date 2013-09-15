@@ -19,9 +19,15 @@
 __all__ = ("AttributeBag", "Tabify", "perf_counter", )
 
 
-import json
+import json, platform, sys
 
 from twisted.python import log
+
+import autobahn
+import autobahntestsuite
+from autobahn.utf8validator import Utf8Validator
+from autobahn.xormasker import XorMaskerNull
+
 
 
 # http://docs.python.org/dev/library/time.html#time.perf_counter
@@ -148,3 +154,43 @@ class Tabify:
          return (self._filler[0] + self._filler[1] + self._filler[0]).join(r)
       else:
          return ' | '.join(r)
+
+
+def envinfo():
+
+   res = {}
+
+   res['platform'] = {'hostname': platform.node(),
+                      'os': platform.platform()}
+
+   res['python'] = {'version': platform.python_version(),
+                    'implementation': platform.python_implementation(),
+                    'versionVerbose': sys.version.replace('\n', ' ')}
+
+   res['twisted'] = {'version': None, 'reactor': None}
+   try:
+      import pkg_resources
+      res['twisted']['version'] = pkg_resources.require("Twisted")[0].version
+   except:
+      ## i.e. no setuptools installed ..
+      pass
+   try:
+      from twisted.internet import reactor
+      res['twisted']['reactor'] = str(reactor.__class__.__name__)
+   except:
+      pass
+
+   v1 = str(Utf8Validator)
+   v1 = v1[v1.find("'")+1:-2]
+
+   v2 = str(XorMaskerNull)
+   v2 = v2[v2.find("'")+1:-2]
+
+   res['autobahn'] = {'version': autobahn.version,
+                      'utf8Validator': v1,
+                      'xorMasker': v2,
+                      'jsonProcessor': '%s-%s' % (autobahn.wamp.json_lib.__name__, autobahn.wamp.json_lib.__version__)}
+
+   res['autobahntestsuite'] = {'version': autobahntestsuite.version}
+
+   return res

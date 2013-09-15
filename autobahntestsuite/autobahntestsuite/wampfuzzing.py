@@ -83,15 +83,15 @@ class FuzzingWampClient(object):
             print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
 
       if spec.get('parallel', False):
-         fails, resultIds = yield self._runParallel(runId, testRuns, progress)
+         fails, resultIds = yield self._runParallel(runId, spec, testRuns, progress)
       else:
-         fails, resultIds = yield self._runSequential(runId, testRuns, progress)
+         fails, resultIds = yield self._runSequential(runId, spec, testRuns, progress)
 
       returnValue((runId, resultIds))
 
 
    @inlineCallbacks
-   def _runSequential(self, runId, testRuns, progress):
+   def _runSequential(self, runId, spec, testRuns, progress):
       """
       Execute all test runs sequentially - that is for each
       testee (one after another), run the testee's set of
@@ -111,7 +111,7 @@ class FuzzingWampClient(object):
             if TestCase:
                ## run test case, let fire progress() callback and cumulate results
                ##
-               testCase = TestCase(testRun.testee)
+               testCase = TestCase(testRun.testee, spec)
                #print testCase.description
                #print testCase.expectation
                result = yield testCase.run()
@@ -131,7 +131,7 @@ class FuzzingWampClient(object):
       returnValue((fails, progressResults))
 
 
-   def _runParallel(self, runId, testRuns, progress):
+   def _runParallel(self, runId, spec, testRuns, progress):
       """
       Execute all test runs in parallel - that is run
       each testee's set of test cases sequentially

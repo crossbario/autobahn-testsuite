@@ -213,13 +213,21 @@ class WampCase2_2_x_x_Params(AttributeBag):
 @implementer(ITestCase)
 class WampCase2_2_x_x_Base:
 
-   def __init__(self, testee):
+   def __init__(self, testee, spec):
       self.testee = testee
+      self.spec = spec
       self.result = TestResult()
       self.result.passed = False
       self.result.observed = {}
       self.result.expected = {}
       self.result.log = []
+
+      if self.testee.options.has_key('rtt'):
+         self._rtt = self.testee.options['rtt']
+      elif self.spec.has_key('options') and self.spec['options'].has_key('rtt'):
+         self._rtt = self.spec['options']['rtt']
+      else:
+         self._rtt = 0.2
 
 
    def run(self):
@@ -314,7 +322,7 @@ class WampCase2_2_x_x_Base:
          ## to compare with our expectation. By default, we wait 3x the
          ## specified/default RTT.
          ##
-         wait = 3 * self.testee.options.get("rtt", 0.2)
+         wait = 3 * self._rtt
          def afterwait():
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             shutdown()
@@ -332,7 +340,7 @@ class WampCase2_2_x_x_Base:
          ## before the testee has subscribed all clients as needed.
          ## We need acknowledgement of subscribe for WAMPv2!
          ##
-         wait = 3 * self.testee.options.get("rtt", 0.2)
+         wait = 3 * self._rtt
          def afterwait():
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             test()
