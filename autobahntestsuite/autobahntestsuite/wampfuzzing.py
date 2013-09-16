@@ -19,6 +19,7 @@
 __all__ = ("FuzzingWampClient",)
 
 from zope.interface import implementer
+from zope.interface.verify import verifyObject, verifyClass
 
 from twisted.internet.defer import returnValue, \
                                    inlineCallbacks
@@ -28,7 +29,8 @@ import autobahntestsuite
 
 from autobahn.wamp import exportRpc
 
-from interfaces import ITestRunner
+from interfaces import ITestRunner, ITestDb
+from rinterfaces import RITestDb
 from testrun import TestRun, Testee
 
 
@@ -45,9 +47,12 @@ class FuzzingWampClient(object):
    MODENAME = 'fuzzingwampclient'
 
 
-   def __init__(self, testDb, caseSet, debug = False):
+   def __init__(self, testDb, debug = False):
+
+      assert(verifyObject(ITestDb, testDb))
+      assert(verifyObject(RITestDb, testDb))
+
       self._testDb = testDb
-      self._caseSet = caseSet
       self._debug = debug
 
 
@@ -56,7 +61,7 @@ class FuzzingWampClient(object):
    def run(self, specName, observers = []):
 
       specId, spec = yield self._testDb.getSpecByName(specName)
-      casesByTestee = self._caseSet.generateCasesByTestee(spec)
+      casesByTestee = yield self._testDb.generateCasesByTestee(specId)
 
       testRuns = []
       for obj in spec['testees']:
@@ -78,7 +83,7 @@ class FuzzingWampClient(object):
       print
       print "Autobahn Version          : %s" % autobahn.version
       print "AutobahnTestsuite Version : %s" % autobahntestsuite.version
-      print "WAMP Test Cases           : %d" % len(self._caseSet.Cases)
+      #print "WAMP Test Cases           : %d" % len(self._caseSet.Cases)
       print "WAMP Testees              : %d" % len(spec["testees"])
       print
       for testRun in testRuns:

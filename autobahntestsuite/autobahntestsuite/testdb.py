@@ -33,11 +33,13 @@ from autobahn.util import utcnow, newid
 from autobahn.wamp import exportRpc
 
 from interfaces import ITestDb
+from rinterfaces import RITestDb
 from testrun import TestResult
 from util import envinfo
 
 
 @implementer(ITestDb)
+@implementer(RITestDb)
 class TestDb:
    """
    sqlite3 based test database implementing ITestDb. Usually, a single
@@ -45,6 +47,9 @@ class TestDb:
    test results in the database and report generators fetch test results
    from the database. This allows to decouple application parts.
    """
+
+   URI = "http://api.testsuite.autobahn.ws/testdb/"
+
 
    def __init__(self, caseSets, dbfile = None):
 
@@ -68,9 +73,11 @@ class TestDb:
 
    def _initCaseSets(self):
       self._cs = {}
+      self._css = {}
       for cs in self._caseSets:
          if not self._cs.has_key(cs.CaseSetName):
             self._cs[cs.CaseSetName] = {}
+            self._css[cs.CaseSetName] = cs
          else:
             raise Exception("duplicate case set name")
          for c in cs.Cases:
@@ -79,20 +86,6 @@ class TestDb:
                self._cs[cs.CaseSetName][idx] = c
             else:
                raise Exception("duplicate case index")
-
-
-   def getTestCase(self, caseSetName, caseIndex):
-      if self._cs.has_key(caseSetName):
-         if self._cs[caseSetName].has_key(caseIndex):
-            return self._cs[caseSetName][caseIndex]
-      return None
-
-
-   def getTestCaseIndices(self, caseSetName):
-      if self._cs.has_key(caseSetName):
-         return sorted(self._cs[caseSetName].keys())
-      else:
-         return None
 
 
    def _createDb(self):
@@ -159,14 +152,136 @@ class TestDb:
 
 
    def _checkDb(self):
+      ## FIXME
       pass
 
 
-   def getTestCaseCategories(self, caseSet = "wamp"):
-      if caseSet == "wamp":
-         pass
-      else:
-         raise Exception("no such case set")
+   def newRun(self, specId):
+
+      def do(txn):
+         txn.execute("SELECT mode FROM testspec WHERE id = ? AND valid_to IS NULL", [specId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such spec or spec not active")
+
+         mode = res[0]
+         if not mode in ITestDb.TESTMODES:
+            raise Exception("mode '%s' invalid or not implemented" % mode)
+
+         id = newid()
+         now = utcnow()
+         env = envinfo()
+         txn.execute("INSERT INTO testrun (id, testspec_id, env, started) VALUES (?, ?, ?, ?)", [id, specId, json.dumps(env), now])
+         return id
+
+      return self._dbpool.runInteraction(do)
+
+
+   def closeRun(self, runId):
+
+      def do(txn):
+         now = utcnow()
+
+         ## verify that testrun exists and is not closed already
+         ##
+         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test run")
+         if res[1] is not None:
+            raise Exception("test run already closed")
+
+         ## close test run
+         ##
+         txn.execute("UPDATE testrun SET ended = ? WHERE id = ?", [now, runId])
+
+      return self._dbpool.runInteraction(do)
+
+
+   def generateCasesByTestee(self, specId):
+
+      def do(txn):
+
+         txn.execute("SELECT valid_to, mode, caseset, spec FROM testspec WHERE id = ?", [specId])
+         row = txn.fetchone()
+
+         if row is None:
+            raise Exception("no test specification with ID '%s'" % specId)
+         else:
+            validTo, mode, caseset, spec = row
+            if validTo is not None:
+               raise Exception("test spec no longer active")
+            if not self._css.has_key(caseset):
+               raise Exception("case set %s not loaded in database" % caseset)
+            spec = json.loads(spec)
+            res = self._css[caseset].generateCasesByTestee(spec)
+            return res
+
+      return self._dbpool.runInteraction(do)
+
+
+   def saveResult(self, runId, testRun, test, result):
+
+      def do(txn):
+         ## verify that testrun exists and is not closed already
+         ##
+         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test run")
+         if res[1] is not None:
+            raise Exception("test run already closed")
+
+         ## save test case results with foreign key to test run
+         ##
+         id = newid()
+         now = utcnow()
+
+         ci = []
+         for i in xrange(5):
+            if len(test.index) > i:
+               ci.append(test.index[i])
+            else:
+               ci.append(0)
+
+         txn.execute("""
+            INSERT INTO testresult
+               (id, testrun_id, inserted, testee, c1, c2, c3, c4, c5, duration, passed, result)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, [
+               id,
+               runId,
+               now,
+               testRun.testee.name,
+               ci[0],
+               ci[1],
+               ci[2],
+               ci[3],
+               ci[4],
+               result.ended - result.started,
+               1 if result.passed else 0,
+               result.serialize()])
+
+         ## save test case log with foreign key to test result
+         ##
+         lineno = 1
+         for l in result.log:
+            txn.execute("""
+               INSERT INTO testlog
+                  (testresult_id, lineno, timestamp, sessionidx, sessionid, line)
+                     VALUES (?, ?, ?, ?, ?, ?)
+               """, [
+               id,
+               lineno,
+               l[0],
+               l[1],
+               l[2],
+               l[3]])
+            lineno += 1
+
+         return id
+
+      return self._dbpool.runInteraction(do)
 
 
    def _checkTestSpec(self, spec):
@@ -237,6 +352,7 @@ class TestDb:
 
    @exportRpc
    def importSpec(self, spec):
+
       self._checkTestSpec(spec)
 
       name = spec['name']
@@ -337,218 +453,6 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   def newRun(self, specId):
-
-      def do(txn):
-         txn.execute("SELECT mode FROM testspec WHERE id = ? AND valid_to IS NULL", [specId])
-         res = txn.fetchone()
-         if res is None:
-            raise Exception("no such spec or spec not active")
-
-         mode = res[0]
-         if not mode in ITestDb.TESTMODES:
-            raise Exception("mode '%s' invalid or not implemented" % mode)
-
-         id = newid()
-         now = utcnow()
-         env = envinfo()
-         txn.execute("INSERT INTO testrun (id, testspec_id, env, started) VALUES (?, ?, ?, ?)", [id, specId, json.dumps(env), now])
-         return id
-
-      return self._dbpool.runInteraction(do)
-
-
-   def _saveResult_dstyle(self, runId, result):
-      """
-      Deferred style version of saveResult(). Just for checking
-      if inline deferreds trigger any issues together with ADBAPI.
-      """
-      dr = Deferred()
-      d1 = self._dbpool.runQuery("SELECT started, ended FROM testrun WHERE id = ?", [runId])
-
-      def found(res):
-         started, ended = res[0]
-         id = newid()
-         d2 = self._dbpool.runQuery("INSERT INTO testcase (id, testrun_id, result) VALUES (?, ?, ?)", [id, runId, json.dumps(result)])
-
-         def saved(res):
-            dr.callback(id)
-         d2.addCallback(saved)
-
-      d1.addCallback(found)
-      return dr
-
-
-   def saveResult(self, runId, testRun, test, result):
-
-      if False:
-         print
-         print result.passed
-         print result.expected
-         print result.observed
-         print result.started
-         print result.ended
-         print result.log
-         print
-         print test.index
-         print test.description
-         print test.expectation
-         print test.testee
-         print
-
-      def do(txn):
-         ## verify that testrun exists and is not closed already
-         ##
-         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
-         res = txn.fetchone()
-         if res is None:
-            raise Exception("no such test run")
-         if res[1] is not None:
-            raise Exception("test run already closed")
-
-         ## save test case results with foreign key to test run
-         ##
-         id = newid()
-         now = utcnow()
-
-         ci = []
-         for i in xrange(5):
-            if len(test.index) > i:
-               ci.append(test.index[i])
-            else:
-               ci.append(0)
-
-         txn.execute("""
-            INSERT INTO testresult
-               (id, testrun_id, inserted, testee, c1, c2, c3, c4, c5, duration, passed, result)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, [
-               id,
-               runId,
-               now,
-               testRun.testee.name,
-               ci[0],
-               ci[1],
-               ci[2],
-               ci[3],
-               ci[4],
-               result.ended - result.started,
-               1 if result.passed else 0,
-               result.serialize()])
-
-         ## save test case log with foreign key to test result
-         ##
-         lineno = 1
-         for l in result.log:
-            txn.execute("""
-               INSERT INTO testlog
-                  (testresult_id, lineno, timestamp, sessionidx, sessionid, line)
-                     VALUES (?, ?, ?, ?, ?, ?)
-               """, [
-               id,
-               lineno,
-               l[0],
-               l[1],
-               l[2],
-               l[3]])
-            lineno += 1
-
-         return id
-
-      return self._dbpool.runInteraction(do)
-
-
-   def closeRun(self, runId):
-
-      def do(txn):
-         now = utcnow()
-
-         ## verify that testrun exists and is not closed already
-         ##
-         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
-         res = txn.fetchone()
-         if res is None:
-            raise Exception("no such test run")
-         if res[1] is not None:
-            raise Exception("test run already closed")
-
-         ## close test run
-         ##
-         txn.execute("UPDATE testrun SET ended = ? WHERE id = ?", [now, runId])
-
-      return self._dbpool.runInteraction(do)
-
-
-   def getTestResult(self, resultId):
-
-      def do(txn):
-         txn.execute("SELECT id, testrun_id, testee, c1, c2, c3, c4, c5, passed, duration, result FROM testresult WHERE id = ?", [resultId])
-         res = txn.fetchone()
-         if res is None:
-            raise Exception("no such test result")
-         id, runId, testeeName, c1, c2, c3, c4, c5, passed, duration, data = res
-
-         caseName = "WampCase" + '.'.join([str(x) for x in [c1, c2, c3, c4, c5]])
-
-         result = TestResult()
-         result.deserialize(data)
-         result.id, result.runId, result.testeeName, result.caseName = id, runId, testeeName, caseName
-
-         result.log = []
-         txn.execute("SELECT timestamp, sessionidx, sessionid, line FROM testlog WHERE testresult_id = ? ORDER BY lineno ASC", [result.id])
-         for l in txn.fetchall():
-            result.log.append(l)
-
-         return result
-
-      return self._dbpool.runInteraction(do)
-
-
-   def getTestRunIndex(self, runId):
-
-      def do(txn):
-         txn.execute("SELECT id, testee, c1, c2, c3, c4, c5, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
-         res = txn.fetchall()
-         return [{'id': row[0],
-                  'testee': row[1],
-                  'c1': row[2],
-                  'c2': row[3],
-                  'c3': row[4],
-                  'c4': row[5],
-                  'c5': row[6],
-                  'passed': row[7] != 0,
-                  'duration': row[8]} for row in res]
-
-      return self._dbpool.runInteraction(do)
-
-
-   def getTestRunSummary(self, runId):
-
-      def do(txn):
-
-         ## verify that testrun exists and is not closed already
-         ##
-         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
-         res = txn.fetchone()
-         if res is None:
-            raise Exception("no such test run")
-         if res[1] is None:
-            print "Warning: test run not closed yet"
-
-         txn.execute("SELECT testee, SUM(passed), COUNT(*) FROM testresult WHERE testrun_id = ? GROUP BY testee", [runId])
-         res = txn.fetchall()
-         r = {}
-         for row in res:
-            testee, passed, count = row
-            r[testee] = {'name': testee,
-                         'passed': passed,
-                         'failed': count - passed,
-                         'count': count}
-         return [r[k] for k in sorted(r.keys())]
-
-      return self._dbpool.runInteraction(do)
-
-
    @exportRpc
    def getTestRuns(self, limit = 10):
 
@@ -585,5 +489,78 @@ class TestDb:
             res.append(o)
 
          return res
+
+      return self._dbpool.runInteraction(do)
+
+
+   @exportRpc
+   def getTestResult(self, resultId):
+
+      def do(txn):
+         txn.execute("SELECT id, testrun_id, testee, c1, c2, c3, c4, c5, passed, duration, result FROM testresult WHERE id = ?", [resultId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test result")
+         id, runId, testeeName, c1, c2, c3, c4, c5, passed, duration, data = res
+
+         caseName = "WampCase" + '.'.join([str(x) for x in [c1, c2, c3, c4, c5]])
+
+         result = TestResult()
+         result.deserialize(data)
+         result.id, result.runId, result.testeeName, result.caseName = id, runId, testeeName, caseName
+
+         result.log = []
+         txn.execute("SELECT timestamp, sessionidx, sessionid, line FROM testlog WHERE testresult_id = ? ORDER BY lineno ASC", [result.id])
+         for l in txn.fetchall():
+            result.log.append(l)
+
+         return result
+
+      return self._dbpool.runInteraction(do)
+
+
+   @exportRpc
+   def getTestRunIndex(self, runId):
+
+      def do(txn):
+         txn.execute("SELECT id, testee, c1, c2, c3, c4, c5, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
+         res = txn.fetchall()
+         return [{'id': row[0],
+                  'testee': row[1],
+                  'c1': row[2],
+                  'c2': row[3],
+                  'c3': row[4],
+                  'c4': row[5],
+                  'c5': row[6],
+                  'passed': row[7] != 0,
+                  'duration': row[8]} for row in res]
+
+      return self._dbpool.runInteraction(do)
+
+
+   @exportRpc
+   def getTestRunSummary(self, runId):
+
+      def do(txn):
+
+         ## verify that testrun exists and is not closed already
+         ##
+         txn.execute("SELECT started, ended FROM testrun WHERE id = ?", [runId])
+         res = txn.fetchone()
+         if res is None:
+            raise Exception("no such test run")
+         if res[1] is None:
+            print "Warning: test run not closed yet"
+
+         txn.execute("SELECT testee, SUM(passed), COUNT(*) FROM testresult WHERE testrun_id = ? GROUP BY testee", [runId])
+         res = txn.fetchall()
+         r = {}
+         for row in res:
+            testee, passed, count = row
+            r[testee] = {'name': testee,
+                         'passed': passed,
+                         'failed': count - passed,
+                         'count': count}
+         return [r[k] for k in sorted(r.keys())]
 
       return self._dbpool.runInteraction(do)

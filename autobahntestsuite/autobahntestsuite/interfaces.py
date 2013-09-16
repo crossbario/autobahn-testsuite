@@ -28,28 +28,7 @@ class ITestDb(Interface):
    for test cases, results and related data.
    """
 
-   def importSpec(spec):
-      """
-      Import a test specification into the test database.
-
-      Returns a pair `(op, id)`, where `op` specifies the operation that
-      actually was carried out:
-
-          - None: unchanged
-          - 'U': updated
-          - 'I': inserted
-
-      The `id` is the new (or existing) database object ID for the spec.
-      """
-
-
-   def getSpecByName(name):
-      """
-      Find a (currently active, if any) test specification by name.
-      """
-
-
-   def newRun(mode, spec):
+   def newRun(specId):
       """
       Create a new testsuite run.
 
@@ -60,16 +39,6 @@ class ITestDb(Interface):
       :returns Deferred -- The test run ID.
       """
 
-   def saveResult(runId, result):
-      """
-      Saves a test result in the database.
-
-      :param runId: The test run ID.
-      :type runId: str
-      :param result: The test result. An instance of TestResult.
-      :type result: object
-      :returns Deferred -- The test result ID.
-      """
 
    def closeRun(runId):
       """
@@ -80,53 +49,43 @@ class ITestDb(Interface):
       :type testRunId: str
       """
 
-   def getTestRuns(limit = 10):
+
+   def generateCasesByTestee(specId):
       """
-      Return a list of latest testruns.
       """
 
-   def getResult(resultId):
-      """
-      Get a single test result by ID.
 
-      :param resultId: The ID of the test result to retrieve.
-      :type resultId: str
-      :returns Deferred -- A single instance of TestResult.
+   def saveResult(runId, testRun, test, result):
       """
-
-   def getResults(runId):
-      """
-      Get all test results that were ran under the test
-      run with the given ID.
+      Saves a test result in the database.
 
       :param runId: The test run ID.
       :type runId: str
-      :returns Deferred -- A list of TestResult instances.
+      :param result: The test result. An instance of TestResult.
+      :type result: object
+      :returns Deferred -- The test result ID.
       """
 
-   def registerResultFile(resultId, type, sha1, path):
-      """
-      When a report file generator has produced it's output
-      and created (or recreated/modified) a file, it should
-      register the file location via this function.
+   # def registerResultFile(resultId, type, sha1, path):
+   #    """
+   #    When a report file generator has produced it's output
+   #    and created (or recreated/modified) a file, it should
+   #    register the file location via this function.
 
-      :param resultId: The ID of the test result this file was generated for.
-      :type resultId: str
-      :param type: The type of file produced (FIXME: ['html', 'json'] ??)
-      :type type: FIXME
-      :param sha1: The SHA-1 computed over the generated octet stream.
-      :type sha1 str
-      :param path: The filesystem path to the generated file.
-      :type path: str
-      """
+   #    :param resultId: The ID of the test result this file was generated for.
+   #    :type resultId: str
+   #    :param type: The type of file produced (FIXME: ['html', 'json'] ??)
+   #    :type type: FIXME
+   #    :param sha1: The SHA-1 computed over the generated octet stream.
+   #    :type sha1 str
+   #    :param path: The filesystem path to the generated file.
+   #    :type path: str
+   #    """
 
 ITestDb.TESTMODES = set(['fuzzingwampclient', 'fuzzingclient'])
 """
 The list of implemented test modes.
 """
-
-
-#def computeLink(resultId)
 
 
 class IReportGenerator(Interface):

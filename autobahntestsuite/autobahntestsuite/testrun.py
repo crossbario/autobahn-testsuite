@@ -60,6 +60,7 @@ class TestRun:
    """
 
    def __init__(self, testee, cases, randomize = False):
+      assert(isinstance(testee, Testee))
       self.testee = testee
       _cases = cases[:]
       if randomize:

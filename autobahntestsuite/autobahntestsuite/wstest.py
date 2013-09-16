@@ -245,7 +245,7 @@ class WsTestRunner(object):
       self.mode = str(self.options['mode'])
       self.testData = self._loadTestData()
 
-      
+
    def startService(self):
 
       if self.mode == "import":
@@ -297,7 +297,7 @@ class WsTestRunner(object):
 
       testSet = WampCaseSet()
       testDb = TestDb([testSet])
-      testRunner = FuzzingWampClient(testDb, testSet)
+      testRunner = FuzzingWampClient(testDb)
 
       runId, resultIds = yield testRunner.run(specName)
 
@@ -389,9 +389,8 @@ class WsTestRunner(object):
       #app.debug = True
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
-      app.testset = WampCaseSet()
-      app.db = TestDb([app.testset])
-      app.runner = FuzzingWampClient(app.db, app.testset)
+      app.db = TestDb([WampCaseSet()])
+      app.runner = FuzzingWampClient(app.db)
 
 
       @app.route('/')
@@ -535,7 +534,7 @@ class WsTestRunner(object):
 
          testSet = WampCaseSet()
          testDb = TestDb([testSet])
-         testRunner = FuzzingWampClient(testDb, testSet)
+         testRunner = FuzzingWampClient(testDb)
 
          runId, resultIds = yield testRunner.run(spec)
 
@@ -622,7 +621,7 @@ class WsTestRunner(object):
 
    def startWsPerfControl(self):
       wsuri = str(self.options['wsuri'])
-      
+
       spec = self._loadSpec()
       factory = WsPerfControlFactory(wsuri)
       factory.spec = spec
@@ -699,7 +698,7 @@ class WsTestRunner(object):
       spec = json.loads(open(spec_filename).read())
       return spec
 
-   
+
    def _setupSite(self, prefix):
       webdir = File(pkg_resources.resource_filename("autobahntestsuite",
                                                     "web/%s" % prefix))
@@ -732,7 +731,7 @@ class WsTestRunner(object):
       cert = str(self.options['cert'])
       return ssl.DefaultOpenSSLContextFactory(key, cert)
 
-   
+
    def _loadTestData(self):
       test_data = {
          'gutenberg_faust':
