@@ -37,7 +37,6 @@ from testrun import TestResult
 from util import envinfo
 
 
-
 @implementer(ITestDb)
 class TestDb:
    """
@@ -158,14 +157,6 @@ class TestDb:
 
       ## add: testee, testcase, testspec?
 
-   ## Cases are identified by "caseSetName", a string, e.g. "wamp"
-   ## and a "caseIndex", e.g. [2, 2, 5, 11].
-   ##
-   ## Testees are identified by
-   ##
-   ## hostname, IP, port
-   ## WAMP ident
-   ## specname
 
    def _checkDb(self):
       pass
@@ -595,4 +586,3 @@ class TestDb:
          return res
 
       return self._dbpool.runInteraction(do)
-

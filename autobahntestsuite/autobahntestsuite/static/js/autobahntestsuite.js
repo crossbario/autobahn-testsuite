@@ -153,7 +153,7 @@ function test_getSpecs() {
             console.log("Spec Meta", i, spec);
             test_getSpec(i, spec.id);
          }
-      },
+      },      
       ab.log
    );
 }
