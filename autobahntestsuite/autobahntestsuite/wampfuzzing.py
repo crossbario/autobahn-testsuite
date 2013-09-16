@@ -62,7 +62,13 @@ class FuzzingWampClient(object):
       for obj in spec['testees']:
          testee = Testee(**obj)
          cases = casesByTestee.get(testee.name, [])
-         testRun = TestRun(testee, cases, randomize = spec.get('randomize', False))
+         if testee.options.has_key('randomize'):
+            randomize = testee.options['randomize']
+         elif spec.has_key('options') and spec['options'].has_key('randomize'):
+            randomize = spec['options']['randomize']
+         else:
+            randomize = False
+         testRun = TestRun(testee, cases, randomize = randomize)
          testRuns.append(testRun)
 
       runId = yield self._testDb.newRun(specId)

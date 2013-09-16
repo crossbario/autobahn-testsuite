@@ -2,11 +2,11 @@
    "name": "Local WAMP 1",
    "desc": "Quick test case set targeting a locally running AutobahnPython based WAMP server.",
 
-   "mode": "fuzzingwampclient",  
+   "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["2.3.*"],
-   "exclude": ["2.3.4.*"],
+   "cases": ["*"],
+   "exclude": [],
 
    "options": {
       "rtt": 0.05,
@@ -19,8 +19,9 @@
          "name": "AutobahnPython",
          "desc": "This runs 'testeewampserver' from wstest.",
          "url": "ws://127.0.0.1:9001",
-         "exclude": ["2.3.5"],
+         "exclude": [],
          "options":  {
+            "randomize": false,
             "rtt": 0.01
          }
       }

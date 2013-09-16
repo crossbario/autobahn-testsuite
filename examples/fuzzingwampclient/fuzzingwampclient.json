@@ -2,7 +2,7 @@
    "name": "Local AB/WebMQ",
    "desc": "Quick test case set targeting local WAMP servers 'AutobahnPython' and 'WebMQ'.",
 
-   "mode": "fuzzingwampclient",  
+   "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
    "cases": ["*"],
@@ -21,6 +21,7 @@
          "url": "ws://127.0.0.1:9001",
          "exclude": ["3.*"],
          "options":  {
+            "randomize": false,
             "rtt": 0.005
          }
       },

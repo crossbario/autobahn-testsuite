@@ -200,7 +200,8 @@ class TestDb:
                               'authSecret': (False, [str, unicode, types.NoneType]),
                               'authExtra': (False, [dict])}
 
-      sig_spec_testee_options = {'rtt': (False, [int, float])}
+      sig_spec_testee_options = {'rtt': (False, [int, float]),
+                                'randomize': (False, [bool])}
 
 
       def verifyDict(obj, sig, signame):
@@ -264,7 +265,7 @@ class TestDb:
          else:
             beforeId = None
             op = 'I'
-            
+
          txn.execute("INSERT INTO testspec (id, before_id, valid_from, name, desc, mode, caseset, spec) VALUES (?, ?, ?, ?, ?, ?, ?, ?)", [id, beforeId, now, name, desc, mode, caseset, data])
          return (op, id, name)
 
