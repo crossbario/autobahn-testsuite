@@ -80,6 +80,11 @@ class ITestDb(Interface):
       :type testRunId: str
       """
 
+   def getTestRuns(limit = 10):
+      """
+      Return a list of latest testruns.
+      """
+
    def getResult(resultId):
       """
       Get a single test result by ID.

@@ -321,7 +321,10 @@ class WsTestRunner(object):
       """
       specFilename = os.path.abspath(specFilename)
       print "Importing spec from %s ..." % specFilename
-      specData = open(specFilename).read()
+      try:
+         spec = json.loads(open(specFilename).read())
+      except Exception, e:
+         raise Exception("Error: invalid JSON data - %s" % e)
 
       ## FIXME: this should allow to import not only WAMP test specs,
       ## but WebSocket test specs as well ..
@@ -341,7 +344,7 @@ class WsTestRunner(object):
       def failed(failure):
          print "Error: spec import failed - %s." % failure.value
 
-      d = db.importSpec(specData)
+      d = db.importSpec(spec)
       d.addCallbacks(done, failed)
       return d
 

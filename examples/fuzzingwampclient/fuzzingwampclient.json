@@ -1,5 +1,5 @@
 {
-   "name": "Local WAMP 1",
+   "name": "Local AB/WebMQ",
    "desc": "Quick test case set targeting local WAMP servers 'AutobahnPython' and 'WebMQ'.",
 
    "mode": "fuzzingwampclient",  

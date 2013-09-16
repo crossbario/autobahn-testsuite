@@ -81,7 +81,6 @@ class TestDb:
             else:
                raise Exception("duplicate case index")
 
-# casesetname -> [{header: {}, children: [{header: {}, children: []}]}]
 
    def getTestCase(self, caseSetName, caseIndex):
       if self._cs.has_key(caseSetName):
@@ -244,17 +243,9 @@ class TestDb:
          raise Exception("invalid caseset '%s' in test specification" % spec['caseset'])
 
 
-   def _loadTestSpec(self, specData):
-      try:
-         spec = json.loads(specData)
-      except Exception, e:
-         raise Exception("Error: invalid JSON data - %s" % e)
+   @exportRpc
+   def importSpec(self, spec):
       self._checkTestSpec(spec)
-      return spec
-
-
-   def importSpec(self, specData):
-      spec = self._loadTestSpec(specData)
 
       name = spec['name']
       mode = spec['mode']
@@ -289,7 +280,40 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   def getSpec(self, specId):
+   @exportRpc
+   def getSpecs(self, activeOnly = True):
+
+      def do(txn):
+
+         if activeOnly:
+            txn.execute("""
+               SELECT id, before_id, valid_from, valid_to, name, desc, mode, caseset
+                  FROM testspec WHERE valid_to IS NULL ORDER BY name ASC""")
+         else:
+            txn.execute("""
+               SELECT id, before_id, valid_from, valid_to, name, desc, mode, caseset
+                  FROM testspec ORDER BY name ASC, valid_from DESC""")
+
+         res = []
+         for row in txn.fetchall():
+            o = {'id': row[0],
+                 'beforeId': row[1],
+                 'validFrom': row[2],
+                 'validTo': row[3],
+                 'name': row[4],
+                 'desc': row[5],
+                 'mode': row[6],
+                 'caseset': row[7]
+                 }
+            res.append(o)
+
+         return res
+
+      return self._dbpool.runInteraction(do)
+
+
+   @exportRpc
+   def getSpec(self, specId): # Status: OK.
 
       def do(txn):
 
@@ -304,7 +328,8 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   def getSpecByName(self, specName):
+   @exportRpc
+   def getSpecByName(self, specName): # Status: OK.
 
       def do(txn):
 

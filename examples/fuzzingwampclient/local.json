@@ -5,8 +5,8 @@
    "mode": "fuzzingwampclient",  
 
    "caseset": "wamp",
-   "cases": ["*"],
-   "exclude": [],
+   "cases": ["2.3.*"],
+   "exclude": ["2.3.4.*"],
 
    "options": {
       "rtt": 0.05,
@@ -19,7 +19,7 @@
          "name": "AutobahnPython",
          "desc": "This runs 'testeewampserver' from wstest.",
          "url": "ws://127.0.0.1:9001",
-         "exclude": ["3.*"],
+         "exclude": ["2.3.5"],
          "options":  {
             "rtt": 0.01
          }
