@@ -332,7 +332,9 @@ class WampCase2_2_x_x_Base:
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             shutdown()
          self.result.log.append((perf_counter(), None, None, "Sleeping for <strong>%s ms</strong> ..." % (1000. * wait)))
-         reactor.callLater(wait, afterwait)
+         def beforewait():
+            reactor.callLater(wait, afterwait)
+         reactor.callLater(0, beforewait)
 
 
       def launch(_):
@@ -350,7 +352,9 @@ class WampCase2_2_x_x_Base:
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             test()
          self.result.log.append((perf_counter(), None, None, "Sleeping for  <strong>%s ms</strong> ..." % (1000. * wait)))
-         reactor.callLater(wait, afterwait)
+         def beforewait():
+            reactor.callLater(wait, afterwait)
+         reactor.callLater(0, beforewait)
 
 
       def error(err):
