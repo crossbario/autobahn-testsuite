@@ -5,25 +5,45 @@
 
    <table class="wamplog" style="width: 80%">
       <tr>
-         <td style="">&nbsp;</td>
-         <td style="">Started</td>
-         <td style="">Run Mode</td>
+         <td style="">Fuzzing Mode</td>
          <td style="">Case Set</td>
          <td style="">Spec</td>
+         <td style="">Started</td>
+         <td style="">Status</td>
          <td style="">Testees</td>
-         <td style="">Tests Passed</td>
-         <td style="">Tests Failed</td>
+         <td style="">Tests</td>
+         <td style="">&nbsp;</td>
       </tr>
       {% for testrun in testruns %}
       <tr>
-         <td><a href="/testrun/{{ testrun.id }}">Goto test run</a></td>
-         <td>{{ testrun.started }} </td>
          <td>{{ testrun.runMode }}</td>
          <td>{{ testrun.caseSetName }}</td>
          <td><a href="/testspec/{{ testrun.specId }}">{{ testrun.specName }}</a></td>
-         <td>{{ testrun.testeeCount }}</td>
-         <td>{{ testrun.passed }} passed</td>
-         <td>{{ testrun.total - testrun.passed }} failed</td>
+         <td>{{ testrun.started }}</td>
+         <td>
+            {% if testrun.ended %}
+            Completed in {{ testrun.duration }} s.
+            {% else %}
+            Running  since {{ testrun.duration }} s ..
+            {% endif %}
+         </td>
+         <td>
+            {{ testrun.testeeCount }}
+            {% if testrun.testeeFailedCount > 0 %}
+            ({{ testrun.testeeFailedCount }} failed)
+            {% else %}
+            (ok)
+            {% endif %}
+         </td>
+         <td>
+            {{ testrun.total }}
+            {% if testrun.failed > 0 %}
+            ({{ testrun.failed }} failed)
+            {% else %}
+            (ok)
+            {% endif %}
+         </td>
+         <td><a href="/testrun/{{ testrun.id }}">Goto test run</a></td>
       </tr>
       {% endfor %}
    </table>

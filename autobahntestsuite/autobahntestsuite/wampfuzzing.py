@@ -18,12 +18,15 @@
 
 __all__ = ("FuzzingWampClient",)
 
-from twisted.internet.defer import returnValue, inlineCallbacks
+from zope.interface import implementer
+
+from twisted.internet.defer import returnValue, \
+                                   inlineCallbacks
 
 import autobahn
 import autobahntestsuite
 
-from zope.interface import implementer
+from autobahn.wamp import exportRpc
 
 from interfaces import ITestRunner
 from testrun import TestRun, Testee
@@ -49,6 +52,7 @@ class FuzzingWampClient(object):
 
 
    @inlineCallbacks
+   @exportRpc
    def run(self, specName, observers = []):
 
       specId, spec = yield self._testDb.getSpecByName(specName)
@@ -77,7 +81,7 @@ class FuzzingWampClient(object):
 
       def progress(runId, testRun, test, result, remaining):
          if test:
-            print "%s%s (%d tests remaining)" % ("PASSED   : " if result.passed else "FAILED  : ", test.__class__.__name__, remaining)
+            print "%s - %s%s (%d tests remaining)" % (testRun.testee.name, "PASSED   : " if result.passed else "FAILED  : ", test.__class__.__name__, remaining)
             return self._testDb.saveResult(runId, testRun, test, result)
          else:
             print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
@@ -86,6 +90,8 @@ class FuzzingWampClient(object):
          fails, resultIds = yield self._runParallel(runId, spec, testRuns, progress)
       else:
          fails, resultIds = yield self._runSequential(runId, spec, testRuns, progress)
+
+      yield self._testDb.closeRun(runId)
 
       returnValue((runId, resultIds))
 

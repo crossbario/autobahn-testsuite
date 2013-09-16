@@ -179,7 +179,7 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
                                   )
 
     def initializePubSub(self):
-        self.registerForPubSub("http://example.com/simple")
+        self.registerForPubSub("http://example.com/simple", True)
         self.registerForPubSub("http://example.com/foobar")
         #self.registerForPubSub("http://example.com/event#", True)
         #self.registerForPubSub("http://example.com/event/simple")

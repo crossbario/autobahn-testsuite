@@ -139,6 +139,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
    def main(self):
       subscribeTopics = self.test.params.peers[self.factory.peerIndex]
       for topic in subscribeTopics:
+         topic += self.factory.test._uriSuffix
          self.subscribe(topic, self.onEvent)
          self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "Subscribed to <pre>%s</pre>" % topic))
       self.factory.onReady.callback(self.session_id)
@@ -209,6 +210,8 @@ class WampCase2_2_x_x_Params(AttributeBag):
                  'expectedReceivers']
 
 
+import random
+
 
 @implementer(ITestCase)
 class WampCase2_2_x_x_Base:
@@ -221,6 +224,8 @@ class WampCase2_2_x_x_Base:
       self.result.observed = {}
       self.result.expected = {}
       self.result.log = []
+
+      self._uriSuffix = '#' + str(random.randint(0, 10000))
 
       if self.testee.options.has_key('rtt'):
          self._rtt = self.testee.options['rtt']
@@ -264,12 +269,12 @@ class WampCase2_2_x_x_Base:
          expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
          for r in expectedReceivers:
             for p in self.params.eventPayloads:
-               e = (self.params.publicationTopic, p)
+               e = (self.params.publicationTopic + self._uriSuffix, p)
                self.result.expected[r.proto.session_id].append(e)
 
          publisherPeerIndex = 0
          publisher = self.clients[publisherPeerIndex]
-         topic = self.params.publicationTopic
+         topic = self.params.publicationTopic + self._uriSuffix
          payloads = self.params.eventPayloads
          
          ## map exclude indices to session IDs
@@ -369,7 +374,7 @@ class WampCase2_2_x_x_Base:
             print "Client errors", clientErrors
          else:
             passed = json.dumps(self.result.observed) == json.dumps(self.result.expected)
-            if not passed:
+            if False and not passed:
                print
                print "EXPECTED"
                print self.result.expected

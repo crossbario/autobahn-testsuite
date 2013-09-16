@@ -538,15 +538,16 @@ class TestDb:
       def do(txn):
 
          txn.execute("""
-            SELECT r.id, s.id, s.name, s.mode, s.caseset, r.started, r.ended, e.testee_count, e.passed, e.total
+            SELECT r.id, s.id, s.name, s.mode, s.caseset, r.started, r.ended, e.testee_count, e.testee_failed_count, e.passed, e.total
                FROM testrun r
                   INNER JOIN testspec s ON r.testspec_id = s.id
                      LEFT JOIN (
                         SELECT testrun_id,
                                COUNT(DISTINCT testee) testee_count,
+                               COUNT(DISTINCT (CASE WHEN passed = 0 THEN testee ELSE NULL END)) testee_failed_count,
                                SUM(passed) AS passed,
                                COUNT(*) AS total
-                           FROM testresult
+                           FROM testresult x
                               GROUP BY testrun_id) e ON r.id = e.testrun_id
                ORDER BY r.started DESC LIMIT ?""", [limit])
 
@@ -560,8 +561,9 @@ class TestDb:
                  'started': row[5],
                  'ended': row[6],
                  'testeeCount': row[7],
-                 'passed': row[8],
-                 'total': row[9]
+                 'testeeFailedCount': row[8],
+                 'passed': row[9],
+                 'total': row[10]
                  }
             res.append(o)
 

@@ -17,6 +17,7 @@
 ###############################################################################
 
 import sys, os, json, pkg_resources, uuid
+from datetime import datetime
 from pprint import pprint
 
 from twisted.python import log, usage
@@ -203,6 +204,7 @@ class WsTestWampProtocol(WampServerProtocol):
 
    def onSessionOpen(self):
       self.registerForRpc(self.factory._testDb, "http://api.testsuite.autobahn.ws/testdb/")
+      self.registerForRpc(self.factory._testRunner, "http://api.testsuite.autobahn.ws/testrunner/")
 
 
 class WsTestWampFactory(WampServerFactory):
@@ -382,20 +384,34 @@ class WsTestRunner(object):
 
       app = klein.Klein()
       #app.debug = True
-
-      testSet = WampCaseSet()
-      app.db = TestDb([testSet])
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
-      print envinfo()
+      app.testset = WampCaseSet()
+      app.db = TestDb([app.testset])
+      app.runner = FuzzingWampClient(app.db, app.testset)
+
 
       @app.route('/')
       @inlineCallbacks
       def page_home(request):
-         testruns = yield app.db.getTestRuns()
+         testruns = yield app.db.getTestRuns(limit = 20)
+         rm = {'fuzzingwampclient': 'WAMP/client'}
+         cs = {'wamp': 'WAMP'}
          for tr in testruns:
-            tr['started'] = pprint_timeago(parseutc(tr['started']))
-            tr['ended'] = pprint_timeago(parseutc(tr['ended']))
+            started = parseutc(tr['started'])
+            ended = parseutc(tr['ended'])
+            endedOrNow = ended if ended else datetime.utcnow()
+            duration = (endedOrNow - started).seconds
+            tr['duration'] = duration
+
+            if started:
+               tr['started'] = pprint_timeago(started)
+            if ended:
+               tr['ended'] = pprint_timeago(ended)
+
+            tr['failed'] = tr['total'] - tr['passed']
+            tr['runMode'] = rm[tr['runMode']]
+            tr['caseSetName'] = cs[tr['caseSetName']]
          page = app.templates.get_template('index.html')
          returnValue(page.render(testruns = testruns))
 
@@ -460,6 +476,7 @@ class WsTestRunner(object):
       wamp_factory.startFactory()
       wamp_factory.protocol = WsTestWampProtocol
       wamp_factory._testDb = app.db
+      wamp_factory._testRunner = app.runner
       wamp_resource = WebSocketResource(wamp_factory)
 
       ## we need to wrap stuff, since the Klein Twisted Web resource
