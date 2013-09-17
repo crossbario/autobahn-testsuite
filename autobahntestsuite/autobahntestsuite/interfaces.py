@@ -187,10 +187,13 @@ class ITestRunObserver(Interface):
 class ITestCase(Interface):
    """
    """
-   name = Attribute("""Test case name.""")
+   index = Attribute("""Test case index.""")
    description = Attribute("""Test case description.""")
    expectation = Attribute("""Test case expectation.""")
+   params = Attribute("""Test case parameters.""")
 
    def run():
       """
+      Run the test case. Returns a deferred that provides an instance
+      of TestResult when successful.
       """

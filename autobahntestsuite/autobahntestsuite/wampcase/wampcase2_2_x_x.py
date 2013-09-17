@@ -460,9 +460,18 @@ class WampCase2_2_x_x_Base:
          for pl in payloads:
 
             if self.params.publicationMethod == 0:
+
+               ## publish using standard WAMP event publication
+               ##
                publisher.proto.publish(topic, pl, **args)
+
             elif self.params.publicationMethod == 1:
+
+               ## publish indirectly by instructing the peer to
+               ## dispatch an event
+               ##
                publisher.proto.call("http://api.testsuite.wamp.ws/testee/control#dispatch", topic, pl, args)
+
             else:
                raise Exception("no such publication method: %s" % self.params.publicationMethod)
 
@@ -643,8 +652,12 @@ the sessions %s""" % ', '.join(['<strong>%s</strong>' % x for x in params.expect
    return res
 
 
-
+## standard WAMP publication
+##
 Cases.extend(generate_WampCase2_2_x_x_classes((2, 1), SETTINGS0, PAYLOADS0, 0))
 Cases.extend(generate_WampCase2_2_x_x_classes((2, 2), SETTINGS0, PAYLOADS0, 0))
+
+## peer-initiated event dispatching
+##
 Cases.extend(generate_WampCase2_2_x_x_classes((2, 3), SETTINGS1, PAYLOADS1, 1))
 Cases.extend(generate_WampCase2_2_x_x_classes((2, 4), SETTINGS1, PAYLOADS1, 1))
