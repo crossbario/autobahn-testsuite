@@ -69,7 +69,8 @@ class FuzzingWampClient(object):
       casesByTestee = yield self._testDb.generateCasesByTestee(specId)
 
       def save(runId, testRun, testCase, result, remaining):
-         self._testDb.saveResult(runId, testRun, testCase, result, saveResults)
+         if testCase:
+            self._testDb.saveResult(runId, testRun, testCase, result, saveResults)
 
       if saveResults:
          observers.append(save)
@@ -141,9 +142,6 @@ class FuzzingWampClient(object):
                ##
                testCase = TestCase(testRun.testee, spec)
                result = yield testCase.run()
-               if False:
-                  for time, sid, msg in result.log:
-                     print time, sid, msg
                if not result.passed:
                   fails += 1
                pres = yield progress(runId, testRun, testCase, result, testRun.remaining())

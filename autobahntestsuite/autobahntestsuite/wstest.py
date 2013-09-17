@@ -20,6 +20,8 @@ import sys, os, json, pkg_resources, uuid
 from datetime import datetime
 from pprint import pprint
 
+from zope.interface.verify import verifyObject, verifyClass
+
 from twisted.python import log, usage
 from twisted.internet import reactor
 from twisted.internet.defer import inlineCallbacks, Deferred, returnValue
@@ -55,7 +57,7 @@ from wamptestserver import WampTestServerFactory
 from wamptestee import TesteeWampServerProtocol
 from massconnect import MassConnectTest
 from testdb import TestDb
-from interfaces import ITestDb
+from interfaces import ITestDb, ITestRunner
 from wampcase import WampCaseSet
 from util import Tabify, envinfo, pprint_timeago
 
@@ -211,9 +213,12 @@ class WsTestWampFactory(WampServerFactory):
 
    protocol = WsTestWampProtocol
 
-   #def __init__(self, testDb, url):
-   #   WampServerFactory.__init__(self, url)
-   #   self._testDb = testDb
+   def __init__(self, testDb, testRunner, url, debug = False):
+      assert(verifyObject(ITestDb, testDb))
+      assert(verifyObject(ITestRunner, testRunner))
+      WampServerFactory.__init__(self, url, debugWamp = debug)
+      self._testDb = testDb
+      self._testRunner = testRunner
 
 
 
@@ -305,7 +310,7 @@ class WsTestRunner(object):
          else:
             print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
 
-      runId, resultIds = yield testRunner.run(specName, [progress])
+      runId, resultIds = yield testRunner.runAndObserve(specName, observers = [progress])
 
       print
       print "Tests finished: run ID %s, result IDs %d" % (runId, len(resultIds))
@@ -485,12 +490,8 @@ class WsTestRunner(object):
       ##
       static_resource = File("autobahntestsuite/static")
 
-      #wamp_factory = WsTestWampFactory(app.db, "ws://localhost:%d" % port)
-      wamp_factory = WampServerFactory("ws://localhost:%d" % port, debugWamp = True)
+      wamp_factory = WsTestWampFactory(app.db, app.runner, "ws://localhost:%d" % port, debug = debug)
       wamp_factory.startFactory()
-      wamp_factory.protocol = WsTestWampProtocol
-      wamp_factory._testDb = app.db
-      wamp_factory._testRunner = app.runner
       wamp_resource = WebSocketResource(wamp_factory)
 
       ## we need to wrap stuff, since the Klein Twisted Web resource

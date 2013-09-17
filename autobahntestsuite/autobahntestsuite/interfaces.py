@@ -21,6 +21,11 @@ __all__ = ('ITestDb', 'IReportGenerator', )
 import zope
 from zope.interface import Interface, Attribute
 
+class ICaseSet(Interface):
+   """
+   """
+   pass
+
 
 class ITestDb(Interface):
    """
@@ -142,6 +147,8 @@ class IReportGenerator(Interface):
       """
 
 
+
+
 class ITestRun(Interface):
    """
    """
@@ -168,13 +175,11 @@ class ITestRun(Interface):
       """
 
 
-
-
 class ITestRunObserver(Interface):
    """
    """
 
-   def progress(runId, testRun, test, result, remaining):
+   def progress(runId, testRun, testCase, result, remaining):
       """
       """
 
