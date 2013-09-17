@@ -25,6 +25,14 @@ Cases = []
 
 #### BEGIN OF CONFIG
 
+
+###############################################################################
+##
+##   WampCase 2.1.*
+##
+###############################################################################
+
+
 ## the topic our test publisher will publish to
 ##
 TOPIC_PUBLISHED_TO = "http://example.com/simple"
@@ -33,30 +41,17 @@ TOPIC_PUBLISHED_TO = "http://example.com/simple"
 ##
 TOPIC_NOT_PUBLISHED_TO = "http://example.com/foobar"
 
+## topic that we will publish to, but that is not
+## reigstered on the testee, and hence no events
+## shalle be dispatched
+##
+TOPIC_NOT_REGISTERED = "http://example.com/barbaz"
+
 
 ## for each peer, list of topics the peer subscribes to
 ## the publisher is always the first peer in this list
 ##
-PEERSET1 = [
-   [TOPIC_PUBLISHED_TO],
-   [TOPIC_PUBLISHED_TO]
-]
-
-## these settings control the options the publisher uses
-## during publishing - see WampCase2_2_x_x_Params
-## and what the test case expects for success
-##
-SETTINGS1 = [
-# (peers, publicationTopic, excludeMe, exclude, eligible, expectedReceivers)
-   (PEERSET1, TOPIC_PUBLISHED_TO, None, [], None, [1]),
-   (PEERSET1, TOPIC_PUBLISHED_TO, True, [], None, [1]),
-   (PEERSET1, TOPIC_PUBLISHED_TO, False, [], None, [0, 1]),
-   (PEERSET1, TOPIC_PUBLISHED_TO, False, [0], None, [1]),
-   (PEERSET1, TOPIC_PUBLISHED_TO, None, [1,], None, [0]),
-   (PEERSET1, TOPIC_PUBLISHED_TO, None, [0, 1], None, []),
-]
-
-PEERSET2 = [
+PEERSET0_1 = [
    [TOPIC_PUBLISHED_TO],
    [TOPIC_PUBLISHED_TO],
    [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
@@ -64,24 +59,54 @@ PEERSET2 = [
    []
 ]
 
-SETTINGS2 = [
-   (PEERSET2, TOPIC_PUBLISHED_TO, None, [], None, [1, 2]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, True, [], None, [1, 2]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, False, [], None, [0, 1, 2]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, False, [0], None, [1, 2]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, None, [2], None, [0, 1]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, None, [1, 2], None, [0]),
-   (PEERSET2, TOPIC_PUBLISHED_TO, None, [0, 1, 2], None, []),
+PEERSET0_2 = [
+   [],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
+   [TOPIC_NOT_PUBLISHED_TO],
+   []
 ]
 
-SETTINGS = SETTINGS1 + SETTINGS2
+PEERSET0_3 = [
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO, TOPIC_NOT_PUBLISHED_TO],
+   [TOPIC_NOT_PUBLISHED_TO],
+   []
+]
 
-## The event payloads the publisher sends in one session.
-##
-## Note: be aware of JSON roundtripping "issues" like
-##    (ujson.loads(ujson.dumps(0.1234)) == 0.1234) => False
-##
-PAYLOADS = [
+PEERSET0_4 = [
+   [TOPIC_NOT_REGISTERED],
+   [TOPIC_NOT_REGISTERED],
+   [TOPIC_NOT_REGISTERED, TOPIC_NOT_PUBLISHED_TO],
+   [TOPIC_NOT_PUBLISHED_TO],
+   []
+]
+
+PEERSET0_5 = [
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO]
+]
+
+SETTINGS0 = [
+## (peers,      publicationTopic,     excludeMe, exclude, eligible, expectedReceivers)
+   (PEERSET0_1, TOPIC_PUBLISHED_TO,   None,      None,    None,     [1, 2]),
+   (PEERSET0_2, TOPIC_PUBLISHED_TO,   None,      None,    None,     [1, 2]),
+   (PEERSET0_3, TOPIC_NOT_REGISTERED, None,      None,    None,     []),
+   (PEERSET0_4, TOPIC_NOT_REGISTERED, None,      None,    None,     []),
+   (PEERSET0_5, TOPIC_PUBLISHED_TO,   None,      None,    None,     [1, 2, 3, 4, 5, 6, 7, 8, 9]),
+]
+
+
+PAYLOADS0 = [
    [None],
    [100],
    [-0.248], # value has exact representation in _binary_ float (JSON is IEEE binary)
@@ -90,9 +115,149 @@ PAYLOADS = [
    [True],
    [False],
    [666, 23, 999],
-   [{}],
+   [{}, [], None],
    [100, "hello", {u'foo': u'bar'}, [1, 2, 3], ["hello", 20, {'baz': 'poo'}]]
 ]
+
+
+###############################################################################
+##
+##   WampCase 2.2.*
+##
+###############################################################################
+
+
+TOPIC_PUBLISHED_TO = "http://example.com/simple"
+
+
+PEERSET1 = [
+   [TOPIC_PUBLISHED_TO],
+   [TOPIC_PUBLISHED_TO]
+]
+
+
+SETTINGS1 = [
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      None,    None,     [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      None,    None,     [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     None,    None,     [0, 1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [],      None,     [0, 1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [],      None,     [0, 1]), # exclude has precedence over excludeMe !
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [],      None,     [0, 1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0],     None,     [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0],     None,     [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0],     None,     [1]), # exclude has precedence over excludeMe !
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [1],     None,     [0]), # exclude has precedence over excludeMe !
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [1],     None,     [0]), # exclude has precedence over excludeMe !
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [1],     None,     [0]), # exclude has precedence over excludeMe !
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0, 1],  None,     []), # exclude has precedence over excludeMe !
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0, 1],  None,     []), # exclude has precedence over excludeMe !
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0, 1],  None,     []), # exclude has precedence over excludeMe !
+
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      None,    [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      None,    [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      None,    [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      None,    [0, 1],   [1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      None,    [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      None,    [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      None,    [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      None,    [0, 1],   [1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     None,    [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     None,    [0],      [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     None,    [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     None,    [0, 1],   [0, 1]),
+
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [],      [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [],      [0],      [0]),     # !!
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [],      [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [],      [0, 1],   [0, 1]),  # !!
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [],      [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [],      [0],      [0]),     # !!
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [],      [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [],      [0, 1],   [0, 1]),  # !!
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [],      [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [],      [0],      [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [],      [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [],      [0, 1],   [0, 1]),
+
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0],     [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0],     [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0],     [0, 1],   [1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0],     [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0],     [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0],     [0, 1],   [1]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0],     [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0],     [1],      [1]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0],     [0, 1],   [1]),
+
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [1],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [1],     [0],      [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [1],     [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [1],     [0, 1],   [0]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [1],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [1],     [0],      [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [1],     [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [1],     [0, 1],   [0]),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [1],     [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [1],     [0],      [0]),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [1],     [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [1],     [0, 1],   [0]),
+
+##
+## (peers,    publicationTopic,   excludeMe, exclude, eligible, expectedReceivers)
+##
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0, 1],  [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0, 1],  [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0, 1],  [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, None,      [0, 1],  [0, 1],   []),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0, 1],  [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0, 1],  [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0, 1],  [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, True,      [0, 1],  [0, 1],   []),
+
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0, 1],  [],       []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0, 1],  [0],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0, 1],  [1],      []),
+   (PEERSET1, TOPIC_PUBLISHED_TO, False,     [0, 1],  [0, 1],   []),
+]
+
+## The event payloads the publisher sends in one session.
+##
+## Note: be aware of JSON roundtripping "issues" like
+##    (ujson.loads(ujson.dumps(0.1234)) == 0.1234) => False
+##
+PAYLOADS1 = [["Hello, world!"]]
+
 
 #### END OF CONFIG
 
@@ -277,50 +442,33 @@ class WampCase2_2_x_x_Base:
          topic = self.params.publicationTopic + self._uriSuffix
          payloads = self.params.eventPayloads
 
-         ## map exclude indices to session IDs
-         ##
-         exclude = []
-         for i in self.params.exclude:
-            exclude.append(self.clients[i].proto.session_id)
+         args = {}
 
-         def plog(topic, pl, opts = None):
-            if opts:
-               self.result.log.append((perf_counter(),
-                                       publisherPeerIndex,
-                                       publisher.proto.session_id,
-                                       "Published event to topic <pre>%s</pre> with options <pre>%s</pre> and payload <pre>%s</pre>" % (topic, ', '.join(opts), pl)))
-            else:
-               self.result.log.append((perf_counter(),
-                                       publisherPeerIndex,
-                                       publisher.proto.session_id,
-                                       "Published event to topic <pre>%s</pre> and payload <pre>%s</pre>" % (topic, pl)))
+         if self.params.excludeMe is not None:
+            args['excludeMe'] = self.params.excludeMe
 
-         if self.params.excludeMe is None:
-            if len(exclude) > 0:
-               for pl in payloads:
-                  publisher.proto.publish(topic,
-                                          pl,
-                                          exclude = exclude)
-                  plog(topic, pl, ["exclude=%s" % exclude])
-            else:
-               for pl in payloads:
-                  publisher.proto.publish(topic,
-                                          pl)
-                  plog(topic, pl)
-         else:
-            if len(exclude) > 0:
-               for pl in payloads:
-                  publisher.proto.publish(topic,
-                                          pl,
-                                          excludeMe = self.params.excludeMe,
-                                          exclude = exclude)
-                  plog(topic, pl, ["exclude=%s" % exclude, "excludeMe=%s" % self.params.excludeMe])
-            else:
-               for pl in payloads:
-                  publisher.proto.publish(topic,
-                                          pl,
-                                          excludeMe = self.params.excludeMe)
-                  plog(topic, pl, ["excludeMe=%s" % self.params.excludeMe])
+         if self.params.exclude is not None:
+            ## map exclude indices to session IDs
+            args['exclude'] = []
+            for i in self.params.exclude:
+               args['exclude'].append(self.clients[i].proto.session_id)
+
+         if self.params.eligible is not None:
+            ## map exclude indices to session IDs
+            args['eligible'] = []
+            for i in self.params.eligible:
+               args['eligible'].append(self.clients[i].proto.session_id)
+
+
+         for pl in payloads:
+            publisher.proto.publish(topic, pl, **args)
+
+            s_args = ["%s=%s" % (k,v) for (k,v) in args.items()]
+            self.result.log.append((perf_counter(),
+                                    publisherPeerIndex,
+                                    publisher.proto.session_id,
+                                    "Published event to topic <pre>%s</pre> with options <pre>%s</pre> and payload <pre>%s</pre>" % (topic, ', '.join(s_args), pl)
+                                    ))
 
          ## After having published everything the test had specified,
          ## we need to _wait_ to receive events on all our WAMP sessions
@@ -397,14 +545,16 @@ class WampCase2_2_x_x_Base:
 
 
 
-def generate_WampCase2_2_x_x_classes():
+def generate_WampCase2_2_x_x_classes(baseIndex, settings, payloads):
    ## dynamically create case classes
    ##
    res = []
+
    jc = 1
-   for setting in SETTINGS:
+   for setting in settings:
+
       ic = 1
-      for payload in PAYLOADS:
+      for payload in payloads:
 
          params = WampCase2_2_x_x_Params(peers = setting[0],
                                          publicationTopic = setting[1],
@@ -460,8 +610,8 @@ See the log for actual URIs used.
          expectation = """We expect the testee to dispatch the events to us on \
 the sessions %s""" % ', '.join(['<strong>%s</strong>' % x for x in params.expectedReceivers])
 
-         klassname = "WampCase2_2_%d_%d" % (jc, ic)
-         index = (2, 2, jc, ic)
+         index = (baseIndex[0], baseIndex[1], jc, ic)
+         klassname = "WampCase%d_%d_%d_%d" % index
 
          Klass = type(klassname,
                       (object, WampCase2_2_x_x_Base, ),
@@ -477,8 +627,10 @@ the sessions %s""" % ', '.join(['<strong>%s</strong>' % x for x in params.expect
          res.append(Klass)
          ic += 1
       jc += 1
+
    return res
 
 
 
-Cases.extend(generate_WampCase2_2_x_x_classes())
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 1), SETTINGS0, PAYLOADS0))
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 2), SETTINGS1, PAYLOADS1))

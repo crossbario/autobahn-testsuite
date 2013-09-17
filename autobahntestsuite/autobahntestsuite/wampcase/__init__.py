@@ -46,6 +46,7 @@ CaseSubCategories = {
    "2.2": "Exclude and eligible",
    "2.3": "Unsubscribe",
    "2.4": "Peer initiated events",
+
    "2.5": "Publisher identification (WAMPv2)",
    "2.6": "Pattern-based subscriptions (WAMPv2)",
    "2.7": "Metaevents (WAMPv2)",

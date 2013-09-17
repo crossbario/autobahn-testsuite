@@ -539,17 +539,36 @@ class TestDb:
    def getTestRunIndex(self, runId):
 
       def do(txn):
-         txn.execute("SELECT id, testee, c1, c2, c3, c4, c5, passed, duration FROM testresult WHERE testrun_id = ?", [runId])
-         res = txn.fetchall()
-         return [{'id': row[0],
-                  'testee': row[1],
-                  'c1': row[2],
-                  'c2': row[3],
-                  'c3': row[4],
-                  'c4': row[5],
-                  'c5': row[6],
-                  'passed': row[7] != 0,
-                  'duration': row[8]} for row in res]
+         txn.execute("""
+            SELECT r.id, r.testee, r.c1, r.c2, r.c3, r.c4, r.c5, r.passed, r.duration,
+                   rr.started, rr.ended,
+                   s.id AS spec_id, s.name AS spec_name, s.mode, s.caseset
+               FROM testresult r
+                  INNER JOIN testrun rr ON r.testrun_id = rr.id
+                     INNER JOIN testspec s ON rr.testspec_id = s.id
+               WHERE r.testrun_id = ?
+         """, [runId])
+
+         res = {}
+         for row in txn.fetchall():
+
+            index = (row[2], row[3], row[4], row[5], row[6])
+
+            id, testee, passed, duration = row[0], row[1], row[7], row[8]
+
+            if not res.has_key(index):
+               res[index] = {}
+
+            if res[index].has_key(testee):
+               raise Exception("logic error")
+
+            res[index][testee] = {'id': id, 'passed': passed, 'duration': duration}
+
+         sres = []
+         for index in sorted(res.keys()):
+            sres.append({'index': list(index),  'results': res[index]})
+
+         return sres
 
       return self._dbpool.runInteraction(do)
 

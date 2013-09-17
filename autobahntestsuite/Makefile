@@ -26,7 +26,7 @@ publish:
 	python setup.py bdist_egg upload
 	python setup.py bdist_wininst upload
 
-test:
+test_sql:
 	echo "select count(*) from testresult;" | sqlite3 .wstest.db
 
 test_import:
@@ -37,3 +37,9 @@ test_run:
 
 test_web:
 	python autobahntestsuite/wstest.py -m web
+
+test:
+	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual.json
+	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
+	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP Dual'
+	python autobahntestsuite/wstest.py -m web -d

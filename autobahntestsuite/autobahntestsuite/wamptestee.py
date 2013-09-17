@@ -145,12 +145,12 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
     A WAMP test server for testing the AutobahnPython WAMP functionality.
     """
 
-    
+
     def onSessionOpen(self):
         self.initializePubSub()
         self.initializeServices()
 
-        
+
     def initializeServices(self):
         """
         Initialize the services and register the RPC methods.
@@ -179,8 +179,25 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
                                   )
 
     def initializePubSub(self):
+        ## Tests publish events to topics having this prefix.
+        ##
         self.registerForPubSub("http://example.com/simple", True)
+
+        ## Tests publish events to this topic expecting events
+        ## to be dispatched. Tests also publish to topics with
+        ## this URI as prefix, but then expect no dispatching to
+        ## happen, since the URI was not registered
+        ## with prefix = True.
+        ##
         self.registerForPubSub("http://example.com/foobar")
+
+        ## This topic is intentionally left unregistered
+        ## Tests will publish to this topic and check that
+        ## events are not dispatched.
+        ##
+        #self.registerForPubSub("http://example.com/barbaz")
+
+
         #self.registerForPubSub("http://example.com/event#", True)
         #self.registerForPubSub("http://example.com/event/simple")
         #self.topicservice = MyTopicService([1, 3, 7])

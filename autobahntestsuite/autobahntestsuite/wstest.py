@@ -441,6 +441,11 @@ class WsTestRunner(object):
          runid = kwargs.get('runid', None)
          testees = yield app.db.getTestRunSummary(runid)
          testresults = yield app.db.getTestRunIndex(runid)
+         for tr in testresults:
+            tr['index'] = "Case " + '.'.join(str(x) for x in tr['index'][0:4])
+            for r in tr['results']:
+               tr['results'][r]['duration'] *= 1000
+
          page = app.templates.get_template('testrun.html')
          returnValue(page.render(testees = testees, testresults = testresults))
 

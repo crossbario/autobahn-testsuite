@@ -1,19 +1,36 @@
-<!doctype html>
-<html>
-   <head>
-   </head>
-   <body>
-      <h1>Testrun</h1>
-      <ul>
-         {% for testee in testees %}
-         <li>{{ testee }}</li>
-         {% endfor %}
-      </ul>
+{% extends "base.html" %}
+{% block inner %}
 
-      <ul>
-         {% for result in testresults %}
-         <li><a href="/testresult/{{ result.id }}">{{ result.testee }} {{ result.case }}</a></li>
+   <h1>Testrun</h1>
+
+   <table class="wamplog">
+      <tr>
+         <td>Test / Testees:</td>
+         {% for testee in testees %}
+         <td>{{ testee.name }}</td>
          {% endfor %}
-      </ul>
-   </body>
-</html>
+      </tr>
+      {% for result in testresults %}
+      <tr>
+         <td>
+           {{ result.index }}
+         </td>
+         {% for testee in testees %}
+         <td>
+            <a href="/testresult/{{ result.results[testee.name].id }}">
+              {% if result.results[testee.name].passed %}
+              Pass
+              {% else %}
+              Fail
+              {% endif %}
+              ({{ result.results[testee.name].duration|round|int }} ms)
+           </a>
+         </td>
+         {% endfor %}
+      </tr>
+      {% endfor %}
+   </table>
+
+   <hr>
+
+{% endblock %}
