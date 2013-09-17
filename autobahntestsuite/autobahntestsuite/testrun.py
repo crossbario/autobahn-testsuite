@@ -44,6 +44,8 @@ class TestResult(AttributeBag):
    ATTRIBUTES = ['id',
                  'runId',
                  'passed',
+                 'description',
+                 'expectation',
                  'expected',
                  'observed',
                  'log',

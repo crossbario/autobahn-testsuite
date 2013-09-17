@@ -88,6 +88,17 @@ The list of implemented test modes.
 """
 
 
+class ITestRunner(Interface):
+   """
+   """
+
+   def runAndObserve(specName, observers = [], saveResults = True):
+      """
+      :param observers: An iterable of ITestRunObserver instances.
+      :type observers: iterable
+      """
+
+
 class IReportGenerator(Interface):
    """
    A Report generator is able to produce report files (in a
@@ -157,17 +168,6 @@ class ITestRun(Interface):
       """
 
 
-
-
-class ITestRunner(Interface):
-   """
-   """
-
-   def run(spec, observers = []):
-      """
-      :param observers: An iterable of ITestRunObserver instances.
-      :type observers: iterable
-      """
 
 
 class ITestRunObserver(Interface):

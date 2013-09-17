@@ -276,7 +276,7 @@ class WampCase2_2_x_x_Base:
          publisher = self.clients[publisherPeerIndex]
          topic = self.params.publicationTopic + self._uriSuffix
          payloads = self.params.eventPayloads
-         
+
          ## map exclude indices to session IDs
          ##
          exclude = []
@@ -421,9 +421,9 @@ def generate_WampCase2_2_x_x_classes():
          i = 0
          for p in params.peers:
             if len(p) > 0:
-               s.append("%d: %s" % (i, ' & '.join(p)))
+               s.append("<strong>%s</strong>: <i>%s</i>" % (i, ' & '.join(p)))
             else:
-               s.append("%d: %s" % (i, '-'))
+               s.append("<strong>%s</strong>: <i>%s</i>" % (i, '-'))
             i += 1
          s = ', '.join(s)
 
@@ -439,22 +439,26 @@ def generate_WampCase2_2_x_x_classes():
          else:
             o = "-"
 
-         description = """The test connects %d WAMP clients to the testee, subscribes \
-the sessions to topics %s, waits 3x <RTT> seconds and \
-then publishes %d event%s to the topic %s with payload%s %s from the first session. \
-The test then waits 3x <RTT> seconds to receive events dispatched from the testee.
-For publishing of test events, the following publication options are used: %s.
+         description = """The test connects <strong>%s</strong> WAMP clients to the testee, subscribes \
+the sessions to topics %s, waits <strong>3xRTT</strong> seconds and \
+then publishes <strong>%d</strong> event%s to the topic <i>%s</i> with payload%s <i>%s</i> from the first session. \
+The test then waits <strong>3xRTT</strong> seconds to receive events dispatched from the testee.
+<br><br>
+For publishing of test events, the following publication options are used: <i>%s</i>.
+<br><br>
+Note that the test has used the topic URIs from above description with a session specific suffix, e.g. <i>#6011</i>. \
+See the log for actual URIs used.
 """ % (len(params.peers),
        s,
        pl,
        plc,
        params.publicationTopic,
        plc,
-       ', '.join(['"' + str(x) + '"' for x in params.eventPayloads]),
+       ', '.join([str(x) for x in params.eventPayloads]),
        o)
 
          expectation = """We expect the testee to dispatch the events to us on \
-the sessions %s""" % (params.expectedReceivers,)
+the sessions %s""" % ', '.join(['<strong>%s</strong>' % x for x in params.expectedReceivers])
 
          klassname = "WampCase2_2_%d_%d" % (jc, ic)
          index = (2, 2, jc, ic)

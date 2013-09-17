@@ -30,12 +30,13 @@ import autobahntestsuite
 from autobahn.wamp import exportRpc
 
 from interfaces import ITestRunner, ITestDb
-from rinterfaces import RITestDb
+from rinterfaces import RITestDb, RITestRunner
 from testrun import TestRun, Testee
 
 
 
 @implementer(ITestRunner)
+@implementer(RITestRunner)
 class FuzzingWampClient(object):
    """
    A test driver for WAMP test cases.
@@ -56,12 +57,22 @@ class FuzzingWampClient(object):
       self._debug = debug
 
 
-   @inlineCallbacks
    @exportRpc
-   def run(self, specName, observers = []):
+   def run(self, specName, saveResults = True):
+      return self.runAndObserve(specName, saveResults = saveResults)
+
+
+   @inlineCallbacks
+   def runAndObserve(self, specName, observers = [], saveResults = True):
 
       specId, spec = yield self._testDb.getSpecByName(specName)
       casesByTestee = yield self._testDb.generateCasesByTestee(specId)
+
+      def save(runId, testRun, testCase, result, remaining):
+         self._testDb.saveResult(runId, testRun, testCase, result, saveResults)
+
+      if saveResults:
+         observers.append(save)
 
       testRuns = []
       for obj in spec['testees']:
@@ -90,12 +101,12 @@ class FuzzingWampClient(object):
          print "%s @ %s : %d test cases prepared" % (testRun.testee.name, testRun.testee.url, testRun.remaining())
       print
 
-      def progress(runId, testRun, test, result, remaining):
-         if test:
-            print "%s - %s%s (%d tests remaining)" % (testRun.testee.name, "PASSED   : " if result.passed else "FAILED  : ", test.__class__.__name__, remaining)
-            return self._testDb.saveResult(runId, testRun, test, result)
-         else:
-            print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
+      def progress(runId, testRun, testCase, result, remaining):
+         for obsv in observers:
+            try:
+               obsv(runId, testRun, testCase, result, remaining)
+            except Exception, e:
+               print e
 
       if spec.get('parallel', False):
          fails, resultIds = yield self._runParallel(runId, spec, testRuns, progress)
@@ -129,8 +140,6 @@ class FuzzingWampClient(object):
                ## run test case, let fire progress() callback and cumulate results
                ##
                testCase = TestCase(testRun.testee, spec)
-               #print testCase.description
-               #print testCase.expectation
                result = yield testCase.run()
                if False:
                   for time, sid, msg in result.log:

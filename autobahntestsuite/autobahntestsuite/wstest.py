@@ -258,7 +258,7 @@ class WsTestRunner(object):
          return self.startFuzzingWampClient(self.options['testset'])
 
       elif self.mode == "web":
-         return self.startWeb()
+         return self.startWeb(debug = self.debug)
 
       else:
          pass
@@ -299,13 +299,20 @@ class WsTestRunner(object):
       testDb = TestDb([testSet])
       testRunner = FuzzingWampClient(testDb)
 
-      runId, resultIds = yield testRunner.run(specName)
+      def progress(runId, testRun, testCase, result, remaining):
+         if testCase:
+            print "%s - %s%s (%d tests remaining)" % (testRun.testee.name, "PASSED   : " if result.passed else "FAILED  : ", testCase.__class__.__name__, remaining)
+         else:
+            print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
+
+      runId, resultIds = yield testRunner.run(specName, [progress])
 
       print
       print "Tests finished: run ID %s, result IDs %d" % (runId, len(resultIds))
       print
 
       summary = yield testDb.getTestRunSummary(runId)
+
       tab = Tabify(['l32', 'r5', 'r5'])
       print
       print tab.tabify(['Testee', 'Pass', 'Fail'])
@@ -380,17 +387,18 @@ class WsTestRunner(object):
       return d
 
 
-   def startWeb(self, port = 8090):
+   def startWeb(self, port = 8090, debug = False):
       """
       Start Web service for test database.
       """
+      print "Debug", debug
 
       app = klein.Klein()
-      #app.debug = True
+      app.debug = debug
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
 
-      app.db = TestDb([WampCaseSet()])
-      app.runner = FuzzingWampClient(app.db)
+      app.db = TestDb([WampCaseSet()], debug = debug)
+      app.runner = FuzzingWampClient(app.db, debug = debug)
 
 
       @app.route('/')
@@ -411,7 +419,11 @@ class WsTestRunner(object):
             if ended:
                tr['ended'] = pprint_timeago(ended)
 
-            tr['failed'] = tr['total'] - tr['passed']
+            if tr['total']:
+               tr['failed'] = tr['total'] - tr['passed']
+            else:
+               tr['failed'] = 0
+
             tr['runMode'] = rm[tr['runMode']]
             tr['caseSetName'] = cs[tr['caseSetName']]
          page = app.templates.get_template('index.html')

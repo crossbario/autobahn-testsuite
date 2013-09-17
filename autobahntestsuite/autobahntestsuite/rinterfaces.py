@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-__all__ = ('RITestDb', )
+__all__ = ('RITestDb', 'RITestRunner', )
 
 import zope
 from zope.interface import Interface, Attribute
@@ -88,3 +88,12 @@ class RITestDb(Interface):
       """
       """
 
+
+
+class RITestRunner(Interface):
+   """
+   """
+
+   def run(specName, saveResults = True):
+      """
+      """

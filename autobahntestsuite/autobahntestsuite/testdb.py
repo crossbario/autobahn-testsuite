@@ -51,7 +51,9 @@ class TestDb:
    URI = "http://api.testsuite.autobahn.ws/testdb/"
 
 
-   def __init__(self, caseSets, dbfile = None):
+   def __init__(self, caseSets, dbfile = None, debug = False):
+
+      self._debug = debug
 
       if not dbfile:
          dbfile = ".wstest.db"
@@ -220,7 +222,7 @@ class TestDb:
       return self._dbpool.runInteraction(do)
 
 
-   def saveResult(self, runId, testRun, test, result):
+   def saveResult(self, runId, testRun, testCase, result, saveLog = True):
 
       def do(txn):
          ## verify that testrun exists and is not closed already
@@ -239,10 +241,18 @@ class TestDb:
 
          ci = []
          for i in xrange(5):
-            if len(test.index) > i:
-               ci.append(test.index[i])
+            if len(testCase.index) > i:
+               ci.append(testCase.index[i])
             else:
                ci.append(0)
+
+         if saveLog:
+            log = result.log
+         else:
+            log = []
+         result.log = None
+
+         resultData = result.serialize()
 
          txn.execute("""
             INSERT INTO testresult
@@ -260,12 +270,12 @@ class TestDb:
                ci[4],
                result.ended - result.started,
                1 if result.passed else 0,
-               result.serialize()])
+               resultData])
 
          ## save test case log with foreign key to test result
          ##
          lineno = 1
-         for l in result.log:
+         for l in log:
             txn.execute("""
                INSERT INTO testlog
                   (testresult_id, lineno, timestamp, sessionidx, sessionid, line)
@@ -508,6 +518,12 @@ class TestDb:
          result = TestResult()
          result.deserialize(data)
          result.id, result.runId, result.testeeName, result.caseName = id, runId, testeeName, caseName
+
+         idx = (c1, c2, c3, c4)
+         caseKlass = self._cs['wamp'][idx]
+         #print caseName, idx, caseKlass
+         result.description = caseKlass.description
+         result.expectation = caseKlass.expectation
 
          result.log = []
          txn.execute("SELECT timestamp, sessionidx, sessionid, line FROM testlog WHERE testresult_id = ? ORDER BY lineno ASC", [result.id])

@@ -12,7 +12,7 @@ body {
 }
 
 h1, h2, h3, h4 {
-   font-family: "Segoe UI Light", sans-serif;   
+   font-family: "Segoe UI Light", sans-serif;
 }
 
 h2 {
@@ -54,17 +54,23 @@ table.wamplog {
    width: 100%;
 }
 
-table.wamplog pre {
+#wrapper i {
    display: inline;
    color: #ff6600;
-/*   
-   padding-left: 1em;
-   padding-right: 1em;
-*/   
+   font-family: "Courier New", monospace;
+   font-weight: bold;
+   font-style: normal;
+   font-size: 14px;
+}
+
+#wrapper pre {
+   display: inline;
+   color: #ff6600;
+   font-family: "Courier New", monospace;
    font-weight: bold;
 }
 
-table.wamplog strong {
+#wrapper strong {
    color: #027eae;
    font-weight: bold;
 }
