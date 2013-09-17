@@ -5,7 +5,7 @@
    "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["*"],
+   "cases": ["2.*"],
    "exclude": [],
 
    "options": {

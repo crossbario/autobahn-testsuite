@@ -88,6 +88,8 @@ def setupUri(case, ref=None):
         uri = "%s#%s" % (uri, ref)
     return uri
 
+
+
 class MyTopicService:
 
    def __init__(self, allowedTopicIds):
@@ -149,12 +151,41 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
     def onSessionOpen(self):
         self.initializePubSub()
         self.initializeServices()
+        self.debugWamp = True
+        self.debugWs = False
+        self.debug = False
+
+
+    #@wamp.exportRpc("dispatch")
+    def testDispatch(self, topic, event, options):
+        """
+        Simulate a server initiated event controlled by the tester.
+        """
+        if options.has_key('exclude'):
+            exclude = options['exclude']
+        else:
+            excludeMe = options.get('excludeMe', None)
+            if excludeMe is None or excludeMe == True:
+                exclude = [self.session_id]
+            else:
+                exclude = []
+
+        exclude = self.factory.sessionIdsToProtos(exclude)
+
+        eligible = options.get('eligible', None)
+        if eligible:
+            eligible = self.factory.sessionIdsToProtos(eligible)
+
+        self.factory.dispatch(topic, event, exclude = exclude, eligible = eligible)
 
 
     def initializeServices(self):
         """
         Initialize the services and register the RPC methods.
         """
+        #self.registerForRpc("http://api.testsuite.wamp.ws/testee/control#", self)
+        self.registerMethodForRpc("http://api.testsuite.wamp.ws/testee/control#dispatch", self, TesteeWampServerProtocol.testDispatch)
+
         self.echo_service = EchoService()
         self.string_service = StringService()
         self.number_service = NumberService()

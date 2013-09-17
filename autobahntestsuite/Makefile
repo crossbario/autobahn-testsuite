@@ -12,7 +12,7 @@ clean:
 	rm -rf ./autobahntestsuite.egg-info
 	rm -rf ./build
 	rm -rf ./dist
-	find . -name "*.pyc" -exec rm -f {} \;
+	find . -name '*.pyc' -exec rm -f {} \;
 
 build:
 	python setup.py bdist_egg
@@ -31,6 +31,7 @@ test_sql:
 
 test_import:
 	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
+	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual.json
 
 test_run:
 	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP 1'
@@ -38,8 +39,4 @@ test_run:
 test_web:
 	python autobahntestsuite/wstest.py -m web
 
-test:
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual.json
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
-	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP Dual'
-	python autobahntestsuite/wstest.py -m web -d
+test: test_import test_run test_web

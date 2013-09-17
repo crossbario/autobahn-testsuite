@@ -368,6 +368,7 @@ class WampCase2_2_x_x_Params(AttributeBag):
 
    ATTRIBUTES = ['peers',
                  'publicationTopic',
+                 'publicationMethod',
                  'excludeMe',
                  'exclude',
                  'eligible',
@@ -425,22 +426,19 @@ class WampCase2_2_x_x_Base:
 
 
       def test():
-         ## setup what we expected, and what we actually received
-         ##
          for c in self.clients:
             self.result.expected[c.proto.session_id] = []
             self.result.observed[c.proto.session_id] = []
-
-         expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
-         for r in expectedReceivers:
-            for p in self.params.eventPayloads:
-               e = (self.params.publicationTopic + self._uriSuffix, p)
-               self.result.expected[r.proto.session_id].append(e)
 
          publisherPeerIndex = 0
          publisher = self.clients[publisherPeerIndex]
          topic = self.params.publicationTopic + self._uriSuffix
          payloads = self.params.eventPayloads
+
+         expectedReceivers = [self.clients[i] for i in self.params.expectedReceivers]
+         for r in expectedReceivers:
+            for p in payloads:
+               self.result.expected[r.proto.session_id].append((topic, p))
 
          args = {}
 
@@ -459,16 +457,29 @@ class WampCase2_2_x_x_Base:
             for i in self.params.eligible:
                args['eligible'].append(self.clients[i].proto.session_id)
 
-
          for pl in payloads:
-            publisher.proto.publish(topic, pl, **args)
+
+            if self.params.publicationMethod == 0:
+               publisher.proto.publish(topic, pl, **args)
+            elif self.params.publicationMethod == 1:
+               publisher.proto.call("http://api.testsuite.wamp.ws/testee/control#dispatch", topic, pl, args)
+            else:
+               raise Exception("no such publication method: %s" % self.params.publicationMethod)
 
             s_args = ["%s=%s" % (k,v) for (k,v) in args.items()]
-            self.result.log.append((perf_counter(),
-                                    publisherPeerIndex,
-                                    publisher.proto.session_id,
-                                    "Published event to topic <pre>%s</pre> with options <pre>%s</pre> and payload <pre>%s</pre>" % (topic, ', '.join(s_args), pl)
-                                    ))
+            if len(s_args) > 0:
+               s_args = 'with options <pre>%s</pre> ' % ', '.join(s_args)
+            else:
+               s_args = ''
+
+            if self.params.publicationMethod == 0:
+               msg = "Published event to topic <pre>%s</pre> %sand payload <pre>%s</pre>" % (topic, s_args, pl)
+            elif self.params.publicationMethod == 1:
+               msg = "Initiated server dispatched event to topic <pre>%s</pre> %sand payload <pre>%s</pre>" % (topic, s_args, pl)
+            else:
+               msg = ""
+
+            self.result.log.append((perf_counter(), publisherPeerIndex, publisher.proto.session_id, msg))
 
          ## After having published everything the test had specified,
          ## we need to _wait_ to receive events on all our WAMP sessions
@@ -545,7 +556,7 @@ class WampCase2_2_x_x_Base:
 
 
 
-def generate_WampCase2_2_x_x_classes(baseIndex, settings, payloads):
+def generate_WampCase2_2_x_x_classes(baseIndex, settings, payloads, publicationMethod = 0):
    ## dynamically create case classes
    ##
    res = []
@@ -558,6 +569,7 @@ def generate_WampCase2_2_x_x_classes(baseIndex, settings, payloads):
 
          params = WampCase2_2_x_x_Params(peers = setting[0],
                                          publicationTopic = setting[1],
+                                         publicationMethod = publicationMethod,
                                          excludeMe = setting[2],
                                          exclude = setting[3],
                                          eligible = setting[4],
@@ -632,5 +644,7 @@ the sessions %s""" % ', '.join(['<strong>%s</strong>' % x for x in params.expect
 
 
 
-Cases.extend(generate_WampCase2_2_x_x_classes((2, 1), SETTINGS0, PAYLOADS0))
-Cases.extend(generate_WampCase2_2_x_x_classes((2, 2), SETTINGS1, PAYLOADS1))
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 1), SETTINGS0, PAYLOADS0, 0))
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 2), SETTINGS0, PAYLOADS0, 0))
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 3), SETTINGS1, PAYLOADS1, 1))
+Cases.extend(generate_WampCase2_2_x_x_classes((2, 4), SETTINGS1, PAYLOADS1, 1))
