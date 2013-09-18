@@ -32,6 +32,7 @@ test_sql:
 test_import:
 	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
 	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual.json
+	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual_webmq.json
 
 test_run:
 	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP 1'
