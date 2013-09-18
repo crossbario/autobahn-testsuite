@@ -473,6 +473,7 @@ class WampCase2_2_x_x_Base:
                ##
                args['me'] = publisherSessionId
                publisher.proto.call("http://api.testsuite.wamp.ws/testee/control#dispatch", topic, pl, args)
+               del args['me'] # don't show this in test log
 
             else:
                raise Exception("no such publication method: %s" % self.params.publicationMethod)
