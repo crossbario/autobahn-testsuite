@@ -472,7 +472,9 @@ class WampCase2_2_x_x_Base:
                ## dispatch an event
                ##
                args['me'] = publisherSessionId
-               publisher.proto.call("http://api.testsuite.wamp.ws/testee/control#dispatch", topic, pl, args)
+               ENDPOINT = "http://api.testsuite.wamp.ws/testee/control#dispatch"
+               #ENDPOINT = "http://api.testsuite.wamp.ws/autobahn/testee/control#dispatch"
+               publisher.proto.call(ENDPOINT, topic, pl, args)
                del args['me'] # don't show this in test log
 
             else:

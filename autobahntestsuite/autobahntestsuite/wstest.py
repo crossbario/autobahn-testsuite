@@ -393,7 +393,7 @@ class WsTestRunner(object):
       return d
 
 
-   def startWeb(self, port = 8090, debug = False):
+   def startWeb(self, port = 7070, debug = False):
       """
       Start Web service for test database.
       """

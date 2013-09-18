@@ -17,7 +17,7 @@ function start() {
 
    // Connect to Tavendo WebMQ ..
    //
-   ab.connect("ws://127.0.0.1:8090/ws",
+   ab.connect("ws://127.0.0.1:7070/ws",
       function (sess) {
          console.log("connected");
          session = sess;

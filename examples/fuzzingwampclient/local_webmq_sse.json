@@ -18,7 +18,7 @@
       {
          "name": "Tavendo WebMQ",
          "desc": "Here we run WeMB in a VM.",
-         "url": "ws://192.168.56.102/ws",
+         "url": "ws://127.0.0.1/ws",
          "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {

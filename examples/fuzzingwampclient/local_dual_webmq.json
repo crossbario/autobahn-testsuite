@@ -5,7 +5,7 @@
    "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["*"],
+   "cases": ["2.3.*"],
    "exclude": [],
 
    "options": {
@@ -27,11 +27,11 @@
       {
          "name": "Tavendo WebMQ",
          "desc": "Here we run WeMB in a VM.",
-         "url": "ws://192.168.56.102/ws",
+         "url": "ws://127.0.0.1/ws",
          "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {
-            "rtt": 0.01
+            "rtt": 0.05
          }
       }
    ]
