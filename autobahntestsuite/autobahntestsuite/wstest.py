@@ -205,8 +205,9 @@ wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
 class WsTestWampProtocol(WampServerProtocol):
 
    def onSessionOpen(self):
-      self.registerForRpc(self.factory._testDb, "http://api.testsuite.autobahn.ws/testdb/")
-      self.registerForRpc(self.factory._testRunner, "http://api.testsuite.autobahn.ws/testrunner/")
+      self.registerForPubSub("http://api.testsuite.wamp.ws", True)
+      self.registerForRpc(self.factory._testDb, "http://api.testsuite.wamp.ws/testdb/")
+      self.registerForRpc(self.factory._testRunner, "http://api.testsuite.wamp.ws/testrunner/")
 
 
 class WsTestWampFactory(WampServerFactory):
@@ -216,7 +217,7 @@ class WsTestWampFactory(WampServerFactory):
    def __init__(self, testDb, testRunner, url, debug = False):
       assert(verifyObject(ITestDb, testDb))
       assert(verifyObject(ITestRunner, testRunner))
-      WampServerFactory.__init__(self, url, debugWamp = debug)
+      WampServerFactory.__init__(self, url, debug = True, debugWamp = True)
       self._testDb = testDb
       self._testRunner = testRunner
 
@@ -396,8 +397,6 @@ class WsTestRunner(object):
       """
       Start Web service for test database.
       """
-      print "Debug", debug
-
       app = klein.Klein()
       app.debug = debug
       app.templates = jinja2.Environment(loader = jinja2.FileSystemLoader('autobahntestsuite/templates'))
@@ -492,22 +491,33 @@ class WsTestRunner(object):
          return d1
 
       ## serve statuc stuff from a standard File resource
-      ##
       static_resource = File("autobahntestsuite/static")
 
+      ## serve a WAMP server to access the testsuite
       wamp_factory = WsTestWampFactory(app.db, app.runner, "ws://localhost:%d" % port, debug = debug)
+
+      ## we MUST start the factory manually here .. Twisted Web won't
+      ## do for us.
       wamp_factory.startFactory()
+
+      ## wire up "dispatch" so that test db/runner can notify
+      app.db.dispatch = wamp_factory.dispatch
+      app.runner.dispatch = wamp_factory.dispatch
+
+      ## wrap in a Twisted Web resource
       wamp_resource = WebSocketResource(wamp_factory)
 
-      ## we need to wrap stuff, since the Klein Twisted Web resource
-      ## does not seem to support putChild()
-      ##
+      ## we need to wrap our resources, since the Klein Twisted Web resource
+      ## does not seem to support putChild(), and we want to have a WebSocket
+      ## resource under path "/ws" and our static file serving under "/static"
       root_resource = WSGIRootResource(app.resource(),
-         {'static': static_resource,
-          'ws': wamp_resource})
+         {
+            'static': static_resource,
+            'ws': wamp_resource
+         }
+      )
 
       ## serve everything from one port
-      ##
       reactor.listenTCP(port, Site(root_resource), interface = "0.0.0.0")
 
       return True

@@ -55,6 +55,7 @@ class FuzzingWampClient(object):
 
       self._testDb = testDb
       self._debug = debug
+      self.dispatch = None
 
 
    @exportRpc
@@ -63,17 +64,46 @@ class FuzzingWampClient(object):
 
 
    @inlineCallbacks
-   def runAndObserve(self, specName, observers = [], saveResults = True):
+   def runAndObserve(self, specName, observers_ = [], saveResults = True):
 
       specId, spec = yield self._testDb.getSpecByName(specName)
       casesByTestee = yield self._testDb.generateCasesByTestee(specId)
+      _observers = observers_[:]
 
+      ## publish WAMP event on test case finished
+      ##
+      def notify(runId, testRun, testCase, result, remaining):
+         if testCase:
+            evt = {
+               'testee': testRun.testee.name,
+               'runId': runId,
+               'index': testCase.index,
+               'passed': result.passed,
+               'remaining': remaining
+            }
+            topic = "http://api.testsuite.wamp.ws/testrun#onResult"
+         else:
+            evt = {
+               'testee': testRun.testee.name,
+               'runId': runId
+            }
+            topic = "http://api.testsuite.wamp.ws/testrun#onComplete"
+
+         self.dispatch(topic, evt)
+         #if result and not result.passed:
+         #   print topic, evt
+
+      if self.dispatch:
+         _observers.append(notify)
+
+      ## save test results to test database
+      ##
       def save(runId, testRun, testCase, result, remaining):
          if testCase:
             self._testDb.saveResult(runId, testRun, testCase, result, saveResults)
 
       if saveResults:
-         observers.append(save)
+         _observers.append(save)
 
       testRuns = []
       for obj in spec['testees']:
@@ -101,9 +131,10 @@ class FuzzingWampClient(object):
       for testRun in testRuns:
          print "%s @ %s : %d test cases prepared" % (testRun.testee.name, testRun.testee.url, testRun.remaining())
       print
+      print
 
       def progress(runId, testRun, testCase, result, remaining):
-         for obsv in observers:
+         for obsv in _observers:
             try:
                obsv(runId, testRun, testCase, result, remaining)
             except Exception, e:

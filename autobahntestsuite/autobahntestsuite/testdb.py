@@ -54,6 +54,7 @@ class TestDb:
    def __init__(self, caseSets, dbfile = None, debug = False):
 
       self._debug = debug
+      self.dispatch = None
 
       if not dbfile:
          dbfile = ".wstest.db"
@@ -274,20 +275,21 @@ class TestDb:
 
          ## save test case log with foreign key to test result
          ##
-         lineno = 1
-         for l in log:
-            txn.execute("""
-               INSERT INTO testlog
-                  (testresult_id, lineno, timestamp, sessionidx, sessionid, line)
-                     VALUES (?, ?, ?, ?, ?, ?)
-               """, [
-               id,
-               lineno,
-               l[0],
-               l[1],
-               l[2],
-               l[3]])
-            lineno += 1
+         if log:
+            lineno = 1
+            for l in log:
+               txn.execute("""
+                  INSERT INTO testlog
+                     (testresult_id, lineno, timestamp, sessionidx, sessionid, line)
+                        VALUES (?, ?, ?, ?, ?, ?)
+                  """, [
+                  id,
+                  lineno,
+                  l[0],
+                  l[1],
+                  l[2],
+                  l[3]])
+               lineno += 1
 
          return id
 

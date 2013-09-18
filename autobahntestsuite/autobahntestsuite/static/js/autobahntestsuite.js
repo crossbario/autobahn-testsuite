@@ -32,9 +32,19 @@ function start() {
 
 
 function main() {
-   session.prefix("testdb", "http://api.testsuite.autobahn.ws/testdb/");
-   session.prefix("testrunner", "http://api.testsuite.autobahn.ws/testrunner/");
+   session.prefix("testdb", "http://api.testsuite.wamp.ws/testdb/");
+   session.prefix("testrunner", "http://api.testsuite.wamp.ws/testrunner/");
 
+   session.subscribe("http://api.testsuite.wamp.ws/testrun#onResult", test_onTestRunResult);
+}
+
+
+function test_onTestRunResult (topic, event) {
+   if (!event.passed) {
+      console.log("Test failed", event.testee, event.index, event);
+   } else {
+      console.log("Test passed", event.testee, event.remaining);
+   }
 }
 
 
@@ -59,7 +69,7 @@ function test_startRun (specName) {
       function (res) {
          var runId = res[0];
          var resultIds = res[1];
-         console.log("New test run started", runId, resultIds.length);
+         console.log("Test run ended", runId, resultIds.length);
       },
       ab.log
    );
@@ -72,7 +82,7 @@ function test_importSpec() {
       "name": "Local WAMP 1",
       "desc": "Quick test case set targeting a locally running AutobahnPython based WAMP server.",
 
-      "mode": "fuzzingwampclient",  
+      "mode": "fuzzingwampclient",
 
       "caseset": "wamp",
       "cases": ["*"],
@@ -153,7 +163,7 @@ function test_getSpecs() {
             console.log("Spec Meta", i, spec);
             test_getSpec(i, spec.id);
          }
-      },      
+      },
       ab.log
    );
 }

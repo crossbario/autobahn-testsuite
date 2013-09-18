@@ -1,11 +1,11 @@
 {
-   "name": "Local WAMP WebMQ",
-   "desc": "Quick test case set targeting 2 locally running AutobahnPython based WAMP servers.",
+   "name": "Local WAMP WebMQ SSE",
+   "desc": "Tests 2.3/2.4 (Server-initiated events) for a local WebMQ.",
 
    "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["*"],
+   "cases": ["2.3.*", "2.4.*"],
    "exclude": [],
 
    "options": {
@@ -16,22 +16,13 @@
 
    "testees": [
       {
-         "name": "AutobahnPython",
-         "desc": "This runs 'testeewampserver' from wstest.",
-         "url": "ws://127.0.0.1:9001",
-         "exclude": [],
-         "options":  {
-            "rtt": 0.01
-         }
-      },
-      {
          "name": "Tavendo WebMQ",
          "desc": "Here we run WeMB in a VM.",
          "url": "ws://192.168.56.102/ws",
          "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {
-            "rtt": 0.01
+            "rtt": 0.05
          }
       }
    ]
