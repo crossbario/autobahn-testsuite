@@ -432,6 +432,7 @@ class WampCase2_2_x_x_Base:
 
          publisherPeerIndex = 0
          publisher = self.clients[publisherPeerIndex]
+         publisherSessionId = publisher.proto.session_id
          topic = self.params.publicationTopic + self._uriSuffix
          payloads = self.params.eventPayloads
 
@@ -470,6 +471,7 @@ class WampCase2_2_x_x_Base:
                ## publish indirectly by instructing the peer to
                ## dispatch an event
                ##
+               args['me'] = publisherSessionId
                publisher.proto.call("http://api.testsuite.wamp.ws/testee/control#dispatch", topic, pl, args)
 
             else:
