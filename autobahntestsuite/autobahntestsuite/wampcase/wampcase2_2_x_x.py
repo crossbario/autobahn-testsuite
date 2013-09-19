@@ -290,6 +290,16 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
          self.main()
 
 
+   def sendMessage(self, payload):
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, '<pre class="wamp">TX => %s</pre>' % payload))
+      WampCraClientProtocol.sendMessage(self, payload)
+
+
+   def onMessage(self, payload, binary):
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, '<pre class="wamp">RX <= %s</pre>' % payload))
+      WampCraClientProtocol.onMessage(self, payload, binary)
+
+
    def onAuthSuccess(self, permissions):
       self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP session %s authenticated with credentials: <pre>%s</pre>" % (self.session_id, self.test.testee.auth)))
       self.main()
@@ -334,6 +344,7 @@ class WampCase2_2_x_x_Factory(WampClientFactory):
       proto = self.protocol()
       proto.factory = self
       proto.test = self.test
+      proto.session_id = None
       self.proto = proto
       return proto
 
@@ -423,6 +434,7 @@ class WampCase2_2_x_x_Base:
       def shutdown():
          for c in self.clients:
             c.proto.sendClose()
+            self.result.log.append((perf_counter(), c.peerIndex, c.proto.session_id, "Test client closing ..."))
 
 
       def test():
@@ -520,7 +532,8 @@ class WampCase2_2_x_x_Base:
                beforewait()
             d.addCallback(onres)
          else:
-            reactor.callLater(0, beforewait)
+            #reactor.callLater(0, beforewait)
+            beforewait()
 
 
       def launch(_):

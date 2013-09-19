@@ -57,7 +57,7 @@ table.wamplog {
 #wrapper i {
    display: inline;
    color: #ff6600;
-   font-family: "Courier New", monospace;
+   font-family: "Consolas", "Courier New", monospace;
    font-weight: bold;
    font-style: normal;
    font-size: 14px;
@@ -66,8 +66,16 @@ table.wamplog {
 #wrapper pre {
    display: inline;
    color: #ff6600;
-   font-family: "Courier New", monospace;
+   font-family: "Consolas", "Courier New", monospace;
    font-weight: bold;
+}
+
+#wrapper pre.wamp {
+   font-family: "Consolas", monospace;
+   color: #999;
+   font-weight: normal;
+   font-size: 12px;
+   margin-left: 20px;
 }
 
 #wrapper strong {

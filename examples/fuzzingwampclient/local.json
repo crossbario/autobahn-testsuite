@@ -5,12 +5,12 @@
    "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["2.*"],
+   "cases": ["*"],
    "exclude": [],
 
    "options": {
       "rtt": 0.05,
-      "randomize": true,
+      "randomize": false,
       "parallel": false
    },
 

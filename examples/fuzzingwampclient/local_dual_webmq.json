@@ -31,7 +31,7 @@
          "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {
-            "rtt": 0.1
+            "rtt": 0.05
          }
       }
    ]
