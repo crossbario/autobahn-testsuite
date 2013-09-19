@@ -172,8 +172,15 @@ class FuzzingWampClient(object):
             if TestCase:
                ## run test case, let fire progress() callback and cumulate results
                ##
-               testCase = TestCase(testRun.testee, spec)
-               result = yield testCase.run()
+               try:
+                  testCase = TestCase(testRun.testee, spec)
+               except Exception, e:
+                  print "ERROR 1", e
+               else:
+                  try:
+                     result = yield testCase.run()
+                  except Exception, e:
+                     print "ERROR 2", e
                if not result.passed:
                   fails += 1
                pres = yield progress(runId, testRun, testCase, result, testRun.remaining())
