@@ -5,7 +5,7 @@
    "mode": "fuzzingwampclient",
 
    "caseset": "wamp",
-   "cases": ["2.3.*"],
+   "cases": ["*"],
    "exclude": [],
 
    "options": {
@@ -31,7 +31,7 @@
          "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {
-            "rtt": 0.05
+            "rtt": 0.1
          }
       }
    ]

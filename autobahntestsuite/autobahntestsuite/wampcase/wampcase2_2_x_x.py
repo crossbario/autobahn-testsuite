@@ -391,7 +391,7 @@ class WampCase2_2_x_x_Base:
       self.result.expected = {}
       self.result.log = []
 
-      self._uriSuffix = '#' + str(random.randint(0, 10000))
+      self._uriSuffix = '#' + str(random.randint(0, 1000000))
 
       if self.testee.options.has_key('rtt'):
          self._rtt = self.testee.options['rtt']
@@ -458,6 +458,8 @@ class WampCase2_2_x_x_Base:
             for i in self.params.eligible:
                args['eligible'].append(self.clients[i].proto.session_id)
 
+         d_pl = []
+
          for pl in payloads:
 
             if self.params.publicationMethod == 0:
@@ -474,8 +476,9 @@ class WampCase2_2_x_x_Base:
                args['me'] = publisherSessionId
                ENDPOINT = "http://api.testsuite.wamp.ws/testee/control#dispatch"
                #ENDPOINT = "http://api.testsuite.wamp.ws/autobahn/testee/control#dispatch"
-               publisher.proto.call(ENDPOINT, topic, pl, args)
+               cd = publisher.proto.call(ENDPOINT, topic, pl, args)
                del args['me'] # don't show this in test log
+               d_pl.append(cd)
 
             else:
                raise Exception("no such publication method: %s" % self.params.publicationMethod)
@@ -500,14 +503,24 @@ class WampCase2_2_x_x_Base:
          ## to compare with our expectation. By default, we wait 3x the
          ## specified/default RTT.
          ##
-         wait = 3 * self._rtt
+         wait = 1.5 * self._rtt
+
          def afterwait():
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             shutdown()
-         self.result.log.append((perf_counter(), None, None, "Sleeping for <strong>%s ms</strong> ..." % (1000. * wait)))
+
          def beforewait():
+            self.result.log.append((perf_counter(), None, None, "Sleeping for <strong>%s ms</strong> ..." % (1000. * wait)))
             reactor.callLater(wait, afterwait)
-         reactor.callLater(0, beforewait)
+
+         if self.params.publicationMethod == 1 and len(d_pl) > 0:
+            d = DeferredList(d_pl)
+            def onres(res):
+               self.result.log.append((perf_counter(), None, None, "Event init call result: %s" % res))
+               beforewait()
+            d.addCallback(onres)
+         else:
+            reactor.callLater(0, beforewait)
 
 
       def launch(_):
@@ -520,7 +533,7 @@ class WampCase2_2_x_x_Base:
          ## before the testee has subscribed all clients as needed.
          ## We need acknowledgement of subscribe for WAMPv2!
          ##
-         wait = 3 * self._rtt
+         wait = 2.5 * self._rtt
          def afterwait():
             self.result.log.append((perf_counter(), None, None, "Continuing test .."))
             test()
