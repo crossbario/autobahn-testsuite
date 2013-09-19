@@ -186,8 +186,11 @@ class ITestRunObserver(Interface):
 
 class ITestCase(Interface):
    """
+   Tests are instantiated as objects providing this interface.
+   They have their run() method called exactly once before
+   being disposed.
    """
-   index = Attribute("""Test case index.""")
+   index = Attribute("""Test case index - a tuple of ints.""")
    description = Attribute("""Test case description.""")
    expectation = Attribute("""Test case expectation.""")
    params = Attribute("""Test case parameters.""")

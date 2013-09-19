@@ -69,6 +69,7 @@ class FuzzingWampClient(object):
       specId, spec = yield self._testDb.getSpecByName(specName)
       casesByTestee = yield self._testDb.generateCasesByTestee(specId)
       _observers = observers_[:]
+      #_observers = observers_
 
       ## publish WAMP event on test case finished
       ##

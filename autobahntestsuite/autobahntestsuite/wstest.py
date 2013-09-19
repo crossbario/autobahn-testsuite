@@ -254,20 +254,25 @@ class WsTestRunner(object):
 
    def startService(self):
 
-      if self.mode == "import":
-         return self.startImportSpec(self.options['spec'])
+      try:
 
-      elif self.mode == "export":
-         return self.startExportSpec(self.options['testset'], self.options.get('spec', None))
+         if self.mode == "import":
+            return self.startImportSpec(self.options['spec'])
 
-      elif self.mode == "fuzzingwampclient":
-         return self.startFuzzingWampClient(self.options['testset'])
+         elif self.mode == "export":
+            return self.startExportSpec(self.options['testset'], self.options.get('spec', None))
 
-      elif self.mode == "web":
-         return self.startWeb(debug = self.debug)
+         elif self.mode == "fuzzingwampclient":
+            return self.startFuzzingWampClient(self.options['testset'])
 
-      else:
-         pass
+         elif self.mode == "web":
+            return self.startWeb(debug = self.debug)
+
+         else:
+            pass
+      except Exception, e:
+         print e
+         reactor.stop()
 
 
       methodMapping = {
@@ -300,18 +305,17 @@ class WsTestRunner(object):
       """
       Start a WAMP fuzzing client test run using a spec previously imported.
       """
-
       testSet = WampCaseSet()
       testDb = TestDb([testSet])
       testRunner = FuzzingWampClient(testDb)
 
       def progress(runId, testRun, testCase, result, remaining):
          if testCase:
-            print "%s - %s%s (%d tests remaining)" % (testRun.testee.name, "PASSED   : " if result.passed else "FAILED  : ", testCase.__class__.__name__, remaining)
+            print "%s - %s %s (%d tests remaining)" % (testRun.testee.name, "PASSED   : " if result.passed else "FAILED  : ", testCase.__class__.__name__, remaining)
          else:
             print "FINISHED : Test run for testee '%s' ended." % testRun.testee.name
 
-      runId, resultIds = yield testRunner.runAndObserve(specName, observers = [progress])
+      runId, resultIds = yield testRunner.runAndObserve(specName, [progress])
 
       print
       print "Tests finished: run ID %s, result IDs %d" % (runId, len(resultIds))
