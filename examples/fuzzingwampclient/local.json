@@ -16,9 +16,10 @@
 
    "testees": [
       {
-         "name": "AutobahnPython",
+         "name": "WebMQ",
          "desc": "This runs 'testeewampserver' from wstest.",
-         "url": "ws://127.0.0.1:9001",
+         "url": "ws://192.168.56.102/ws",
+         "auth": {"authKey": "testsuite", "authSecret": "testsuite"},
          "exclude": [],
          "options":  {
             "randomize": false,
