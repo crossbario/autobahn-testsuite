@@ -42,7 +42,7 @@ PART3 = %s<br>
 
       self.expectedClose = {"closedByMe": False, "closeCode": [self.p.CLOSE_STATUS_CODE_INVALID_PAYLOAD], "requireClean": False}
 
-      self.p.beginMessage(opcode = WebSocketProtocol.MESSAGE_TYPE_TEXT)
+      self.p.beginMessage()
       self.p.beginMessageFrame(len(self.PAYLOAD))
       self.p.sendMessageFrameData(self.PAYLOAD[:12])
       self.p.continueLater(1, self.part2, "A")
