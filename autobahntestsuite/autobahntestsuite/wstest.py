@@ -48,6 +48,10 @@ from fuzzing import FuzzingClientFactory, FuzzingServerFactory
 from wampfuzzing import FuzzingWampClient
 from echo import EchoClientFactory, EchoServerFactory
 from broadcast import BroadcastClientFactory, BroadcastServerFactory
+
+import testee
+import fuzzing
+
 from testee import TesteeClientFactory, TesteeServerFactory
 from wsperfcontrol import WsPerfControlFactory
 from wsperfmaster import WsPerfMasterFactory, WsPerfMasterUiFactory
@@ -132,8 +136,7 @@ class WsTestOptions(usage.Options):
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
       ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) ' '[required in server modes for WSS].')],
-      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) ' '[required in server modes for WSS].')],
-      ['ident', 'i', None, 'Override client or server identifier for testee modes.']
+      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) ' '[required in server modes for WSS].')]
    ]
 
    optFlags = [
@@ -252,25 +255,39 @@ class WsTestRunner(object):
 
    def startService(self):
 
-      try:
+#      try:
 
-         if self.mode == "import":
-            return self.startImportSpec(self.options['spec'])
+      if self.mode == "import":
+         return self.startImportSpec(self.options['spec'])
 
-         elif self.mode == "export":
-            return self.startExportSpec(self.options['testset'], self.options.get('spec', None))
+      elif self.mode == "export":
+         return self.startExportSpec(self.options['testset'], self.options.get('spec', None))
 
-         elif self.mode == "fuzzingwampclient":
-            return self.startFuzzingWampClient(self.options['testset'])
+      elif self.mode == "fuzzingwampclient":
+         return self.startFuzzingWampClient(self.options['testset'])
 
-         elif self.mode == "web":
-            return self.startWeb(debug = self.debug)
+      elif self.mode == "web":
+         return self.startWeb(debug = self.debug)
+         
+      elif self.mode == "testeeclient":
+         return testee.startClient(self.options['wsuri'], debug = self.debug)
 
-         else:
-            pass
-      except Exception, e:
-         print e
-         reactor.stop()
+      elif self.mode == "testeeserver":
+         return testee.startServer(self.options['wsuri'], debug = self.debug)
+
+      elif self.mode == "fuzzingclient":
+         spec = self._loadSpec()
+         return fuzzing.startClient(spec, debug = self.debug)
+
+      elif self.mode == "fuzzingserver":
+         spec = self._loadSpec()
+         return fuzzing.startServer(spec, debug = self.debug)
+
+      else:
+         pass
+      #except Exception, e:
+      #   print e
+      #   reactor.stop()
 
 
       methodMapping = {
@@ -525,8 +542,6 @@ class WsTestRunner(object):
       return True
 
 
-
-
    @inlineCallbacks
    def startFuzzingService(self):
       spec = self._loadSpec()
@@ -600,13 +615,11 @@ class WsTestRunner(object):
       wsuri = str(self.options['wsuri'])
 
       if self.mode == 'testeeserver':
-         factory = TesteeServerFactory(wsuri, self.debug,
-                                       ident = self.options['ident'])
+         factory = TesteeServerFactory(wsuri, self.debug)
          listenWS(factory, self._createWssContext(factory))
 
       elif self.mode == 'testeeclient':
-         factory = TesteeClientFactory(wsuri, self.debug,
-                                       ident = self.options['ident'])
+         factory = TesteeClientFactory(wsuri, self.debug)
          connectWS(factory)
 
       else:

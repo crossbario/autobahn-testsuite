@@ -16,26 +16,31 @@
 ##
 ###############################################################################
 
-import os, json, binascii, time, textwrap
+__all__ = ['startClient', 'startServer']
 
-from twisted.python import log
+
+import os, json, binascii, time, textwrap, pkg_resources
+
+from twisted.python import log, usage
 from twisted.internet import reactor
 
 # for versions
 import autobahn
 import autobahntestsuite
 
+from autobahn.websocket import connectWS, listenWS
+
 from autobahn.websocket import WebSocketProtocol, \
                                WebSocketServerFactory, \
                                WebSocketServerProtocol, \
                                WebSocketClientFactory, \
-                               WebSocketClientProtocol, \
-                               connectWS
+                               WebSocketClientProtocol
 
 from case import Case, \
                  Cases, \
                  CaseCategories, \
                  CaseSubCategories, \
+                 CaseSetname, \
                  CaseBasename
 
 from caseset import CaseSet
@@ -55,6 +60,7 @@ def binLogData(data, maxlen = 64):
    else:
       dd = binascii.b2a_hex(data)
    return dd
+
 
 
 def asciiLogData(data, maxlen = 64, replace = False):
@@ -388,6 +394,7 @@ class FuzzingProtocol:
 
             else:
                raise Exception("fuzzing peer received unknown command" % obj[0])
+
 
 
 class FuzzingFactory:
@@ -1168,7 +1175,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
       self.spec = spec
 
-      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
+      self.CaseSet = CaseSet(CaseSetname, CaseBasename, Cases, CaseCategories, CaseSubCategories)
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
       self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
@@ -1254,3 +1261,44 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       else:
          self.createReports()
          reactor.stop()
+
+
+
+def startClient(spec, debug = False):
+   factory = FuzzingClientFactory(spec, debug)
+   #factory.testData = self.testData
+   # no connectWS done here, since this is done within
+   # FuzzingClientFactory automatically to orchestrate tests
+   return True
+
+
+
+def startServer(spec, sslKey = None, sslCert = None, debug = False):
+   ## use TLS server key/cert from spec, but allow overriding
+   ## from cmd line
+   if sslKey:
+      sslKey = spec.get('key', None)
+   if sslCert:
+      sslCert = spec.get('cert', None)
+
+   factory = FuzzingServerFactory(spec, debug)
+   #factory.testData = self.testData
+
+   if sslKey and sslCert:
+      sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
+   else:
+      sslContext = None
+
+   listenWS(factory, sslContext)
+
+   webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                 "web/fuzzingserver"))
+   curdir = File('.')
+   webdir.putChild('cwd', curdir)
+   web = Site(webdir)
+   if factory.isSecure:
+      reactor.listenSSL(spec.get("webport", 8080), web, context)
+   else:
+      reactor.listenTCP(spec.get("webport", 8080), web)
+
+   return True

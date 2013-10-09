@@ -16,9 +16,13 @@
 ##
 ###############################################################################
 
+__all__ = ['startClient', 'startServer']
+
+
 from twisted.internet import reactor
 
 import autobahn
+from autobahn.websocket import connectWS, listenWS
 
 from autobahn.websocket import WebSocketClientFactory, \
                                WebSocketClientProtocol
@@ -33,6 +37,8 @@ class TesteeServerProtocol(WebSocketServerProtocol):
 
    def onMessage(self, msg, binary):
       self.sendMessage(msg, binary)
+
+
 
 class TesteeServerFactory(WebSocketServerFactory):
 
@@ -77,6 +83,7 @@ class TesteeClientProtocol(WebSocketClientProtocol):
          print "Ok, will run %d cases" % self.factory.endCaseId
       else:
          self.sendMessage(msg, binary)
+
 
 
 class TesteeClientFactory(WebSocketClientFactory):
@@ -131,3 +138,21 @@ class TesteeClientFactory(WebSocketClientFactory):
    def clientConnectionFailed(self, connector, reason):
       print "Connection to %s failed (%s)" % (self.url, reason.getErrorMessage())
       reactor.stop()
+
+
+
+def startClient(wsuri, debug = False):
+   factory = TesteeClientFactory(wsuri, debug)
+   connectWS(factory)
+   return True
+
+
+
+def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+   factory = TesteeServerFactory(wsuri, debug)
+   if sslKey and sslCert:
+      sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
+   else:
+      sslContext = None
+   listenWS(factory, sslContext)
+   return True

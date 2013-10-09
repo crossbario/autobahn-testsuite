@@ -21,6 +21,7 @@ __all__ = ("Cases",
            "CaseSubCategories",
            "CaseBasename",)
 
+CaseSetname = "websocket"
 
 CaseBasename = "Case"
 
