@@ -250,7 +250,6 @@ class WsTestRunner(object):
          log.startLogging(sys.stdout)
 
       self.mode = str(self.options['mode'])
-      self.testData = self._loadTestData()
 
 
    def startService(self):
@@ -546,36 +545,7 @@ class WsTestRunner(object):
    def startFuzzingService(self):
       spec = self._loadSpec()
 
-      if self.mode == 'fuzzingserver':
-         ## use TLS server key/cert from spec, but allow overriding
-         ## from cmd line
-         if not self.options['key']:
-            self.options['key'] = spec.get('key', None)
-         if not self.options['cert']:
-            self.options['cert'] = spec.get('cert', None)
-
-         factory = FuzzingServerFactory(spec, self.debug)
-         factory.testData = self.testData
-         context = self._createWssContext(factory)
-         listenWS(factory, context)
-
-         webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                       "web/fuzzingserver"))
-         curdir = File('.')
-         webdir.putChild('cwd', curdir)
-         web = Site(webdir)
-         if factory.isSecure:
-            reactor.listenSSL(spec.get("webport", 8080), web, context)
-         else:
-            reactor.listenTCP(spec.get("webport", 8080), web)
-
-      elif self.mode == 'fuzzingclient':
-         factory = FuzzingClientFactory(spec, self.debug)
-         factory.testData = self.testData
-         # no connectWS done here, since this is done within
-         # FuzzingClientFactory automatically to orchestrate tests
-
-      elif self.mode == 'fuzzingwampclient':
+      if self.mode == 'fuzzingwampclient':
 
          testSet = WampCaseSet()
          testDb = TestDb([testSet])
@@ -606,21 +576,6 @@ class WsTestRunner(object):
 
       elif self.mode == 'fuzzingwampserver':
          raise Exception("not implemented")
-
-      else:
-         raise Exception("logic error")
-
-
-   def startTesteeService(self):
-      wsuri = str(self.options['wsuri'])
-
-      if self.mode == 'testeeserver':
-         factory = TesteeServerFactory(wsuri, self.debug)
-         listenWS(factory, self._createWssContext(factory))
-
-      elif self.mode == 'testeeclient':
-         factory = TesteeClientFactory(wsuri, self.debug)
-         connectWS(factory)
 
       else:
          raise Exception("logic error")
@@ -775,44 +730,7 @@ class WsTestRunner(object):
       return ssl.DefaultOpenSSLContextFactory(key, cert)
 
 
-   def _loadTestData(self):
-      test_data = {
-         'gutenberg_faust':
-            {'desc': "Human readable text, Goethe's Faust I (German)",
-             'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
-             'file':
-                'pg2229.txt'
-             },
-         'lena512':
-            {'desc': 'Lena Picture, Bitmap 512x512 bw',
-             'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
-             'file': 'lena512.bmp'
-             },
-         'ooms':
-            {'desc': 'A larger PDF',
-             'url':
-                'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
-             'file': '10.1.1.105.5439.pdf'
-             },
-         'json_data1':
-            {'desc': 'Large JSON data file',
-             'url': None,
-             'file': 'data1.json'
-             },
-         'html_data1':
-            {'desc': 'Large HTML file',
-             'url': None,
-             'file': 'data1.html'
-             }
-         }
 
-      for t in test_data:
-         fn = pkg_resources.resource_filename("autobahntestsuite",
-                                              "testdata/%s" %
-                                              test_data[t]['file'])
-         test_data[t]['data'] = open(fn, 'rb').read()
-
-      return test_data
 
 
 
