@@ -30,8 +30,6 @@ from twisted.web.static import File
 from twisted.web.wsgi import WSGIResource
 from twisted.web.resource import Resource
 
-from flask import Flask, render_template
-
 import autobahn
 import autobahntestsuite
 

@@ -22,6 +22,20 @@ __all__ = ['Cases']
 ## Everything else is private.
 Cases = []
 
+import json
+
+from zope.interface import implementer
+
+from twisted.internet import reactor
+from twisted.internet.defer import Deferred, DeferredList
+
+from autobahn.websocket import connectWS
+from autobahn.wamp import WampClientFactory, WampCraClientProtocol
+
+from autobahntestsuite.testrun import TestResult
+from autobahntestsuite.util import AttributeBag, perf_counter
+from autobahntestsuite.interfaces import ITestCase
+
 
 #### BEGIN OF CONFIG
 
@@ -260,22 +274,6 @@ PAYLOADS1 = [["Hello, world!"]]
 
 
 #### END OF CONFIG
-
-
-import json
-
-from zope.interface import implementer
-
-from twisted.internet import reactor
-from twisted.internet.defer import Deferred, DeferredList
-
-from autobahn.websocket import connectWS
-from autobahn.wamp import WampClientFactory, WampCraClientProtocol
-
-from testrun import TestResult
-from util import AttributeBag, perf_counter
-from interfaces import ITestCase
-
 
 
 class WampCase2_2_x_x_Protocol(WampCraClientProtocol):

@@ -39,12 +39,9 @@ from twisted.internet.defer import Deferred, DeferredList, maybeDeferred
 from autobahn.websocket import connectWS
 from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
-from testrun import TestResult
-from util import AttributeBag, perf_counter
-from interfaces import ITestCase
-
-
-
+from autobahntestsuite.testrun import TestResult
+from autobahntestsuite.util import AttributeBag, perf_counter
+from autobahntestsuite.interfaces import ITestCase
 
 
 class WampCase3_1_x_x_Protocol(WampCraClientProtocol):

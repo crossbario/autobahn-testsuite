@@ -28,7 +28,7 @@ from pprint import pprint
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
 
-from util import AttributeBag
+from autobahntestsuite.util import AttributeBag
 from wampcase import WampCase, WampCaseFactory, WampCaseProtocol
 
 

@@ -22,7 +22,7 @@ __all__ = ['Cases']
 ## Everything else is private.
 Cases = []
 
-from util import AttributeBag
+from autobahntestsuite.util import AttributeBag
 from wampcase import WampCase, WampCaseFactory, WampCaseProtocol
 
 

@@ -83,7 +83,7 @@ setup (
    platforms = ('Any'),
    install_requires = ['setuptools',
                        'Twisted>=11.1',
-                       'Autobahn>=0.6.0',
+                       'Autobahn>=0.6.3',
                        'jinja2>=2.6',
                        'klein>=0.2.1'],
    packages = find_packages(),
