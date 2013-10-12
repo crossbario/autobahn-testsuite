@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2012 Tavendo GmbH
+##  Copyright 2012-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -15,6 +15,9 @@
 ##  limitations under the License.
 ##
 ###############################################################################
+
+__all__ = ['startClient', 'startServer']
+
 
 import sys, json, pprint
 
@@ -217,3 +220,12 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
 class WsPerfControlFactory(WebSocketClientFactory):
 
    protocol = WsPerfControlProtocol
+
+
+
+def startClient(wsuri, spec, debug = False):
+   factory = WsPerfControlFactory(wsuri)
+   factory.spec = spec
+   factory.debugWsPerf = spec['options']['debug']
+   connectWS(factory)
+   return True

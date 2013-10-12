@@ -23,6 +23,8 @@ import os, json, binascii, time, textwrap, pkg_resources
 
 from twisted.python import log, usage
 from twisted.internet import reactor
+from twisted.web.server import Site
+from twisted.web.static import File
 
 # for versions
 import autobahn
@@ -1135,7 +1137,7 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
       self.spec = spec
 
-      self.CaseSet = CaseSet(CaseBasename, Cases, CaseCategories, CaseSubCategories)
+      self.CaseSet = CaseSet(CaseSetname, CaseBasename, Cases, CaseCategories, CaseSubCategories)
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
       self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
@@ -1200,7 +1202,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       proto.runCase = proto.Case(proto)
 
       return proto
- 
+
 
    def nextServer(self):
       self.currSpecCase = -1
@@ -1301,7 +1303,7 @@ def loadTestData():
       test_data[t]['data'] = open(fn, 'rb').read()
 
    return test_data
-   
+
 
 def startClient(spec, debug = False):
    factory = FuzzingClientFactory(spec, debug)

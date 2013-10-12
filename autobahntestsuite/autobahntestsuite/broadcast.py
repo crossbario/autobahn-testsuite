@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -16,12 +16,21 @@
 ##
 ###############################################################################
 
+__all__ = ['startClient', 'startServer']
+
+import pkg_resources
 import os, socket, binascii
 
 from twisted.internet import reactor
+from twisted.web.server import Site
+from twisted.web.static import File
 
-from autobahn.websocket import WebSocketClientFactory, WebSocketClientProtocol
-from autobahn.websocket import WebSocketServerFactory, WebSocketServerProtocol
+from autobahn.websocket import connectWS, \
+                               listenWS, \
+                               WebSocketClientFactory, \
+                               WebSocketClientProtocol, \
+                               WebSocketServerFactory, \
+                               WebSocketServerProtocol
 
 
 class BroadcastServerProtocol(WebSocketServerProtocol):
@@ -36,6 +45,7 @@ class BroadcastServerProtocol(WebSocketServerProtocol):
       self.factory.broadcast(msg, binary)
 
 
+
 class BroadcastServerFactory(WebSocketServerFactory):
 
    protocol = BroadcastServerProtocol
@@ -47,9 +57,6 @@ class BroadcastServerFactory(WebSocketServerFactory):
       self.clients = set()
       self.tickcount = 0
       self.tick()
-
-#   def stopFactory(self):
-#      reactor.stop()
 
    def register(self, client):
       self.clients.add(client)
@@ -67,6 +74,7 @@ class BroadcastServerFactory(WebSocketServerFactory):
       reactor.callLater(1, self.tick)
 
 
+
 class BroadcastClientProtocol(WebSocketClientProtocol):
 
    def sendHello(self):
@@ -82,6 +90,8 @@ class BroadcastClientProtocol(WebSocketClientProtocol):
       else:
          print "received: ", msg
 
+
+
 class BroadcastClientFactory(WebSocketClientFactory):
 
    protocol = BroadcastClientProtocol
@@ -89,5 +99,25 @@ class BroadcastClientFactory(WebSocketClientFactory):
    def __init__(self, url, debug = False):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
 
-#   def clientConnectionLost(self, connector, reason):
-#      reactor.stop()
+
+
+def startClient(wsuri, debug = False):
+   factory = BroadcastClientFactory(wsuri, debug)
+   connectWS(factory)
+   return True
+
+
+
+def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+   factory = BroadcastServerFactory(wsuri, debug)
+   if sslKey and sslCert:
+      sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
+   else:
+      sslContext = None
+   listenWS(factory, sslContext)
+
+   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/broadcastserver"))
+   web = Site(webdir)
+   reactor.listenTCP(8080, web)
+
+   return True

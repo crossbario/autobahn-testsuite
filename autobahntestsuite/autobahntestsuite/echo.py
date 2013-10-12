@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -16,14 +16,29 @@
 ##
 ###############################################################################
 
-from autobahn.websocket import WebSocketClientFactory, WebSocketClientProtocol
-from autobahn.websocket import WebSocketServerFactory, WebSocketServerProtocol
+__all__ = ['startClient', 'startServer']
+
+
+import pkg_resources
+
+from twisted.internet import reactor
+from twisted.web.server import Site
+from twisted.web.static import File
+
+from autobahn.websocket import connectWS, \
+                               listenWS, \
+                               WebSocketClientFactory, \
+                               WebSocketClientProtocol, \
+                               WebSocketServerFactory, \
+                               WebSocketServerProtocol
 
 
 class EchoServerProtocol(WebSocketServerProtocol):
 
    def onMessage(self, msg, binary):
       self.sendMessage(msg, binary)
+
+
 
 class EchoServerFactory(WebSocketServerFactory):
 
@@ -33,10 +48,13 @@ class EchoServerFactory(WebSocketServerFactory):
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
 
 
+
 class EchoClientProtocol(WebSocketClientProtocol):
 
    def onMessage(self, msg, binary):
       self.sendMessage(msg, binary)
+
+
 
 class EchoClientFactory(WebSocketClientFactory):
 
@@ -44,3 +62,26 @@ class EchoClientFactory(WebSocketClientFactory):
 
    def __init__(self, url, debug = False):
       WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+
+
+
+def startClient(wsuri, debug = False):
+   factory = EchoClientFactory(wsuri, debug)
+   connectWS(factory)
+   return True
+
+
+
+def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+   factory = EchoServerFactory(wsuri, debug)
+   if sslKey and sslCert:
+      sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
+   else:
+      sslContext = None
+   listenWS(factory, sslContext)
+
+   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/testee"))
+   web = Site(webdir)
+   reactor.listenTCP(8080, web)
+
+   return True

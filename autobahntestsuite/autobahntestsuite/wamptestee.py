@@ -233,3 +233,28 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
         #self.registerForPubSub("http://example.com/event/simple")
         #self.topicservice = MyTopicService([1, 3, 7])
         #self.registerHandlerForPubSub(self.topicservice, "http://example.com/event/")
+
+
+def startWampService(self):
+   wsuri = str(self.options['wsuri'])
+
+   if self.mode == 'wampserver':
+
+      self._setupSite("wamp")
+
+      factory = WampTestServerFactory(wsuri, self.debug)
+      listenWS(factory, self._createWssContext(factory))
+
+   elif self.mode == 'wampclient':
+      raise Exception("not yet implemented")
+
+   elif self.mode == 'wamptesteeserver':
+      factory = WampServerFactory(wsuri, self.debug)
+      factory.protocol = TesteeWampServerProtocol
+      listenWS(factory, self._createWssContext(factory))
+
+   else:
+      raise Exception("logic error")
+
+   return True
+

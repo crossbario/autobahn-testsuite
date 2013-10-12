@@ -125,7 +125,7 @@ class Tabify:
          if i == flexIndicatorIndex:
             N = self._truncate - totalLen
          else:
-            N = int(self._formats[i][1:]) 
+            N = int(self._formats[i][1:])
 
          if fields:
             s = str(fields[i])
@@ -208,7 +208,7 @@ def pprint_timeago(time = False):
       diff = now - time
    elif not time:
       diff = now - now
-     
+
    second_diff = diff.seconds
    day_diff = diff.days
    if day_diff < 0:
@@ -236,3 +236,46 @@ def pprint_timeago(time = False):
    if day_diff < 365:
       return str(day_diff/30) + " months ago"
    return str(day_diff/365) + " years ago"
+
+
+
+# Help string to be presented if the user wants to use an encrypted connection
+# but didn't specify key and / or certificate
+OPENSSL_HELP = """
+Server key and certificate required for WSS
+To generate server test key/certificate:
+
+openssl genrsa -out server.key 2048
+openssl req -new -key server.key -out server.csr
+openssl x509 -req -days 3650 -in server.csr -signkey server.key -out server.crt
+
+Then start wstest:
+
+wstest -m echoserver -w wss://localhost:9000 -k server.key -c server.crt
+"""
+
+
+def _createWssContext(self, options, factory):
+   """Create an SSL context factory for WSS connections.
+   """
+
+   if not factory.isSecure:
+      return None
+
+   # Check if an OpenSSL library can be imported; abort if it's missing.
+   try:
+      from twisted.internet import ssl
+   except ImportError, e:
+      print ("You need OpenSSL/pyOpenSSL installed for secure WebSockets"
+             "(wss)!")
+      sys.exit(1)
+
+   # Make sure the necessary options ('key' and 'cert') are available
+   if options['key'] is None or options['cert'] is None:
+      print OPENSSL_HELP
+      sys.exit(1)
+
+   # Create the context factory based on the given key and certificate
+   key = str(options['key'])
+   cert = str(options['cert'])
+   return ssl.DefaultOpenSSLContextFactory(key, cert)

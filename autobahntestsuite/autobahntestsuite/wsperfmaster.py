@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2012 Tavendo GmbH
+##  Copyright 2012-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -16,6 +16,10 @@
 ##
 ###############################################################################
 
+
+__all__ = ['startServer']
+
+
 import sys, json, pprint
 
 from twisted.python import log
@@ -23,13 +27,20 @@ from twisted.python import log
 from autobahn.util import newid, utcnow
 
 from autobahn.httpstatus import HTTP_STATUS_CODE_BAD_REQUEST
+
 from autobahn.websocket import HttpException
-from autobahn.websocket import WebSocketServerFactory, WebSocketServerProtocol
-from autobahn.wamp import WampServerFactory, WampServerProtocol, exportRpc
+from autobahn.websocket import listenWS, \
+                               WebSocketServerFactory, \
+                               WebSocketServerProtocol
+
+from autobahn.wamp import WampServerFactory, \
+                          WampServerProtocol, \
+                          exportRpc
 
 
 URI_RPC = "http://wsperf.org/api#"
 URI_EVENT = "http://wsperf.org/event#"
+
 
 
 class WsPerfMasterProtocol(WebSocketServerProtocol):
@@ -129,6 +140,7 @@ class WsPerfMasterProtocol(WebSocketServerProtocol):
          self.protocolError("unexpected binary message")
 
 
+
 class WsPerfMasterFactory(WebSocketServerFactory):
 
    protocol = WsPerfMasterProtocol
@@ -200,6 +212,7 @@ class WsPerfMasterFactory(WebSocketServerFactory):
       #del self.runs[runId]
 
 
+
 class WsPerfMasterUiProtocol(WampServerProtocol):
 
    @exportRpc
@@ -242,3 +255,30 @@ class WsPerfMasterUiFactory(WampServerFactory):
                'workerId': workerId,
                'result': result}
       self._dispatchEvent(URI_EVENT + "caseResult", event)
+
+
+
+def startServer(self, debug = False):
+   ## WAMP Server for wsperf slaves
+   ##
+   wsperf = WsPerfMasterFactory("ws://localhost:9090")
+   wsperf.debugWsPerf = debug
+   listenWS(wsperf)
+
+   ## Web Server for UI static files
+   ##
+   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wsperfmaster"))
+   web = Site(webdir)
+   reactor.listenTCP(8080, web)
+
+   ## WAMP Server for UI
+   ##
+   wsperfUi = WsPerfMasterUiFactory("ws://localhost:9091")
+   wsperfUi.debug = debug
+   wsperfUi.debugWamp = debug
+   listenWS(wsperfUi)
+
+   ## Connect servers
+   ##
+   wsperf.uiFactory = wsperfUi
+   wsperfUi.slaveFactory = wsperf

@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -124,3 +124,17 @@ class MassConnectTest:
          r = yield t.run()
          res.append(r)
       returnValue(res)
+
+
+def startMassConnect(self):
+   spec = self._loadSpec()
+
+   test = MassConnectTest(spec)
+   d = test.run()
+
+   def onTestEnd(res):
+      print res
+      reactor.stop()
+
+   d.addCallback(onTestEnd)
+

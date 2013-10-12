@@ -97,7 +97,7 @@ class TesteeClientFactory(WebSocketClientFactory):
       ## enable permessage-XXX compression extensions
       ##
       offers = [PerMessageDeflateOffer()]
-#      offers = [PerMessageSnappyOffer(), PerMessageBzip2Offer(), PerMessageDeflateOffer()]
+      #offers = [PerMessageSnappyOffer(), PerMessageBzip2Offer(), PerMessageDeflateOffer()]
       self.setProtocolOptions(perMessageCompressionOffers = offers)
 
       def accept(response):
