@@ -13,6 +13,9 @@ clean:
 	rm -rf ./build
 	rm -rf ./dist
 	find . -name '*.pyc' -exec rm -f {} \;
+	rm -f ./*.json
+	rm -rf ./reports
+	rm -f ./.wstest.db
 
 build:
 	python setup.py bdist_egg
