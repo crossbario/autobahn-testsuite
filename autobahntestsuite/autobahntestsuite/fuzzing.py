@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-__all__ = ['startClient', 'startServer']
+__all__ = ['startClient', 'startServer', 'WS_COMPRESSION_TESTDATA']
 
 
 import os, json, binascii, time, textwrap, pkg_resources
@@ -1265,49 +1265,8 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          reactor.stop()
 
 
-def loadTestData():
-   test_data = {
-      'gutenberg_faust':
-         {'desc': "Human readable text, Goethe's Faust I (German)",
-          'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
-          'file':
-             'pg2229.txt'
-          },
-      'lena512':
-         {'desc': 'Lena Picture, Bitmap 512x512 bw',
-          'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
-          'file': 'lena512.bmp'
-          },
-      'ooms':
-         {'desc': 'A larger PDF',
-          'url':
-             'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
-          'file': '10.1.1.105.5439.pdf'
-          },
-      'json_data1':
-         {'desc': 'Large JSON data file',
-          'url': None,
-          'file': 'data1.json'
-          },
-      'html_data1':
-         {'desc': 'Large HTML file',
-          'url': None,
-          'file': 'data1.html'
-          }
-      }
-
-   for t in test_data:
-      fn = pkg_resources.resource_filename("autobahntestsuite",
-                                           "testdata/%s" %
-                                           test_data[t]['file'])
-      test_data[t]['data'] = open(fn, 'rb').read()
-
-   return test_data
-
-
 def startClient(spec, debug = False):
    factory = FuzzingClientFactory(spec, debug)
-   factory.testData = loadTestData()
    # no connectWS done here, since this is done within
    # FuzzingClientFactory automatically to orchestrate tests
    return True
@@ -1323,7 +1282,6 @@ def startServer(spec, sslKey = None, sslCert = None, debug = False):
       sslCert = spec.get('cert', None)
 
    factory = FuzzingServerFactory(spec, debug)
-   factory.testData = loadTestData()
 
    if sslKey and sslCert:
       sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)

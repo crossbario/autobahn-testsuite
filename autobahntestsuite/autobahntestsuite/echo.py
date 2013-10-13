@@ -19,12 +19,6 @@
 __all__ = ['startClient', 'startServer']
 
 
-import pkg_resources
-
-from twisted.internet import reactor
-from twisted.web.server import Site
-from twisted.web.static import File
-
 from autobahn.websocket import connectWS, \
                                listenWS, \
                                WebSocketClientFactory, \
@@ -79,9 +73,5 @@ def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
    else:
       sslContext = None
    listenWS(factory, sslContext)
-
-   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/testee"))
-   web = Site(webdir)
-   reactor.listenTCP(8080, web)
 
    return True

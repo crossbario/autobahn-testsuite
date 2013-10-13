@@ -16,9 +16,9 @@
 ##
 ###############################################################################
 
-__all__ = ['Case12_7_X', 'Case12_8_X']
+__all__ = ['Case12_X_X']
 
-import copy, os
+import copy, os, pkg_resources
 
 from case import Case
 from autobahn.compress import *
@@ -31,12 +31,47 @@ tests = [(0, 1000, 60),
          (1024, 1000, 240),
          (4096, 1000, 480)]
 
-Case12_7_X = []
-Case12_8_X = []
+
+WS_COMPRESSION_TESTDATA = {
+   'gutenberg_faust':
+      {'desc': "Human readable text, Goethe's Faust I (German)",
+       'url': 'http://www.gutenberg.org/cache/epub/2229/pg2229.txt',
+       'file': 'pg2229.txt',
+       'binary': True
+       },
+   'lena512':
+      {'desc': 'Lena Picture, Bitmap 512x512 bw',
+       'url': 'http://www.ece.rice.edu/~wakin/images/lena512.bmp',
+       'file': 'lena512.bmp',
+       'binary': True
+       },
+   'ooms':
+      {'desc': 'A larger PDF',
+       'url': 'http://citeseerx.ist.psu.edu/viewdoc/summary?doi=10.1.1.105.5439',
+       'file': '10.1.1.105.5439.pdf',
+       'binary': True
+       },
+   'json_data1':
+      {'desc': 'Large JSON data file',
+       'url': None,
+       'file': 'data1.json',
+       'binary': False
+       },
+   'html_data1':
+      {'desc': 'Large HTML file',
+       'url': None,
+       'file': 'data1.html',
+       'binary': False
+       }
+}
+
+
+Case12_X_X = []
 
 
 def __init__(self, protocol):
    Case.__init__(self, protocol)
+
 
 def init(self):
    self.reportTime = True
@@ -74,14 +109,13 @@ def init(self):
       self.p.perMessageCompressionAccept = accept
 
 
-   #self.payload = "Hello, world!" * 4096
-   #self.payload = self.payload[:self.LEN]
-   #print self.__class__.__name__
-   if self.BINARY:
-      self.payload = self.p.factory.testData['ooms']['data'][:self.LEN]
-      #self.payload = os.urandom(self.LEN)
-   else:
-      self.payload = self.p.factory.testData['gutenberg_faust']['data'][:self.LEN]
+   self.payloadRXPtr = 0
+   self.payloadTXPtr = 0
+
+   fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % self.TESTDATA['file'])
+   self.testData = open(fn, 'rb').read()
+   self.testDataLen = len(self.testData)
+
 
 def onOpen(self):
    self.p.enableWirelog(False)
@@ -96,9 +130,22 @@ def onOpen(self):
       self.count = 0
       self.sendOne()
 
+
 def sendOne(self):
-   self.p.sendMessage(self.payload, self.BINARY)
+   if self.LEN > 0:
+      idxFrom = self.payloadRXPtr
+      idxTo = (self.payloadRXPtr + self.LEN) % self.testDataLen
+      if idxTo > idxFrom:
+         msg = self.testData[idxFrom:idxTo]
+      else:
+         msg = self.testData[idxFrom:] + self.testData[:idxTo]
+      self.payloadRXPtr = idxTo
+   else:
+      msg = ''
+
+   self.p.sendMessage(msg, self.BINARY)
    self.count += 1
+
 
 def onMessage(self, msg, binary):
    if binary != self.BINARY or len(msg) != self.LEN:
@@ -115,23 +162,20 @@ def onMessage(self, msg, binary):
       self.p.enableWirelog(True)
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
 
-for b in [False, True]:
+
+j = 1
+for td in WS_COMPRESSION_TESTDATA:
    i = 1
    for s in tests:
-      if b:
-         mt = "binary"
-         cc = "Case12_8_%d"
-      else:
-         mt = "text"
-         cc = "Case12_7_%d"
-      DESCRIPTION = """Send %d %s messages of payload size %d to measure implementation/network RTT (round trip time) / latency.""" % (s[1], mt, s[0])
-      EXPECTATION = """Receive echo'ed %s messages (with payload as sent). Timeout case after %d secs.""" % (mt, s[2])
-      C = type(cc % i,
+      cc = "Case12_%d_%d" % (j, i)
+      DESCRIPTION = """Send %d messages of payload size %d to measure implementation/network RTT (round trip time) / latency.""" % (s[1], s[0])
+      EXPECTATION = """Receive echo'ed messages (with payload as sent). Timeout case after %d secs.""" % (s[2])
+      C = type(cc,
                 (object, Case, ),
                 {"LEN": s[0],
                  "COUNT": s[1],
                  "WAITSECS": s[2],
-                 "BINARY": b,
+                 "TESTDATA": WS_COMPRESSION_TESTDATA[td],
                  "DESCRIPTION": """%s""" % DESCRIPTION,
                  "EXPECTATION": """%s""" % EXPECTATION,
                  "__init__": __init__,
@@ -140,8 +184,6 @@ for b in [False, True]:
                  "onMessage": onMessage,
                  "sendOne": sendOne,
                  })
-      if b:
-         Case12_7_X.append(C)
-      else:
-         Case12_8_X.append(C)
+      Case12_X_X.append(C)
       i += 1
+   j += 1

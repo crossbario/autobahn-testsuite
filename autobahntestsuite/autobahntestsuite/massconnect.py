@@ -16,6 +16,9 @@
 ##
 ###############################################################################
 
+__all__ = ['startClient']
+
+
 import time, sys
 
 from twisted.internet import defer, reactor
@@ -126,15 +129,7 @@ class MassConnectTest:
       returnValue(res)
 
 
-def startMassConnect(self):
-   spec = self._loadSpec()
-
+def startClient(self, spec, debug = False):
    test = MassConnectTest(spec)
    d = test.run()
-
-   def onTestEnd(res):
-      print res
-      reactor.stop()
-
-   d.addCallback(onTestEnd)
-
+   return d

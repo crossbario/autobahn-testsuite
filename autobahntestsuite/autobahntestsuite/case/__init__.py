@@ -69,7 +69,7 @@ CaseSubCategories = {"1.1": "Text Messages",
 #                     "7.10": "Close frame structure: invalid close codes (peer initiated)",
 #                     "7.11": "Peer initiated timeouts",
                      "7.13": "Informational close information (fuzzer initiated)",
-                     
+
                      "9.1": "Text Message (increasing size)",
                      "9.2": "Binary Message (increasing size)",
                      "9.3": "Fragmented Text Message (fixed size, increasing fragment size)",
@@ -256,7 +256,7 @@ from case9_9_1 import *
 
 from case10_1_1 import *
 
-from case12_7_x import *
+from case12_X_X import *
 
 
 ##
@@ -299,5 +299,4 @@ Cases += [Case10_1_1]
 
 #Cases += [Case12_1_1]
 
-Cases.extend(Case12_7_X)
-Cases.extend(Case12_8_X)
+Cases.extend(Case12_X_X)

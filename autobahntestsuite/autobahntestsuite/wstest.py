@@ -19,7 +19,7 @@
 ## don't touch: must be first import!
 import choosereactor
 
-import os, json
+import os, json, sys, pkg_resources
 
 from twisted.internet import reactor
 from twisted.python import log, usage
@@ -54,6 +54,7 @@ from spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGWAMPCLIENT, \
                          SPEC_WSPERFCONTROL, \
                          SPEC_MASSCONNECT
+
 
 
 class WsTestOptions(usage.Options):
@@ -246,6 +247,10 @@ class WsTestRunner(object):
 
       elif self.mode == "wsperfmaster":
          return wsperfmaster.startServer(debug = self.debug)
+
+      elif self.mode == "massconnect":
+         spec = self._loadSpec()
+         return massconnect.startClient(spec, debug = self.debug)
 
       else:
          raise Exception("no mode '%s'" % self.mode)
