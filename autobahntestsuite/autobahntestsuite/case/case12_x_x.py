@@ -16,7 +16,7 @@
 ##
 ###############################################################################
 
-__all__ = ['Case12_X_X']
+__all__ = ['Case12_X_X', 'Case12_X_X_CaseSubCategories']
 
 import copy, os, pkg_resources
 
@@ -24,12 +24,17 @@ from case import Case
 from autobahn.compress import *
 
 ## list of (payload length, message count, case timeout)
-tests = [(0, 1000, 60),
-         (16, 1000, 60),
-         (64, 1000, 60),
-         (256, 1000, 120),
-         (1024, 1000, 240),
-         (4096, 1000, 480)]
+tests = [(16,     1000, 60),
+         (64,     1000, 60),
+         (256,    1000, 120),
+         (1024,   1000, 240),
+         (4096,   1000, 480),
+         (8192,   1000, 480),
+         (16384,  1000, 480),
+         (32768,  1000, 480),
+         (65536,  1000, 480),
+         (131072, 1000, 480),
+         ]
 
 
 WS_COMPRESSION_TESTDATA = {
@@ -143,12 +148,12 @@ def sendOne(self):
    else:
       msg = ''
 
-   self.p.sendMessage(msg, self.BINARY)
+   self.p.sendMessage(msg, self.TESTDATA['binary'])
    self.count += 1
 
 
 def onMessage(self, msg, binary):
-   if binary != self.BINARY or len(msg) != self.LEN:
+   if binary != self.TESTDATA['binary'] or len(msg) != self.LEN:
       self.behavior = Case.FAILED
       self.result = "Echo'ed message type or length differs from what I sent (got binary = %s, payload length = %s)." % (binary, len(msg))
       self.p.enableWirelog(True)
@@ -163,8 +168,17 @@ def onMessage(self, msg, binary):
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
 
 
+Case12_X_X_CaseSubCategories = {}
+
 j = 1
 for td in WS_COMPRESSION_TESTDATA:
+
+   isBinary = WS_COMPRESSION_TESTDATA[td]["binary"]
+   fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % WS_COMPRESSION_TESTDATA[td]['file'])
+   fileSize = os.path.getsize(fn)
+
+   Case12_X_X_CaseSubCategories['12.%d' % j] = WS_COMPRESSION_TESTDATA[td]["desc"] + (" (%s, %s bytes)" % ("binary" if isBinary else "utf8", fileSize))
+
    i = 1
    for s in tests:
       cc = "Case12_%d_%d" % (j, i)

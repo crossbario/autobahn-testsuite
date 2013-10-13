@@ -91,7 +91,7 @@ class TesteeClientFactory(WebSocketClientFactory):
    protocol = TesteeClientProtocol
 
    def __init__(self, url, debug = False, ident = None):
-      WebSocketClientFactory.__init__(self, url, debug = debug, debugCodePaths = debug)
+      WebSocketClientFactory.__init__(self, url, useragent = ident, debug = debug, debugCodePaths = debug)
       self.setProtocolOptions(failByDrop = False) # spec conformance
 
       ## enable permessage-XXX compression extensions
@@ -141,8 +141,8 @@ class TesteeClientFactory(WebSocketClientFactory):
 
 
 
-def startClient(wsuri, debug = False):
-   factory = TesteeClientFactory(wsuri, debug)
+def startClient(wsuri, ident = None, debug = False):
+   factory = TesteeClientFactory(wsuri, ident = ident, debug = debug)
    connectWS(factory)
    return True
 

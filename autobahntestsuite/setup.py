@@ -39,6 +39,7 @@ Contains about 300 test cases covering
    * Limits/Performance
    * Closing Handshake
    * Opening Handshake (under development)
+   * WebSocket compression (permessage-deflate extension)
 
 Besides the automated test suite, wstest also includes a number
 of other handy developer tools:

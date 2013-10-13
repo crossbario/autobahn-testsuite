@@ -117,8 +117,9 @@ class WsTestOptions(usage.Options):
       ['testset', 't', None, 'Run a test set from an import test spec.'],
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
-      ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) ' '[required in server modes for WSS].')],
-      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) ' '[required in server modes for WSS].')]
+      ['ident', 'i', None, ('Testee client identifier [optional for client testees].')],
+      ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) [required in server modes for WSS].')],
+      ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) [required in server modes for WSS].')]
    ]
 
    optFlags = [
@@ -216,7 +217,7 @@ class WsTestRunner(object):
          return self.startWeb(debug = self.debug)
 
       elif self.mode == "testeeclient":
-         return testee.startClient(self.options['wsuri'], debug = self.debug)
+         return testee.startClient(self.options['wsuri'], ident = self.options['ident'], debug = self.debug)
 
       elif self.mode == "testeeserver":
          return testee.startServer(self.options['wsuri'], debug = self.debug)

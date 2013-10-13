@@ -47,7 +47,7 @@ CaseCategories = {"0": "Handshake",
                   "8": "Misc",
                   "9": "Limits/Performance",
                   "10": "Misc",
-                  "12": "Compression Limits/Performance"}
+                  "12": "WebSocket Compression"}
 
 CaseSubCategories = {"1.1": "Text Messages",
                      "1.2": "Binary Messages",
@@ -80,10 +80,7 @@ CaseSubCategories = {"1.1": "Text Messages",
                      "9.8": "Binary Message Roundtrip Time (fixed number, increasing size)",
                      "9.9": "Text Message (unlimited size)",
                      "9.10": "Binary Message (unlimited size)",
-                     "10.1": "Auto-Fragmentation",
-
-                     "12.7": "Compressed Text Message Roundtrip Time (fixed number, increasing size)",
-                     "12.8": "Compressed Binary Message Roundtrip Time (fixed number, increasing size)",
+                     "10.1": "Auto-Fragmentation"
                      }
 
 ##
@@ -256,7 +253,7 @@ from case9_9_1 import *
 
 from case10_1_1 import *
 
-from case12_X_X import *
+from case12_x_x import *
 
 
 ##
@@ -297,6 +294,5 @@ Cases.extend(Case9_8_X)
 
 Cases += [Case10_1_1]
 
-#Cases += [Case12_1_1]
-
 Cases.extend(Case12_X_X)
+CaseSubCategories.update(Case12_X_X_CaseSubCategories)
