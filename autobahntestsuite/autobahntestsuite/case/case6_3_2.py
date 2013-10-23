@@ -31,6 +31,9 @@ class Case6_3_2(Case6_3_1):
    def onOpen(self):
 
       self.expected[Case.OK] = []
-      self.expectedClose = {"closedByMe":False,"closeCode":[self.p.CLOSE_STATUS_CODE_INVALID_PAYLOAD],"requireClean":False}
+      self.expectedClose = {"closedByMe": False,
+                            "closeCode": [self.p.CLOSE_STATUS_CODE_INVALID_PAYLOAD],
+                            "requireClean": False,
+                            "closedByWrongEndpointIsFatal": True}
       self.p.sendMessage(self.PAYLOAD, binary = False, payload_frag_size = 1)
       self.p.killAfter(1)

@@ -29,10 +29,10 @@ class Case:
    FAILED_BY_CLIENT = "FAILED BY CLIENT"
    INFORMATIONAL = "INFORMATIONAL"
    UNIMPLEMENTED = "UNIMPLEMENTED"
-   
+
    # to remove
    NO_CLOSE = "NO_CLOSE"
-   
+
    SUBCASES = []
 
    def __init__(self, protocol):
@@ -82,10 +82,10 @@ class Case:
    def onPong(self, payload):
       self.received.append(("pong", payload))
       self.finishWhenDone()
-   
+
    def onClose(self, wasClean, code, reason):
       pass
-   
+
    def compare(self, obj1, obj2):
       return pickle.dumps(obj1) == pickle.dumps(obj2)
 
@@ -97,6 +97,7 @@ class Case:
             self.passed = True
             self.result = "Actual events match at least one expected."
             break
+
       # check the close status
       if self.expectedClose["closedByMe"] != self.p.closedByMe:
          self.behaviorClose = Case.FAILED
@@ -114,12 +115,19 @@ class Case:
          self.behaviorClose = Case.OK
          self.resultClose = "Connection was properly closed"
 
+      ## for UTF8 tests, closing by wrong endpoint means case failure, since
+      ## the peer then did not detect the invalid UTF8 at all
+      ##
+      closedByWrongEndpointIsFatal = self.expectedClose.get("closedByWrongEndpointIsFatal", False)
+      if closedByWrongEndpointIsFatal and self.expectedClose["closedByMe"] != self.p.closedByMe:
+         self.behavior = Case.FAILED
+
    def finishWhenDone(self):
-      # if we match at least one expected outcome check if we are supposed to 
+      # if we match at least one expected outcome check if we are supposed to
       # start the closing handshake and if so, do it.
       for e in self.expected:
          if not self.compare(self.received, self.expected[e]):
             return
       if self.expectedClose["closedByMe"] and not self.suppressClose:
          self.p.sendClose(self.expectedClose["closeCode"][0])
-               
+
