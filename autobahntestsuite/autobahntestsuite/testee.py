@@ -24,6 +24,8 @@ from twisted.internet import reactor
 import autobahn
 from autobahn.websocket import connectWS, listenWS
 
+from autobahn.websocket import WebSocketProtocol
+
 from autobahn.websocket import WebSocketClientFactory, \
                                WebSocketClientProtocol
 
@@ -33,16 +35,42 @@ from autobahn.websocket import WebSocketServerFactory, \
 from autobahn.compress import *
 
 
+
 class TesteeServerProtocol(WebSocketServerProtocol):
 
    def onMessage(self, msg, binary):
       self.sendMessage(msg, binary)
 
 
+class StreamingTesteeServerProtocol(WebSocketServerProtocol):
+
+   def onMessageBegin(self, opcode):
+      #print "onMessageBegin"
+      WebSocketServerProtocol.onMessageBegin(self, opcode)
+      self.beginMessage(binary = opcode == WebSocketProtocol.MESSAGE_TYPE_BINARY)
+
+   def onMessageFrameBegin(self, length, reserved):
+      #print "onMessageFrameBegin", length
+      WebSocketServerProtocol.onMessageFrameBegin(self, length, reserved)
+      self.beginMessageFrame(length)
+
+   def onMessageFrameData(self, data):
+      #print "onMessageFrameData", len(data)
+      self.sendMessageFrameData(data)
+
+   def onMessageFrameEnd(self):
+      #print "onMessageFrameEnd"
+      pass
+
+   def onMessageEnd(self):
+      #print "onMessageEnd"
+      self.endMessage()
+
 
 class TesteeServerFactory(WebSocketServerFactory):
 
    protocol = TesteeServerProtocol
+   #protocol = StreamingTesteeServerProtocol
 
    def __init__(self, url, debug = False, ident = None):
       if ident is not None:
@@ -50,7 +78,9 @@ class TesteeServerFactory(WebSocketServerFactory):
       else:
          server = "AutobahnPython/%s" % autobahn.version
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
-      self.setProtocolOptions(failByDrop = False) # spec conformance
+      #self.setProtocolOptions(failByDrop = False) # spec conformance
+      self.setProtocolOptions(failByDrop = True) # needed for streaming mode
+      #self.setProtocolOptions(utf8validateIncoming = False)
 
       ## enable permessage-XXX compression extensions
       ##
@@ -78,6 +108,7 @@ class TesteeClientProtocol(WebSocketClientProtocol):
          print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peerstr)
 
    def onMessage(self, msg, binary):
+      raise Exception("sdfs")
       if self.factory.endCaseId is None:
          self.factory.endCaseId = int(msg)
          print "Ok, will run %d cases" % self.factory.endCaseId
