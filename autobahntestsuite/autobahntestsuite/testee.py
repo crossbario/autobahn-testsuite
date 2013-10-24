@@ -78,8 +78,8 @@ class TesteeServerFactory(WebSocketServerFactory):
       else:
          server = "AutobahnPython/%s" % autobahn.version
       WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
-      #self.setProtocolOptions(failByDrop = False) # spec conformance
-      self.setProtocolOptions(failByDrop = True) # needed for streaming mode
+      self.setProtocolOptions(failByDrop = False) # spec conformance
+      #self.setProtocolOptions(failByDrop = True) # needed for streaming mode
       #self.setProtocolOptions(utf8validateIncoming = False)
 
       ## enable permessage-XXX compression extensions
