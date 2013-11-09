@@ -230,15 +230,13 @@ def createValidUtf8TestSequences():
    return VALID_UTF8_TEST_SEQUENCES
 
 
-def test_utf8(UTF8_TEST_SEQUENCES):
+def test_utf8(validator):
    """
    These tests verify the UTF-8 decoder/validator on the various test cases from
    http://www.cl.cam.ac.uk/~mgk25/ucs/examples/UTF-8-test.txt
    """
-
-   v = Utf8Validator()
    vs = []
-   for k in UTF8_TEST_SEQUENCES:
+   for k in createUtf8TestSequences():
       vs.extend(k[1])
 
    # All Unicode code points
@@ -262,40 +260,51 @@ def test_utf8(UTF8_TEST_SEQUENCES):
          vs.append((False, ss1 + ss2))
          vs.append((False, ss2 + ss1))
 
+   print "testing validator %s on %d UTF8 sequences" % (validator, len(vs))
+
    # now test and assert ..
    for s in vs:
-      v.reset()
-      r = v.validate(s[1])
+      validator.reset()
+      r = validator.validate(s[1])
       res = r[0] and r[1] # no UTF-8 decode error and everything consumed
       assert res == s[0]
 
+   print "ok, validator works!"
+   print
 
-def test_utf8_incremental():
+
+def test_utf8_incremental(validator, withPositions = True):
    """
    These tests verify that the UTF-8 decoder/validator can operate incrementally.
    """
+   if withPositions:
+      k = 4
+      print "testing validator %s on incremental detection with positions" % validator
+   else:
+      k = 2
+      print "testing validator %s on incremental detection without positions" % validator
 
-   v = Utf8Validator()
+   validator.reset()
+   assert (True, True, 15, 15)[:k] == validator.validate("µ@ßöäüàá")[:k]
 
-   v.reset()
-   assert (True, True, 15, 15) == v.validate("µ@ßöäüàá")
-
-   v.reset()
-   assert (False, False, 0, 0) == v.validate("\xF5")
+   validator.reset()
+   assert (False, False, 0, 0)[:k] == validator.validate("\xF5")[:k]
 
    ## the following 3 all fail on eating byte 7 (0xA0)
-   v.reset()
-   assert (True, True, 6, 6) == v.validate("\x65\x64\x69\x74\x65\x64")
-   assert (False, False, 1, 7) == v.validate("\xED\xA0\x80")
+   validator.reset()
+   assert (True, True, 6, 6)[:k] == validator.validate("\x65\x64\x69\x74\x65\x64")[:k]
+   assert (False, False, 1, 7)[:k] == validator.validate("\xED\xA0\x80")[:k]
 
-   v.reset()
-   assert (True, True, 4, 4) == v.validate("\x65\x64\x69\x74")
-   assert (False, False, 3, 7) == v.validate("\x65\x64\xED\xA0\x80")
+   validator.reset()
+   assert (True, True, 4, 4)[:k] == validator.validate("\x65\x64\x69\x74")[:k]
+   assert (False, False, 3, 7)[:k] == validator.validate("\x65\x64\xED\xA0\x80")[:k]
 
-   v.reset()
-   assert (True, False, 7, 7) == v.validate("\x65\x64\x69\x74\x65\x64\xED")
-   assert (False, False, 0, 7) == v.validate("\xA0\x80")
+   validator.reset()
+   assert (True, False, 7, 7)[:k] == validator.validate("\x65\x64\x69\x74\x65\x64\xED")[:k]
+   assert (False, False, 0, 7)[:k] == validator.validate("\xA0\x80")[:k]
 
+   print "ok, validator works!"
+   print
 
 
 Case6_X_X = []
@@ -410,10 +419,10 @@ if __name__ == '__main__':
    """
    Run unit tests.
    """
-   #test_utf8_incremental()
 
-   #UTF8_TEST_SEQUENCES = createUtf8TestSequences()
-   #test_utf8(UTF8_TEST_SEQUENCES)
+   validator = Utf8Validator()
+   test_utf8(validator)
+   test_utf8_incremental(validator, withPositions = True)
 
    #TESTPOINTS = [(0xfffb, u'\ufffb'),
    #              # (0xd807, u'\ud807'), # Jython does not like this
@@ -421,5 +430,5 @@ if __name__ == '__main__':
    #              (0x110000, None)]
    #test_encode(TESTPOINTS)
 
-   from pprint import pprint
-   pprint(createValidUtf8TestSequences())
+   #from pprint import pprint
+   #pprint(createValidUtf8TestSequences())
