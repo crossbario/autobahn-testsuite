@@ -30,9 +30,13 @@ from autobahn.websocket import WebSocketClientFactory, WebSocketClientProtocol
 
 class MassConnectProtocol(WebSocketClientProtocol):
 
+   wasHandshaked = False
+
    def onOpen(self):
       ## WebSocket opening handshake complete => log
       self.factory.test.onConnected()
+      self.factory.test.protos.append(self)
+      self.wasHandshaked = True
 
 
 class MassConnectFactory(WebSocketClientFactory):
@@ -61,6 +65,7 @@ class MassConnect:
       self.targetCnt = connections
       self.currentCnt = 0
       self.actual = 0
+      self.protos = []
 
    def run(self):
       self.d = Deferred()
@@ -70,10 +75,13 @@ class MassConnect:
 
    def onFailed(self):
       self.failed += 1
+      sys.stdout.write("!")
       return True
 
    def onLost(self):
       self.lost += 1
+      #sys.stdout.write("*")
+      return False
       return True
 
    def onConnected(self):
@@ -91,7 +99,9 @@ class MassConnect:
                    'lost': self.lost,
                    'failed': self.failed,
                    'duration': duration}
-         self.d.callback(result)
+         for p in self.protos:
+            p.sendClose()
+         #self.d.callback(result)
 
    def connectBunch(self):
       if self.currentCnt + self.batchsize < self.targetCnt:
@@ -116,6 +126,7 @@ class MassConnectTest:
 
    @inlineCallbacks
    def run(self):
+      print self.spec
       res = []
       for s in self.spec['servers']:
          t = MassConnect(s['name'],
@@ -129,7 +140,7 @@ class MassConnectTest:
       returnValue(res)
 
 
-def startClient(self, spec, debug = False):
+def startClient(spec, debug = False):
    test = MassConnectTest(spec)
    d = test.run()
    return d
