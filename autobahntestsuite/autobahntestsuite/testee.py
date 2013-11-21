@@ -108,7 +108,6 @@ class TesteeClientProtocol(WebSocketClientProtocol):
          print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peerstr)
 
    def onMessage(self, msg, binary):
-      raise Exception("sdfs")
       if self.factory.endCaseId is None:
          self.factory.endCaseId = int(msg)
          print "Ok, will run %d cases" % self.factory.endCaseId
