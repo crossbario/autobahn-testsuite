@@ -23,9 +23,9 @@ import sys, json, pprint
 
 from twisted.internet import reactor
 
-from autobahn.websocket import WebSocketClientFactory, \
-                               WebSocketClientProtocol, \
-                               connectWS
+from autobahn.twisted.websocket import WebSocketClientFactory, \
+                                       WebSocketClientProtocol, \
+                                       connectWS
 
 from autobahn.util import newid
 

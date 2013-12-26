@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2012-2013 Tavendo GmbH
+##  Copyright (C) 2012-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -26,12 +26,12 @@ from twisted.python import log
 
 from autobahn.util import newid, utcnow
 
-from autobahn.httpstatus import HTTP_STATUS_CODE_BAD_REQUEST
+from autobahn.websocket.http import HttpException, \
+                                    HTTP_STATUS_CODE_BAD_REQUEST
 
-from autobahn.websocket import HttpException
-from autobahn.websocket import listenWS, \
-                               WebSocketServerFactory, \
-                               WebSocketServerProtocol
+from autobahn.twisted.websocket import listenWS, \
+                                       WebSocketServerFactory, \
+                                       WebSocketServerProtocol
 
 from autobahn.wamp import WampServerFactory, \
                           WampServerProtocol, \

@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -22,17 +22,17 @@ __all__ = ['startClient', 'startServer']
 from twisted.internet import reactor
 
 import autobahn
-from autobahn.websocket import connectWS, listenWS
+from autobahn.twisted.websocket import connectWS, listenWS
 
-from autobahn.websocket import WebSocketProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
 
-from autobahn.websocket import WebSocketClientFactory, \
-                               WebSocketClientProtocol
+from autobahn.twisted.websocket import WebSocketClientFactory, \
+                                       WebSocketClientProtocol
 
-from autobahn.websocket import WebSocketServerFactory, \
-                               WebSocketServerProtocol
+from autobahn.twisted.websocket import WebSocketServerFactory, \
+                                       WebSocketServerProtocol
 
-from autobahn.compress import *
+from autobahn.websocket.compress import *
 
 
 

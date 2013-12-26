@@ -20,7 +20,7 @@
 
 import binascii
 from case import Case
-from autobahn.utf8validator import Utf8Validator
+from autobahn.websocket.utf8validator import Utf8Validator
 
 
 def createUtf8TestSequences():

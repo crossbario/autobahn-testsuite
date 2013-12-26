@@ -20,7 +20,7 @@
 
 import binascii
 from case import Case
-from autobahn.websocket import WebSocketProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
 
 
 class Case6_4_1(Case):

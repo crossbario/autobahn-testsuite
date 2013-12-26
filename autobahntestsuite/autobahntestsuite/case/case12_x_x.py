@@ -21,7 +21,7 @@ __all__ = ['Case12_X_X', 'Case12_X_X_CaseSubCategories']
 import copy, os, pkg_resources
 
 from case import Case
-from autobahn.compress import *
+from autobahn.websocket.compress import *
 
 ## list of (payload length, message count, case timeout)
 tests = [(16,     1000, 60),

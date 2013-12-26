@@ -18,6 +18,7 @@
 
 from case import Case
 
+
 class Case7_13_2(Case):
 
    DESCRIPTION = """Send close with close code 65536"""

@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -25,12 +25,12 @@ from twisted.internet import reactor
 from twisted.web.server import Site
 from twisted.web.static import File
 
-from autobahn.websocket import connectWS, \
-                               listenWS, \
-                               WebSocketClientFactory, \
-                               WebSocketClientProtocol, \
-                               WebSocketServerFactory, \
-                               WebSocketServerProtocol
+from autobahn.twisted.websocket import connectWS, \
+                                       listenWS, \
+                                       WebSocketClientFactory, \
+                                       WebSocketClientProtocol, \
+                                       WebSocketServerFactory, \
+                                       WebSocketServerProtocol
 
 
 class BroadcastServerProtocol(WebSocketServerProtocol):

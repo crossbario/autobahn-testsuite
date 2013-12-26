@@ -30,13 +30,12 @@ from twisted.web.static import File
 import autobahn
 import autobahntestsuite
 
-from autobahn.websocket import connectWS, listenWS
+from autobahn.twisted.websocket import connectWS, listenWS
 
-from autobahn.websocket import WebSocketProtocol, \
-                               WebSocketServerFactory, \
-                               WebSocketServerProtocol, \
-                               WebSocketClientFactory, \
-                               WebSocketClientProtocol
+from autobahn.twisted.websocket import WebSocketServerFactory, \
+                                       WebSocketServerProtocol, \
+                                       WebSocketClientFactory, \
+                                       WebSocketClientProtocol
 
 from case import Case, \
                  Cases, \

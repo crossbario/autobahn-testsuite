@@ -24,8 +24,8 @@ import time, sys
 from twisted.internet import defer, reactor
 from twisted.internet.defer import Deferred, returnValue, inlineCallbacks
 
-from autobahn.websocket import connectWS
-from autobahn.websocket import WebSocketClientFactory, WebSocketClientProtocol
+from autobahn.twisted.websocket import connectWS
+from autobahn.twisted.websocket import WebSocketClientFactory, WebSocketClientProtocol
 
 
 class MassConnectProtocol(WebSocketClientProtocol):

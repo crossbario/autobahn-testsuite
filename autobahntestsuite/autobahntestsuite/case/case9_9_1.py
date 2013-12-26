@@ -19,7 +19,7 @@
 ###############################################################################
 
 from case import Case
-from autobahn.websocket import WebSocketProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
 import binascii
 from zope.interface import implements
 from twisted.internet import reactor, interfaces

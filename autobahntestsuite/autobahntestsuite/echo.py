@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2013 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -19,12 +19,12 @@
 __all__ = ['startClient', 'startServer']
 
 
-from autobahn.websocket import connectWS, \
-                               listenWS, \
-                               WebSocketClientFactory, \
-                               WebSocketClientProtocol, \
-                               WebSocketServerFactory, \
-                               WebSocketServerProtocol
+from autobahn.twisted.websocket import connectWS, \
+                                       listenWS, \
+                                       WebSocketClientFactory, \
+                                       WebSocketClientProtocol, \
+                                       WebSocketServerFactory, \
+                                       WebSocketServerProtocol
 
 
 class EchoServerProtocol(WebSocketServerProtocol):

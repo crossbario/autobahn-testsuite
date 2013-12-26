@@ -29,7 +29,7 @@ from zope.interface import implementer
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
 
-from autobahn.websocket import connectWS
+from autobahn.twisted.websocket import connectWS
 from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from autobahntestsuite.testrun import TestResult
