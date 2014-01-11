@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright (C) 2012-2013 Tavendo GmbH
+##  Copyright (C) 2012-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -26,8 +26,7 @@ from twisted.python import log
 
 from autobahn.util import newid, utcnow
 
-from autobahn.websocket.http import HttpException, \
-                                    HTTP_STATUS_CODE_BAD_REQUEST
+from autobahn.websocket import http
 
 from autobahn.twisted.websocket import listenWS, \
                                        WebSocketServerFactory, \
@@ -58,8 +57,8 @@ class WsPerfMasterProtocol(WebSocketServerProtocol):
       if 'wsperf' in connectionRequest.protocols:
          return 'wsperf'
       else:
-         raise HttpException(httpstatus.HTTP_STATUS_CODE_BAD_REQUEST[0],
-                             "You need to speak wsperf subprotocol with this server!")
+         raise http.HttpException(http.HTTP_STATUS_CODE_BAD_REQUEST[0],
+                                  "You need to speak wsperf subprotocol with this server!")
 
    def onOpen(self):
       self.pp = pprint.PrettyPrinter(indent = 3)

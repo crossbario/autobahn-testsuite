@@ -49,7 +49,7 @@ class WampCaseProtocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
-      self.factory.log("WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server, self.peerstr))
+      self.factory.log("WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server, self.peer))
 
       self.factory.result.observed[self.session_id] = []
 

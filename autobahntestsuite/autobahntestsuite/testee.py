@@ -105,7 +105,7 @@ class TesteeClientProtocol(WebSocketClientProtocol):
       if self.factory.endCaseId is None:
          print "Getting case count .."
       elif self.factory.currentCaseId <= self.factory.endCaseId:
-         print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peerstr)
+         print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peer)
 
    def onMessage(self, msg, binary):
       if self.factory.endCaseId is None:

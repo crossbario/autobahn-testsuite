@@ -29,8 +29,8 @@ from autobahn.twisted.websocket import connectWS, \
 
 class EchoServerProtocol(WebSocketServerProtocol):
 
-   def onMessage(self, msg, binary):
-      self.sendMessage(msg, binary)
+   def onMessage(self, payload, isBinary):
+      self.sendMessage(payload, isBinary)
 
 
 
@@ -45,8 +45,8 @@ class EchoServerFactory(WebSocketServerFactory):
 
 class EchoClientProtocol(WebSocketClientProtocol):
 
-   def onMessage(self, msg, binary):
-      self.sendMessage(msg, binary)
+   def onMessage(self, payload, isBinary):
+      self.sendMessage(payload, isBinary)
 
 
 

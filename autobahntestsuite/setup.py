@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -83,8 +83,7 @@ setup (
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
    install_requires = ['setuptools',
-                       'Twisted>=11.1',
-                       'Autobahn>=0.6.3',
+                       'autobahn[twisted]>=0.7.4',
                        'jinja2>=2.6',
                        'klein>=0.2.1'],
    packages = find_packages(),

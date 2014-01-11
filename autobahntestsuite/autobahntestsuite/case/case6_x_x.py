@@ -328,7 +328,7 @@ def onOpen(self):
                             "requireClean": False,
                             "closedByWrongEndpointIsFatal": True}
 
-   self.p.sendMessage(self.PAYLOAD, binary = False)
+   self.p.sendMessage(self.PAYLOAD, False)
    self.p.killAfter(0.5)
 
 
