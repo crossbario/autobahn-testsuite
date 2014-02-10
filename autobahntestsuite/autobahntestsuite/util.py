@@ -26,8 +26,8 @@ from twisted.python import log
 
 import autobahn
 import autobahntestsuite
-from autobahn.utf8validator import Utf8Validator
-from autobahn.xormasker import XorMaskerNull
+from autobahn.websocket.utf8validator import Utf8Validator
+from autobahn.websocket.xormasker import XorMaskerNull
 
 
 

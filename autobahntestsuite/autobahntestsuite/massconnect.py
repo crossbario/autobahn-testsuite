@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ import time, sys
 from twisted.internet import defer, reactor
 from twisted.internet.defer import Deferred, returnValue, inlineCallbacks
 
-from autobahn.websocket import connectWS
-from autobahn.websocket import WebSocketClientFactory, WebSocketClientProtocol
+from autobahn.twisted.websocket import connectWS, \
+                                       WebSocketClientFactory, \
+                                       WebSocketClientProtocol
 
 
 class MassConnectProtocol(WebSocketClientProtocol):

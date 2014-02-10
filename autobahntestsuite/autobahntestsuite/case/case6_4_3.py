@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@
 import binascii
 from case import Case
 from case6_4_1 import Case6_4_1
-from autobahn.websocket import WebSocketProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
 
 
 class Case6_4_3(Case6_4_1):

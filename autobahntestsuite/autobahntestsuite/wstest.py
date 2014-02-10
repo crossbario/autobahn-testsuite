@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -29,8 +29,8 @@ from twisted.internet.defer import Deferred
 ## for versions
 import autobahn
 import autobahntestsuite
-from autobahn.utf8validator import Utf8Validator
-from autobahn.xormasker import XorMaskerNull
+from autobahn.websocket.utf8validator import Utf8Validator
+from autobahn.websocket.xormasker import XorMaskerNull
 
 ## WebSocket testing modes
 import testee

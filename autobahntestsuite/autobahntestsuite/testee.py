@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -22,36 +22,35 @@ __all__ = ['startClient', 'startServer']
 from twisted.internet import reactor
 
 import autobahn
-from autobahn.websocket import connectWS, listenWS
 
-from autobahn.websocket import WebSocketProtocol
+from autobahn.twisted.websocket import connectWS, listenWS
 
-from autobahn.websocket import WebSocketClientFactory, \
-                               WebSocketClientProtocol
+from autobahn.twisted.websocket import WebSocketClientFactory, \
+                                       WebSocketClientProtocol
 
-from autobahn.websocket import WebSocketServerFactory, \
-                               WebSocketServerProtocol
+from autobahn.twisted.websocket import WebSocketServerFactory, \
+                                       WebSocketServerProtocol
 
-from autobahn.compress import *
+from autobahn.websocket.compress import *
 
 
 
 class TesteeServerProtocol(WebSocketServerProtocol):
 
-   def onMessage(self, msg, binary):
-      self.sendMessage(msg, binary)
+   def onMessage(self, payload, isBinary):
+      self.sendMessage(payload, isBinary)
 
 
 class StreamingTesteeServerProtocol(WebSocketServerProtocol):
 
-   def onMessageBegin(self, opcode):
+   def onMessageBegin(self, isBinary):
       #print "onMessageBegin"
-      WebSocketServerProtocol.onMessageBegin(self, opcode)
-      self.beginMessage(binary = opcode == WebSocketProtocol.MESSAGE_TYPE_BINARY)
+      WebSocketServerProtocol.onMessageBegin(self, isBinary)
+      self.beginMessage(isBinary = isBinary)
 
-   def onMessageFrameBegin(self, length, reserved):
-      #print "onMessageFrameBegin", length
-      WebSocketServerProtocol.onMessageFrameBegin(self, length, reserved)
+   def onMessageFrameBegin(self, length):
+      #print "onMessageFrameBegin"
+      WebSocketServerProtocol.onMessageFrameBegin(self, length)
       self.beginMessageFrame(length)
 
    def onMessageFrameData(self, data):

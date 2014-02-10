@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@
 
 import binascii
 from case import Case
-from autobahn.utf8validator import Utf8Validator
+from autobahn.websocket.utf8validator import Utf8Validator
 
 
 def createUtf8TestSequences():

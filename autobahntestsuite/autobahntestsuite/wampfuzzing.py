@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2013 Tavendo GmbH
+##  Copyright (C) 2013-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -27,9 +27,9 @@ from twisted.internet.defer import returnValue, \
 import autobahn
 import autobahntestsuite
 
-from autobahn.wamp import exportRpc, \
-                          WampServerProtocol, \
-                          WampServerFactory
+from autobahn.wamp1.protocol import exportRpc, \
+                                    WampServerProtocol, \
+                                    WampServerFactory
 
 from interfaces import ITestRunner, ITestDb
 from rinterfaces import RITestDb, RITestRunner

@@ -2,7 +2,7 @@
 
 ###############################################################################
 ##
-##  Copyright 2011 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@
 ###############################################################################
 
 from case import Case
-from autobahn.websocket import WebSocketProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
 import binascii
 from zope.interface import implements
 from twisted.internet import reactor, interfaces

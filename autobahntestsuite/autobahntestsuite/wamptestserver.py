@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011,2012 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -20,11 +20,11 @@ import math, shelve, decimal
 
 from twisted.internet import reactor, defer
 
-from autobahn.wamp import exportRpc, \
-                          exportSub, \
-                          exportPub, \
-                          WampServerFactory, \
-                          WampServerProtocol
+from autobahn.wamp1.protocol import exportRpc, \
+                                    exportSub, \
+                                    exportPub, \
+                                    WampServerFactory, \
+                                    WampServerProtocol
 
 
 class Simple:

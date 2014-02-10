@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -30,13 +30,12 @@ from twisted.web.static import File
 import autobahn
 import autobahntestsuite
 
-from autobahn.websocket import connectWS, listenWS
-
-from autobahn.websocket import WebSocketProtocol, \
-                               WebSocketServerFactory, \
-                               WebSocketServerProtocol, \
-                               WebSocketClientFactory, \
-                               WebSocketClientProtocol
+from autobahn.websocket.protocol import WebSocketProtocol
+from autobahn.twisted.websocket import connectWS, listenWS
+from autobahn.twisted.websocket import WebSocketServerFactory, \
+                                       WebSocketServerProtocol, \
+                                       WebSocketClientFactory, \
+                                       WebSocketClientProtocol
 
 from case import Case, \
                  Cases, \
