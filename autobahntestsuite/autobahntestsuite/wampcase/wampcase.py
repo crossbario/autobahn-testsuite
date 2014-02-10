@@ -26,7 +26,7 @@ from zope.interface import implementer
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList, maybeDeferred
 
-from autobahn.websocket import connectWS
+from autobahn.twisted.websocket import connectWS
 from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from autobahntestsuite.testrun import TestResult
@@ -49,7 +49,7 @@ class WampCaseProtocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
-      self.factory.log("WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server, self.peerstr))
+      self.factory.log("WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server, self.peer))
 
       self.factory.result.observed[self.session_id] = []
 

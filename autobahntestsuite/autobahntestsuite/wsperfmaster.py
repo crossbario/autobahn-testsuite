@@ -58,8 +58,7 @@ class WsPerfMasterProtocol(WebSocketServerProtocol):
       if 'wsperf' in connectionRequest.protocols:
          return 'wsperf'
       else:
-         raise HttpException(httpstatus.BAD_REQUEST[0],
-                             "You need to speak wsperf subprotocol with this server!")
+         raise HttpException(BAD_REQUEST[0], "You need to speak wsperf subprotocol with this server!")
 
    def onOpen(self):
       self.pp = pprint.PrettyPrinter(indent = 3)

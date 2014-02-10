@@ -35,5 +35,5 @@ class Case6_2_1(Case):
       self.expectedClose = {"closedByMe": True,
                             "closeCode": [self.p.CLOSE_STATUS_CODE_NORMAL],
                             "requireClean": True}
-      self.p.sendMessage(self.PAYLOAD, binary = False)
+      self.p.sendMessage(self.PAYLOAD, isBinary = False)
       self.p.closeAfter(1)

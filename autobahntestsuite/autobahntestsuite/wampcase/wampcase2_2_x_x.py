@@ -29,7 +29,7 @@ from zope.interface import implementer
 from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
 
-from autobahn.websocket import connectWS
+from autobahn.twisted.websocket import connectWS
 from autobahn.wamp import WampClientFactory, WampCraClientProtocol
 
 from autobahntestsuite.testrun import TestResult
@@ -280,7 +280,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
 
    def onSessionOpen(self):
-      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server ,self.peerstr)))
+      self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP session opened to <strong>%s</strong> at <strong>%s</strong>." % (self.session_server, self.peer)))
       if self.test.testee.auth:
          d = self.authenticate(**self.test.testee.auth)
          d.addCallbacks(self.onAuthSuccess, self.onAuthError)

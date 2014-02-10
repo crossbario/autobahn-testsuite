@@ -22,6 +22,7 @@ __all__ = ['startClient', 'startServer']
 from twisted.internet import reactor
 
 import autobahn
+<<<<<<< HEAD
 
 from autobahn.twisted.websocket import connectWS, listenWS
 
@@ -104,10 +105,9 @@ class TesteeClientProtocol(WebSocketClientProtocol):
       if self.factory.endCaseId is None:
          print "Getting case count .."
       elif self.factory.currentCaseId <= self.factory.endCaseId:
-         print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peerstr)
+         print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peer)
 
    def onMessage(self, msg, binary):
-      raise Exception("sdfs")
       if self.factory.endCaseId is None:
          self.factory.endCaseId = int(msg)
          print "Ok, will run %d cases" % self.factory.endCaseId

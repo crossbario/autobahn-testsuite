@@ -40,5 +40,5 @@ class Case6_3_1(Case):
                             "closeCode": [self.p.CLOSE_STATUS_CODE_INVALID_PAYLOAD],
                             "requireClean": False,
                             "closedByWrongEndpointIsFatal": True}
-      self.p.sendMessage(self.PAYLOAD, binary = False)
+      self.p.sendMessage(self.PAYLOAD, isBinary = False)
       self.p.killAfter(1)

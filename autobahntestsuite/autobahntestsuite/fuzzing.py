@@ -156,8 +156,8 @@ class FuzzingProtocol:
                        "rxFrameStats": self.rxFrameStats,
                        "txOctetStats": self.txOctetStats,
                        "txFrameStats": self.txFrameStats,
-                       "httpRequest": self.http_request_data,
-                       "httpResponse": self.http_response_data,
+                       "httpRequest": self.http_request_data if hasattr(self, 'http_request_data') else '?',
+                       "httpResponse": self.http_response_data if hasattr(self, 'http_response_data') else '?',
                        "trafficStats": self.runCase.trafficStats.__json__() if self.runCase.trafficStats else None}
 
          def cleanBin(e_old):
@@ -183,9 +183,6 @@ class FuzzingProtocol:
          ## now log the case results
          ##
          self.factory.logCase(caseResult)
-
-      # parent's connectionLost does useful things
-      WebSocketProtocol.connectionLost(self,reason)
 
 
    def enableWirelog(self, enable):
@@ -1050,7 +1047,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
    def onConnect(self, connectionRequest):
       if self.debug:
-         log.msg("connection received from %s speaking WebSockets protocol %d - upgrade request for host '%s', path '%s', params %s, origin '%s', protocols %s, headers %s" % (connectionRequest.peerstr, connectionRequest.version, connectionRequest.host, connectionRequest.path, str(connectionRequest.params), connectionRequest.origin, str(connectionRequest.protocols), str(connectionRequest.headers)))
+         log.msg("connection received from %s speaking WebSockets protocol %d - upgrade request for host '%s', path '%s', params %s, origin '%s', protocols %s, headers %s" % (connectionRequest.peer, connectionRequest.version, connectionRequest.host, connectionRequest.path, str(connectionRequest.params), connectionRequest.origin, str(connectionRequest.protocols), str(connectionRequest.headers)))
 
       if connectionRequest.params.has_key("agent"):
          if len(connectionRequest.params["agent"]) > 1:
@@ -1082,12 +1079,12 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
          if not self.caseAgent:
             raise Exception("need agent to run case")
          self.caseStarted = utcnow()
-         print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, connectionRequest.peerstr)
+         print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, connectionRequest.peer)
 
       elif connectionRequest.path == "/updateReports":
          if not self.caseAgent:
             raise Exception("need agent to update reports for")
-         print "Updating reports, requested by peer %s" % connectionRequest.peerstr
+         print "Updating reports, requested by peer %s" % connectionRequest.peer
 
       elif connectionRequest.path == "/getCaseInfo":
          if not self.Case:
@@ -1103,7 +1100,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
          pass
 
       else:
-         print "Entering direct command mode for peer %s" % connectionRequest.peerstr
+         print "Entering direct command mode for peer %s" % connectionRequest.peer
 
       self.path = connectionRequest.path
 
@@ -1152,7 +1149,7 @@ class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
       FuzzingProtocol.connectionMade(self)
       WebSocketClientProtocol.connectionMade(self)
       self.caseStarted = utcnow()
-      print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, self.peerstr)
+      print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, self.peer)
 
 
    def connectionLost(self, reason):

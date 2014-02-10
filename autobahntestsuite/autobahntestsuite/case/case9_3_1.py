@@ -36,20 +36,20 @@ class Case9_3_1(Case):
       self.behavior = Case.FAILED
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.result = "Did not receive message within %d seconds." % self.WAITSECS
-      self.p.sendMessage(payload = self.PAYLOAD, binary = False, payload_frag_size = self.FRAGSIZE)
+      self.p.sendMessage(payload = self.PAYLOAD, isBinary = False, fragmentSize = self.FRAGSIZE)
       self.p.closeAfter(self.WAITSECS)
 
-   def onMessage(self, msg, binary):
-      if binary:
+   def onMessage(self, payload, isBinary):
+      if isBinary:
          self.result = "Expected text message with payload, but got binary."
       else:
-         if len(msg) != self.DATALEN:
-            self.result = "Expected text message with payload of length %d, but got %d." % (self.DATALEN, len(msg))
+         if len(payload) != self.DATALEN:
+            self.result = "Expected text message with payload of length %d, but got %d." % (self.DATALEN, len(payload))
          else:
             ## FIXME : check actual content
             ##
             self.behavior = Case.OK
-            self.result = "Received text message of length %d." % len(msg)
+            self.result = "Received text message of length %d." % len(payload)
       self.p.createWirelog = True
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
 
