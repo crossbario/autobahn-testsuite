@@ -69,19 +69,20 @@ class WsTestOptions(usage.Options):
             'broadcastserver',
             'fuzzingserver',
             'fuzzingclient',
-            'fuzzingwampserver',
-            'fuzzingwampclient',
+            #'fuzzingwampserver',
+            #'fuzzingwampclient',
             'testeeserver',
             'testeeclient',
-            'wsperfcontrol',
-            'wsperfmaster',
-            'wampserver',
-            'wamptesteeserver',
-            'wampclient',
+            #'wsperfcontrol',
+            #'wsperfmaster',
+            #'wampserver',
+            #'wamptesteeserver',
+            #'wampclient',
             'massconnect',
-            'web',
-            'import',
-            'export']
+            #'web',
+            #'import',
+            #'export',
+            ]
 
    # Modes that need a specification file
    MODES_NEEDING_SPEC = ['fuzzingclient',
@@ -174,7 +175,7 @@ class WsTestRunner(object):
       print "Using Twisted reactor class %s" % str(reactor.__class__)
       print "Using UTF8 Validator class %s" % str(Utf8Validator)
       print "Using XOR Masker classes %s" % str(XorMaskerNull)
-      print "Using JSON processor module '%s'" % str(autobahn.wamp.json_lib.__name__)
+      #print "Using JSON processor module '%s'" % str(autobahn.wamp.json_lib.__name__)
       print
 
       if self.mode == "import":

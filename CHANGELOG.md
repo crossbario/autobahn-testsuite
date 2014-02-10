@@ -1,5 +1,11 @@
 # AutobahnTestSuite: Changelog
 
+## v0.6.0
+ * compatibility with Autobahn|Python 0.8.1
+
+## v0.5.7
+ * compatibility with Autobahn|Python 0.7.0
+
 ## v0.5.6
  * compatiblity with AutobahnPython 0.6.3
  * new test section for testing WebSocket compression extension (`permessage-deflate` etc)

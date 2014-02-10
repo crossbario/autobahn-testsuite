@@ -235,26 +235,14 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
         #self.registerHandlerForPubSub(self.topicservice, "http://example.com/event/")
 
 
-def startWampService(self):
-   wsuri = str(self.options['wsuri'])
+def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+   factory = WampServerFactory(wsuri, self.debug)
+   factory.protocol = TesteeWampServerProtocol
 
-   if self.mode == 'wampserver':
-
-      self._setupSite("wamp")
-
-      factory = WampTestServerFactory(wsuri, self.debug)
-      listenWS(factory, self._createWssContext(factory))
-
-   elif self.mode == 'wampclient':
-      raise Exception("not yet implemented")
-
-   elif self.mode == 'wamptesteeserver':
-      factory = WampServerFactory(wsuri, self.debug)
-      factory.protocol = TesteeWampServerProtocol
-      listenWS(factory, self._createWssContext(factory))
-
+   if sslKey and sslCert:
+      sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
    else:
-      raise Exception("logic error")
+      sslContext = None
 
+   listenWS(factory, sslContext)
    return True
-

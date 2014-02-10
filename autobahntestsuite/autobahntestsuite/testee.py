@@ -22,7 +22,6 @@ __all__ = ['startClient', 'startServer']
 from twisted.internet import reactor
 
 import autobahn
-<<<<<<< HEAD
 
 from autobahn.twisted.websocket import connectWS, listenWS
 
