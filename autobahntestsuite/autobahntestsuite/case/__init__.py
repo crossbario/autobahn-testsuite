@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -47,7 +47,9 @@ CaseCategories = {"0": "Handshake",
                   "8": "Misc",
                   "9": "Limits/Performance",
                   "10": "Misc",
-                  "12": "WebSocket Compression"}
+                  "12": "WebSocket Compression (different payloads)",
+                  "13": "WebSocket Compression (different parameters)",
+                  }
 
 CaseSubCategories = {"1.1": "Text Messages",
                      "1.2": "Binary Messages",
@@ -294,5 +296,9 @@ Cases.extend(Case9_8_X)
 
 Cases += [Case10_1_1]
 
+## WebSocket Compression ("permessage-deflate")
 Cases.extend(Case12_X_X)
 CaseSubCategories.update(Case12_X_X_CaseSubCategories)
+
+Cases.extend(Case13_X_X)
+CaseSubCategories.update(Case13_X_X_CaseSubCategories)
