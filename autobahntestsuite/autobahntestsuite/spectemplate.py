@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright 2011-2013 Tavendo GmbH
+##  Copyright (C) 2011-2014 Tavendo GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -27,11 +27,8 @@ __all__= ("SPEC_FUZZINGSERVER",
 SPEC_FUZZINGSERVER = """
 {
    "url": "ws://127.0.0.1:9001",
-
-   "options": {"failByDrop": false},
    "outdir": "./reports/clients",
    "webport": 8080,
-
    "cases": ["*"],
    "exclude-cases": [],
    "exclude-agent-cases": {}
@@ -40,17 +37,13 @@ SPEC_FUZZINGSERVER = """
 
 SPEC_FUZZINGCLIENT = """
 {
-   "options": {"failByDrop": false},
    "outdir": "./reports/servers",
-
    "servers": [
                   {
                      "agent": "AutobahnPython",
-                     "url": "ws://127.0.0.1:9001",
-                     "options": {"version": 18}
+                     "url": "ws://127.0.0.1:9001"
                   }
-               ],
-
+              ],
    "cases": ["*"],
    "exclude-cases": [],
    "exclude-agent-cases": {}

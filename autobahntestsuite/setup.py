@@ -83,7 +83,7 @@ setup (
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
    install_requires = ['setuptools',
-                       'autobahn[twisted]>=0.8.1',
+                       'autobahn[twisted]>=0.8.5',
                        'jinja2>=2.6',
                        'klein>=0.2.1'],
    packages = find_packages(),

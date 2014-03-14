@@ -1129,6 +1129,7 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
       ## WebSocket protocol options
       ##
+      self.setProtocolOptions(failByDrop = False) # spec conformance
       self.setProtocolOptions(**spec.get("options", {}))
 
       self.spec = spec
@@ -1149,6 +1150,11 @@ class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
       FuzzingProtocol.connectionMade(self)
       WebSocketClientProtocol.connectionMade(self)
       self.caseStarted = utcnow()
+
+
+   def onConnect(self, response):
+      if not self.caseAgent:
+         self.caseAgent = response.headers.get('server', 'UnknownServer')
       print "Running test case ID %s for agent %s from peer %s" % (self.factory.CaseSet.caseClasstoId(self.Case), self.caseAgent, self.peer)
 
 
@@ -1180,7 +1186,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       print "Autobahn Fuzzing WebSocket Client (Autobahn Version %s / Autobahn Testsuite Version %s)" % (autobahntestsuite.version, autobahn.version)
       print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
-      print "Servers = %s" % str([x["url"] + "@" + x["agent"] for x in spec["servers"]])
+      print "Servers = %s" % str([x["url"] for x in spec["servers"]])
 
       self.currServer = -1
       if self.nextServer():
@@ -1210,7 +1216,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
          ## agent (=server) string for reports
          ##
-         self.agent = server.get("agent", "UnknownServer")
+         self.agent = server.get("agent")
 
          ## WebSocket session parameters
          ##
@@ -1222,6 +1228,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          ## WebSocket protocol options
          ##
          self.resetProtocolOptions() # reset to defaults
+         self.setProtocolOptions(failByDrop = False) # spec conformance
          self.setProtocolOptions(**self.spec.get("options", {})) # set spec global options
          self.setProtocolOptions(**server.get("options", {})) # set server specific options
          return True
