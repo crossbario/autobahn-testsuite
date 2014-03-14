@@ -21,14 +21,14 @@ from setuptools import setup, find_packages
 LONGSDESC = """
 Twisted-based WebSocket/WAMP protocol implementation test suite.
 
-AutobahnTestSuite provides a fully automated test suite to verify client and
+Autobahn|Testsuite provides a fully automated test suite to verify client and
 server implementations of the WebSocket protocol.
 
 The test suite will check an implementation by doing basic WebSocket
 conversations, extensive protocol compliance verification and
 performance and limits testing.
 
-Contains about 300 test cases covering
+Contains over 500 test cases covering
 
    * Framing
    * Pings/Pongs
@@ -53,6 +53,7 @@ of other handy developer tools:
 More information:
 
    * http://autobahn.ws/testsuite
+   * https://github.com/tavendo/AutobahnTestSuite
    * http://tools.ietf.org/html/rfc6455
    * http://wamp.ws
 """

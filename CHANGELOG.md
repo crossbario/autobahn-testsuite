@@ -1,5 +1,8 @@
-# AutobahnTestSuite: Changelog
+# Autobahn|Testsuite - Changelog
 
+## v0.6.1
+ * permessage-deflate tests with different parameters and fragmentation
+ 
 ## v0.6.0
  * compatibility with Autobahn|Python 0.8.1
 

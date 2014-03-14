@@ -89,8 +89,6 @@ WS_COMPRESSION_TESTDATA = {
 
 
 
-
-
 def __init__(self, protocol):
    Case.__init__(self, protocol)
 

@@ -1,9 +1,8 @@
-AutobahnTestsuite
-=================
+# Autobahn|Testsuite
 
-The AutobahnTestsuite provides a fully automated test suite to verify client and server implementations of [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455) for specification conformance and implementation robustness.
+The **Autobahn**|Testsuite provides a fully automated test suite to verify client and server implementations of [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455) for specification conformance and implementation robustness.
 
-AutobahnTestsuite also provides a couple of other tools useful for WebSocket
+**Autobahn**|Testsuite also provides a couple of other tools useful for WebSocket
 (and [WAMP](http://wamp.ws)) implementors and developers.
 
 
@@ -14,7 +13,7 @@ The test suite will check an implementation by doing basic WebSocket
 conversations, extensive protocol compliance verification and performance
 and limits testing.
 
-Contains about 300 test cases covering
+Contains over 500 test cases covering
 
  * Framing
  * Pings/Pongs
@@ -25,6 +24,7 @@ Contains about 300 test cases covering
  * Limits/Performance
  * Closing Handshake
  * Opening Handshake (under development)
+ * WebSocket compression ([permessage-deflate extension](https://tools.ietf.org/html/draft-ietf-hybi-permessage-compression))
 
 
 Other Tools
@@ -44,18 +44,20 @@ also includes a number of other handy modes:
 Prerequisites
 -------------
 
-AutobahnTestSuite is implemented in Python. It should run anywhere where
+**Autobahn**|Testsuite is implemented in Python. It should run anywhere where
 Python is available.
 
 You will need:
 
   * [Python](http://www.python.org)
-  * [Python Setuptools](http://pypi.python.org/pypi/setuptools)
+  * [pip](https://pypi.python.org/pypi/pip)
   * [Twisted](http://twistedmatrix.com)
 
 Recommended is using the latest Python 2.7 release, Python 2.6 works also fine, but Python 3 won't cut it.
 
-On Windows, for best performance, you might want to run Twisted under IOCP reactor. For that,
+For best performance, you should run on [PyPy](http://pypy.org/).
+
+On Windows, for better performance, you might want to run Twisted under IOCP reactor. For that,
 you will need
 
   * [PyWin32](http://sourceforge.net/projects/pywin32/)
@@ -71,7 +73,7 @@ Installation
 
 Open a command shell, and install from Python package index:
 
-    easy_install autobahntestsuite
+    pip install autobahntestsuite
 
 
 Doing so automatically downloads and installs everything needed
@@ -81,7 +83,7 @@ Alternatively, install from sources:
 
     git clone git://github.com/tavendo/AutobahnTestSuite.git
     cd AutobahnTestSuite
-    git checkout v0.5.2
+    git checkout v0.6.1
     cd autobahntestsuite
     python setup.py install
 
