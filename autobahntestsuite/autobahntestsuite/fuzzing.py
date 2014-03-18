@@ -22,7 +22,7 @@ __all__ = ['startClient', 'startServer', 'WS_COMPRESSION_TESTDATA']
 import os, json, binascii, time, textwrap, pkg_resources
 
 from twisted.python import log, usage
-from twisted.internet import reactor
+from twisted.internet import reactor, ssl
 from twisted.web.server import Site
 from twisted.web.static import File
 
@@ -1279,9 +1279,9 @@ def startClient(spec, debug = False):
 def startServer(spec, sslKey = None, sslCert = None, debug = False):
    ## use TLS server key/cert from spec, but allow overriding
    ## from cmd line
-   if sslKey:
+   if not sslKey:
       sslKey = spec.get('key', None)
-   if sslCert:
+   if not sslCert:
       sslCert = spec.get('cert', None)
 
    factory = FuzzingServerFactory(spec, debug)
@@ -1299,7 +1299,7 @@ def startServer(spec, sslKey = None, sslCert = None, debug = False):
    webdir.putChild('cwd', curdir)
    web = Site(webdir)
    if factory.isSecure:
-      reactor.listenSSL(spec.get("webport", 8080), web, context)
+      reactor.listenSSL(spec.get("webport", 8080), web, sslContext)
    else:
       reactor.listenTCP(spec.get("webport", 8080), web)
 
