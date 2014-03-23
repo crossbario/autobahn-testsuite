@@ -1,13 +1,9 @@
 AutobahnTestsuite Documentation
 ===============================
 
-.. |at| replace:: **Autobahn**\|Testuite
+The |ab| provides a fully automated test suite to verify client and server implementations of the 'WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_ for specification conformance and implementation robustness.
 
-- Overview - :ref:`installation` - :ref:`usage`
-
-The |at| provides a fully automated test suite to verify client and server implementations of the 'WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_ for specification conformance and implementation robustness.
-
-|at| also provides a couple of other tools useful for WebSocket (and `WAMP <http://wamp.ws/>`_) implementors and developers.
+|ab| also provides a couple of other tools useful for WebSocket (and `WAMP <http://wamp.ws/>`_) implementors and developers.
 
 
 For installation, see :ref:`installation`. For usage, please see :ref:`usage`.

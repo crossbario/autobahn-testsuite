@@ -3,7 +3,6 @@
 Usage
 =====
 
-.. |at| replace:: **Autobahn**\|Testuite
 
 The test suite is packaged up and installed as a command line tool **wstest**.
 

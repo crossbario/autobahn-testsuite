@@ -3,12 +3,11 @@
 Installation
 ============
 
-.. |at| replace:: **Autobahn**\|Testuite
 
 Prerequisites
 -------------
 
-|at| is implemented in Python. It should run anywhere where Python is available.
+|ab| is implemented in Python. It should run anywhere where Python is available.
 
 You will need:
 
@@ -64,7 +63,7 @@ To test your installation, open a command shell and do:
 
    wstest --help
 
-``wstest`` is the |at| executable and installed in a system-wide location, i.e. on Windows under
+``wstest`` is the |ab| executable and installed in a system-wide location, i.e. on Windows under
 
 ::
 
