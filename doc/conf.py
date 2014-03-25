@@ -286,6 +286,6 @@ rst_epilog = """
 rst_prolog = """
 .. container:: topnav
 
-   :doc:`Overview <index>`   :doc:`installation`  :doc:`usage`
+   :doc:`Overview <index>`   :doc:`installation`  :doc:`usage` :doc:`table_of_contents`
 
 """

@@ -9,3 +9,4 @@ Table of Contents
    index
    installation
    usage
+   self
