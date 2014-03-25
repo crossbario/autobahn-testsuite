@@ -56,7 +56,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
          <li><a href="https://github.com/lipp/lua-websockets" target="_blank">lua-websockets</a></li>
       </ul>
       <ul style="float: left; margin-left: 30px; width: 190px">
-         <li><a href="http://www.tavendo.de/" target="_blank">Tavendo WebMQ</a></li>
+         <li><a href="http://crossbar.io" target="_blank">Crossbar.io</a></li>
          <li><a href="http://tomcat.apache.org/" target="_blank">Apache Tomcat</a></li>
          <li><a href="https://github.com/Worlize/WebSocket-Node" target="_blank">WebSocket-Node</a></li>
          <li><a href="https://github.com/einaros/ws" target="_blank">WS for node.js</a></li>
@@ -94,13 +94,25 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
 **What users are saying:**
 
 
-.. note:: "Autobahn was a huge help during the standardization and early development of WebSocket in `Firefox <http://autobahn.ws/testsuite/www.mozilla.org/firefox>`__. It helped find many nasty corner conditions in a clean and repeatable way. Interoperation testing like this really moves the Open Web forward." - Patrick McManus, `Mozilla <http://www.mozilla.org/>`_ `Firefox <http://www.mozilla.org/firefox>`_
+"Autobahn was a huge help during the standardization and early development of WebSocket in `Firefox <http://autobahn.ws/testsuite/www.mozilla.org/firefox>`__. It helped find many nasty corner conditions in a clean and repeatable way.
 
+Interoperation testing like this really moves the Open Web forward."
 
-.. note:: "The `Jetty project <http://eclipse.org/jetty>`_ has been active in the development of the websocket protocol and lack of a comprehensive test suite was an impediment to the standardisation of the protocol. The Autobahn test suit has filled that void and been warmly embraced by our websocket engineers at `Intalio <http://www.intalio.com/products/jetty/overview/>`__ as it has been invaluable for evaluating the protocol development, improving inter operability and monitoring adoption of new/optional features. *Our own implementation and the wider websocket 'ecosystem' are significantly better due to the availability of Autobahn*." - Greg Wilkins, `Jetty <http://eclipse.org/jetty>`_ author, Chief Architect at `Intalio <http://www.intalio.com/>`_
+Patrick McManus, `Mozilla <http://www.mozilla.org/>`_ `Firefox <http://www.mozilla.org/firefox>`_
 
+=================
 
-.. note:: "During the time of implementing the latest WebSocket version in `Netty <http://netty.io/>`_ and `Undertow <https://github.com/undertow-io/undertow>`_ we were searching for a way to test our implementations and make sure they are 100% RFC compliant. While we already had unit tests in place there was a lack of good tests for the whole implementation. Using the AutobahnTestsuite for this purpose allowed us to concentrate on the implementation and made it easy to catch regressions as soon as possible." - Norman Maurer, Principal Software Engineer at `Red Hat <http://www.redhat.com/>`_
+"The `Jetty project <http://eclipse.org/jetty>`_ has been active in the development of the websocket protocol and lack of a comprehensive test suite was an impediment to the standardisation of the protocol. The Autobahn test suit has filled that void and been warmly embraced by our websocket engineers at `Intalio <http://www.intalio.com/products/jetty/overview/>`__ as it has been invaluable for evaluating the protocol development, improving inter operability and monitoring adoption of new/optional features.
+
+*Our own implementation and the wider websocket 'ecosystem' are significantly better due to the availability of Autobahn*."
+
+Greg Wilkins, `Jetty <http://eclipse.org/jetty>`_ author, Chief Architect at `Intalio <http://www.intalio.com/>`_
+
+==================
+
+"During the time of implementing the latest WebSocket version in `Netty <http://netty.io/>`_ and `Undertow <https://github.com/undertow-io/undertow>`_ we were searching for a way to test our implementations and make sure they are 100% RFC compliant. While we already had unit tests in place there was a lack of good tests for the whole implementation. Using the AutobahnTestsuite for this purpose allowed us to concentrate on the implementation and made it easy to catch regressions as soon as possible."
+
+Norman Maurer, Principal Software Engineer at `Red Hat <http://www.redhat.com/>`_
 
 
 Test Suite Coverage
