@@ -16,12 +16,35 @@
 ##
 ###############################################################################
 
+from __future__ import absolute_import
+
 __all__ = ['start']
 
 import json
+import binascii
+from autobahn import wamp
+from autobahn.wamp.tests.test_serializer import generate_test_messages
 
 
 def start(outfilename, debug = False):
    with open(outfilename, 'wb') as outfile:
-      #data = json.loads(infile.read())
-      print outfile
+      ser_json = wamp.serializer.JsonSerializer()
+      ser_msgpack = wamp.serializer.MsgPackSerializer()
+
+      res = []
+      for msg in generate_test_messages():
+         case = {}
+         case['name'] = str(msg)
+         case['rmsg'] = msg.marshal()
+
+         ## serialize message to JSON
+         bytes, binary = ser_json.serialize(msg)
+         case['json'] = bytes
+
+         ## serialize message to MsgPack
+         bytes, binary = ser_msgpack.serialize(msg)
+         case['msgpack'] = binascii.hexlify(bytes)
+
+         res.append(case)
+
+      outfile.write(json.dumps(res, indent = 3))

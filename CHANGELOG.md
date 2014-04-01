@@ -1,5 +1,7 @@
 # Autobahn|Testsuite - Changelog
 
+## v0.6.2
+ * new mode for generating WAMP message serializations
 ## v0.6.1
  * permessage-deflate tests with different parameters and fragmentation
  
