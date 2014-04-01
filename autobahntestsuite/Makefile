@@ -66,4 +66,7 @@ test_web:
 test_help:
 	python -m autobahntestsuite.wstest --help
 
+test_serializer:
+	python -m autobahntestsuite.wstest -m serializer --outfile "testdata.json"
+
 test: test_import test_run test_web

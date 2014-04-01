@@ -46,6 +46,7 @@ import broadcast
 import massconnect
 import wsperfcontrol
 import wsperfmaster
+import serializer
 
 
 from spectemplate import SPEC_FUZZINGSERVER, \
@@ -82,6 +83,7 @@ class WsTestOptions(usage.Options):
             #'web',
             #'import',
             #'export',
+            'serializer'
             ]
 
    # Modes that need a specification file
@@ -117,6 +119,7 @@ class WsTestOptions(usage.Options):
       ['mode', 'm', None, 'Test mode, one of: %s [required]' % ', '.join(MODES)],
       ['testset', 't', None, 'Run a test set from an import test spec.'],
       ['spec', 's', None, 'Test specification file [required in some modes].'],
+      ['outfile', 'o', None, 'Output filename for modes that generate testdata.'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
       ['ident', 'i', None, ('Testee client identifier [optional for client testees].')],
       ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) [required in server modes for WSS].')],
@@ -222,6 +225,9 @@ class WsTestRunner(object):
 
       elif self.mode == "massconnect":
          return massconnect.startClient(self.spec, debug = self.debug)
+
+      elif self.mode == "serializer":
+         return serializer.start(outfilename = self.options['outfile'], debug = self.debug)
 
       else:
          raise Exception("no mode '%s'" % self.mode)
