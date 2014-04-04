@@ -3,3 +3,4 @@ autobahntestsuite/reports
 autobahntestsuite/*.json
 .*.db
 fuzzing*.json
+testdata.json
