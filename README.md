@@ -44,8 +44,8 @@ also includes a number of other handy modes:
 For more information take a look at the [project documentation](http://autobahn.ws/testsuite). This provides:
 
  * [test reports](http://autobahn.ws/testsuite#reports)
- * [installation instructions](http://autobahn.ws/testsuite/installation)
- * [usage instructions](http://autobahn.ws/testsuite/usage)
+ * [installation instructions](http://autobahn.ws/testsuite/installation.html)
+ * [usage instructions](http://autobahn.ws/testsuite/usage.html)
 
 
 ## Get in Touch
