@@ -285,7 +285,7 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 rst_epilog = """
-.. |ab| replace:: **Autobahn**\|JS
+.. |ab| replace:: **Autobahn**\|Testsuite
 """
 
 rst_prolog = """
