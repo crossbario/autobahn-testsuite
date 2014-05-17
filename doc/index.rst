@@ -1,5 +1,5 @@
-AutobahnTestsuite Documentation
-===============================
+|ab|
+====
 
 The |ab| provides a fully automated test suite to verify client and server implementations of the `WebSocket Protocol <http://tools.ietf.org/html/rfc6455>`_ for specification conformance and implementation robustness.
 
