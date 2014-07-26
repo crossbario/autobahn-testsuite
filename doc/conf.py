@@ -15,6 +15,21 @@
 import sys
 import os
 
+try:
+   import sphinx_rtd_theme
+except ImportError:
+   sphinx_rtd_theme = None
+
+try:
+   from sphinxcontrib import spelling
+except ImportError:
+   spelling = None
+
+try:
+   import sphinx_bootstrap_theme
+except ImportError:
+   sphinx_bootstrap_theme = None
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
@@ -35,6 +50,9 @@ extensions = [
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
 ]
+
+if spelling is not None:
+   extensions.append('sphinxcontrib.spelling')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -91,8 +109,8 @@ exclude_patterns = ['_build']
 #show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-#pygments_style = 'sphinx'
-pygments_style = 'flask_theme_support.FlaskyStyle'
+pygments_style = 'sphinx'
+# pygments_style = 'flask_theme_support.FlaskyStyle'
 
 # A list of ignored prefixes for module index sorting.
 #modindex_common_prefix = []
@@ -107,9 +125,94 @@ pygments_style = 'flask_theme_support.FlaskyStyle'
 # a list of builtin themes.
 #html_theme = 'default'
 
-sys.path.append(os.path.abspath('_themes'))
-html_theme_path = ['_themes']
-html_theme = 'kr'
+# sys.path.append(os.path.abspath('_themes'))
+# html_theme_path = ['_themes']
+# html_theme = 'kr'
+
+## Sphinx-Bootstrap Theme
+##
+## http://sphinx-bootstrap-theme.readthedocs.org/en/latest/README.html
+##
+if sphinx_bootstrap_theme:
+
+   html_theme = 'bootstrap'
+   html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
+   # (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
+   # Path should be relative to the ``_static`` files directory.
+   html_logo = "autobahntestsuite.svg"
+
+   html_theme_options = {
+       # Navigation bar title. (Default: ``project`` value)
+       'navbar_title': " ",
+
+       # Tab name for entire site. (Default: "Site")
+       'navbar_site_name': "Site",
+
+       # A list of tuples containing pages or urls to link to.
+       # Valid tuples should be in the following forms:
+       #    (name, page)                 # a link to a page
+       #    (name, "/aa/bb", 1)          # a link to an arbitrary relative url
+       #    (name, "http://example.com", True) # arbitrary absolute url
+       # Note the "1" or "True" value above as the third argument to indicate
+       # an arbitrary url.
+       'navbar_links': [
+           #("Examples", "examples"),
+           #("Link", "http://example.com", True),
+       ],
+
+       # Render the next and previous page links in navbar. (Default: true)
+       'navbar_sidebarrel': True,
+
+       # Render the current pages TOC in the navbar. (Default: true)
+       'navbar_pagenav': True,
+
+       # Tab name for the current pages TOC. (Default: "Page")
+       #'navbar_pagenav_name': "Page",
+
+       # Global TOC depth for "site" navbar tab. (Default: 1)
+       # Switching to -1 shows all levels.
+       'globaltoc_depth': 1,
+
+       # Include hidden TOCs in Site navbar?
+       #
+       # Note: If this is "false", you cannot have mixed ``:hidden:`` and
+       # non-hidden ``toctree`` directives in the same page, or else the build
+       # will break.
+       #
+       # Values: "true" (default) or "false"
+       'globaltoc_includehidden': "true",
+
+       # HTML navbar class (Default: "navbar") to attach to <div> element.
+       # For black navbar, do "navbar navbar-inverse"
+       #'navbar_class': "navbar navbar-inverse",
+       'navbar_class': "navbar",
+
+       # Fix navigation bar to top of page?
+       # Values: "true" (default) or "false"
+       'navbar_fixed_top': "true",
+
+       # Location of link to source.
+       # Options are "nav" (default), "footer" or anything else to exclude.
+       'source_link_position': "nav",
+
+       # Bootswatch (http://bootswatch.com/) theme.
+       #
+       # Options are nothing with "" (default) or the name of a valid theme
+       # such as "amelia" or "cosmo".
+       'bootswatch_theme': "",
+
+       # Choose Bootstrap version.
+       # Values: "3" (default) or "2" (in quotes)
+       #'bootstrap_version': "3",
+   }
+
+# if sphinx_rtd_theme:
+#    html_theme = "sphinx_rtd_theme"
+#    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+
+if not html_theme:
+   #html_theme = "default"
+   html_theme = 'sphinxdoc'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -162,9 +265,7 @@ html_context = {'widgeturl': 'https://demo.crossbar.io/clandeckwidget'}
 #html_sidebars = {}
 
 html_sidebars = {
-    # 'index':    ['side-primary.html', 'searchbox.html'],
-    '**':       ['side-secondary.html', 'stay_informed.html', 'sidetoc.html',
-                 'previous_next.html', 'searchbox.html' ]
+   '**':       ['side-primary.html']
 }
 
 # Additional templates that should be rendered to pages, maps page names to
@@ -198,7 +299,7 @@ html_sidebars = {
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'AutobahnTestsuitedoc'
+htmlhelp_basename = 'AutobahnTestsuite'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -285,12 +386,21 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 rst_epilog = """
-.. |ab| replace:: **Autobahn**\|JS
+.. |ab| replace:: Autobahn\|JS
+.. |Ab| replace:: **Autobahn**\|JS
+.. _Autobahn: http://autobahn.ws
+.. _AutobahnPython: **Autobahn**\|Python
+.. _WebSocket: http://tools.ietf.org/html/rfc6455
+.. _RFC6455: http://tools.ietf.org/html/rfc6455
+.. _WAMP: http://wamp.ws/
+.. _WAMPv1: http://wamp.ws/spec/wamp1/
+.. _WAMPv2: https://github.com/tavendo/WAMP/blob/master/spec/README.md
+.. _AutobahnTestsuite: http://autobahn.ws/testsuite
 """
 
-rst_prolog = """
-.. container:: topnav
+# rst_prolog = """
+# .. container:: topnav
 
-   :doc:`Overview <index>`   :doc:`installation`  :doc:`usage` :doc:`table_of_contents`
+#    :doc:`Overview <index>`   :doc:`installation`  :doc:`usage` :doc:`table_of_contents`
 
-"""
+# """
