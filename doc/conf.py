@@ -386,7 +386,7 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 rst_epilog = """
-.. |ab| replace:: Autobahn\|Testsuite
+.. |ab| replace:: **Autobahn**\|Testsuite
 .. |Ab| replace:: **Autobahn**\|Testsuite
 .. _Autobahn: http://autobahn.ws
 .. _AutobahnPython: **Autobahn**\|Python
