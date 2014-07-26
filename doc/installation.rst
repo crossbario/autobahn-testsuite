@@ -11,9 +11,9 @@ Prerequisites
 
 You will need:
 
- * `Python <http://www.python.org/>`_
- * `pip <https://pypi.python.org/pypi/pip>`_
- * `Twisted <http://twistedmatrix.com/>`_
+* `Python <http://www.python.org/>`_
+* `pip <https://pypi.python.org/pypi/pip>`_
+* `Twisted <http://twistedmatrix.com/>`_
 
 Recommended is using the latest Python 2.7 release, Python 2.6 works also fine, but Python 3 doesn't.
 
@@ -23,11 +23,11 @@ For best performance, you should run on `PyPy <http://pypy.org/>`_.
 
 On Windows, for better performance, you might want to run Twisted under IOCP reactor. For that, you will need
 
- * `PyWin32 <http://sourceforge.net/projects/pywin32/>`_
+* `PyWin32 <http://sourceforge.net/projects/pywin32/>`_
 
 If you want to do tests involving secure WebSocket (wss), you will need
 
- * `PyOpenSSL <http://pypi.python.org/pypi/pyOpenSSL/>`_
+* `PyOpenSSL <http://pypi.python.org/pypi/pyOpenSSL/>`_
 
 
 Installation

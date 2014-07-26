@@ -17,15 +17,15 @@ Check out the test reports:
 
 * older, but more testees
 
-   * `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`_
-   * `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`_
-   * `Servers <http://autobahn.ws/testsuite/reports/servers/index.html>`_
+  + `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`_
+  + `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`_
+  + `Servers <http://autobahn.ws/testsuite/reports/servers/index.html>`_
 
 * newer, including WebSocket compression, fewer testees
 
-   * `Browsers & Clients (2013/10) <http://autobahn.ws/testsuite/reports_20131013/clients/index.html>`_
-   * `Servers (2013/10) <http://autobahn.ws/testsuite/reports_20131013/servers/index.html>`_
-   * `Browsers & Clients (2014/03) <http://autobahn.ws/testsuite/reports_20140314/clients/index.html>`_
+  + `Browsers & Clients (2013/10) <http://autobahn.ws/testsuite/reports_20131013/clients/index.html>`_
+  + `Servers (2013/10) <http://autobahn.ws/testsuite/reports_20131013/servers/index.html>`_
+  + `Browsers & Clients (2014/03) <http://autobahn.ws/testsuite/reports_20140314/clients/index.html>`_
 
 `Details on the test setup <https://github.com/tavendo/AutobahnTestSuite/tree/master/examples/publicreports>`_ used with creating the above reports.
 
@@ -122,16 +122,16 @@ The test suite will check an implementation by doing basic WebSocket conversatio
 
 Contains over 500 test cases covering
 
- * Framing
- * Pings/Pongs
- * Reserved Bits
- * Opcodes
- * Fragmentation
- * UTF-8 Handling
- * Limits/Performance
- * Closing Handshake
- * Opening Handshake (under development)
- * WebSocket compression (`permessage-deflate extension <https://tools.ietf.org/html/draft-ietf-hybi-permessage-compression>`_)
+* Framing
+* Pings/Pongs
+* Reserved Bits
+* Opcodes
+* Fragmentation
+* UTF-8 Handling
+* Limits/Performance
+* Closing Handshake
+* Opening Handshake (under development)
+* WebSocket compression (`permessage-deflate extension <https://tools.ietf.org/html/draft-ietf-hybi-permessage-compression>`_)
 
 
 Other Tools
@@ -139,12 +139,12 @@ Other Tools
 
 Besides the automated testsuite (aka "fuzzing" server/client), **wstest** also includes a number of other handy modes that aid WebSocket and WAMP developers:
 
- * WebSocket echo server and client
- * WebSocket broadcast server (and client driver)
- * Testee modes to test `AutobahnPython <http://autobahn.ws/python>`_ against the test suite
- * **wsperf** controller and master (see below for more)
- * WAMP server and client, for developing WAMP implementations
- * WebSocket Mass-Connect
+* WebSocket echo server and client
+* WebSocket broadcast server (and client driver)
+* Testee modes to test `AutobahnPython <http://autobahn.ws/python>`_ against the test suite
+* **wsperf** controller and master (see below for more)
+* WAMP server and client, for developing WAMP implementations
+* WebSocket Mass-Connect
 
 Please see the :ref:`usage` for further information.
 

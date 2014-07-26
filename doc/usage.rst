@@ -14,19 +14,19 @@ To get help and a list of options:
 
 **wstest** has different modes in which it can run:
 
- * ``echoserver``
- * ``echoclient``
- * ``broadcastclient``
- * ``broadcastserver``
- * ``fuzzingserver``
- * ``fuzzingclient``
- * ``testeeserver``
- * ``testeeclient``
- * ``wsperfcontrol``
- * ``wsperfmaster``
- * ``wampserver``
- * ``wampclient``
- * ``massconnect``
+* ``echoserver``
+* ``echoclient``
+* ``broadcastclient``
+* ``broadcastserver``
+* ``fuzzingserver``
+* ``fuzzingclient``
+* ``testeeserver``
+* ``testeeclient``
+* ``wsperfcontrol``
+* ``wsperfmaster``
+* ``wampserver``
+* ``wampclient``
+* ``massconnect``
 
 Server and client modes support TLS (that is WSS). For servers you will need to provide a server key and certificate file.
 
@@ -36,8 +36,8 @@ Mode fuzzingserver/fuzzingclient
 
 The automated WebSocket test suite comes under the modes:
 
- * fuzzingserver
- * fuzzingclient
+* fuzzingserver
+* fuzzingclient
 
 For example, to test browsers (or other WebSocket clients):
 
@@ -140,10 +140,10 @@ Mode wsperfcontrol
 
 This mode is used to control **wsperf** running in master mode. **wsperf** is a WebSocket performance probe developed as part of WebSocket++.
 
- * http://www.zaphoyd.com/wsperf
- * https://github.com/zaphoyd/websocketpp
- * https://github.com/zaphoyd/websocketpp/wiki/wsperf
- * https://github.com/zaphoyd/websocketpp/wiki/wsperf:-stress_test
+* http://www.zaphoyd.com/wsperf
+* https://github.com/zaphoyd/websocketpp
+* https://github.com/zaphoyd/websocketpp/wiki/wsperf
+* https://github.com/zaphoyd/websocketpp/wiki/wsperf:-stress_test
 
 Build **wsperf**:
 
@@ -219,20 +219,20 @@ Here is the generated test spec:
 
 A test spec must provide a list of *servers* and a list of *testsets*. Each *testset* must specify the test *mode* (currently only "echo"). *Options* specify tunables that apply to the complete *testset*:
 
- * ``outfile`` - name of the output file to write results
- * ``digits`` - numbers of digits to round results to
- * ``sep`` - seperator character used for writing results
- * ``rtts`` - output Round-trip times of each and every message
- * ``quantile_count`` - number of quantiles in result statistics
+* ``outfile`` - name of the output file to write results
+* ``digits`` - numbers of digits to round results to
+* ``sep`` - seperator character used for writing results
+* ``rtts`` - output Round-trip times of each and every message
+* ``quantile_count`` - number of quantiles in result statistics
 
 A list of *cases* specifies the actual test cases. Test cases for echo have the following parameters:
 
- * ``count`` - number of message to send
- * ``size`` - size of messages in bytes
- * ``timeout`` - WebSocket connection timeout in seconds
- * ``binary`` - if true, send binary WebSocket messages, else text
- * ``sync`` - if true, wait for message echo before sending new message
- * ``verify`` - if true, verify the content of the echo reply, else only check length
+* ``count`` - number of message to send
+* ``size`` - size of messages in bytes
+* ``timeout`` - WebSocket connection timeout in seconds
+* ``binary`` - if true, send binary WebSocket messages, else text
+* ``sync`` - if true, wait for message echo before sending new message
+* ``verify`` - if true, verify the content of the echo reply, else only check length
 
 When the parameter is present in the ``case``, that value applies. If not, the setting from ``options`` on ``testset`` applies. At least one must be present.
 
@@ -254,8 +254,8 @@ Mode wsperfmaster
 
 This mode is used to control distributed sets of *wsperf* (running in slave mode). *wsperf* is a WebSocket performance probe developed as part of WebSocket++.
 
- * http://www.zaphoyd.com/wsperf
- * https://github.com/zaphoyd/websocketpp
+* http://www.zaphoyd.com/wsperf
+* https://github.com/zaphoyd/websocketpp
 
 
 Mode wampserver/wampclient
