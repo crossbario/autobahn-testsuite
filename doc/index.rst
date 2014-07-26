@@ -158,6 +158,7 @@ Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing 
 .. toctree::
    :hidden:
 
+   Home <self>
    installation
    usage
    table_of_contents
