@@ -17,7 +17,7 @@ You will need:
 
 Recommended is using the latest Python 2.7 release, Python 2.6 works also fine, but Python 3 doesn't.
 
-.. note:: Unless you have a specific requirement and know what you are doing, a 32-bit Python is recommended.
+.. note:: On Windows, unless you have a specific requirement and know what you are doing, a 32-bit Python is recommended.
 
 For best performance, you should run on `PyPy <http://pypy.org/>`_.
 

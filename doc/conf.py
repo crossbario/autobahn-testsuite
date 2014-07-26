@@ -386,8 +386,8 @@ intersphinx_mapping = {'http://docs.python.org/': None}
 
 
 rst_epilog = """
-.. |ab| replace:: Autobahn\|JS
-.. |Ab| replace:: **Autobahn**\|JS
+.. |ab| replace:: Autobahn\|Testsuite
+.. |Ab| replace:: **Autobahn**\|Testsuite
 .. _Autobahn: http://autobahn.ws
 .. _AutobahnPython: **Autobahn**\|Python
 .. _WebSocket: http://tools.ietf.org/html/rfc6455
@@ -395,7 +395,6 @@ rst_epilog = """
 .. _WAMP: http://wamp.ws/
 .. _WAMPv1: http://wamp.ws/spec/wamp1/
 .. _WAMPv2: https://github.com/tavendo/WAMP/blob/master/spec/README.md
-.. _AutobahnTestsuite: http://autobahn.ws/testsuite
 """
 
 # rst_prolog = """

@@ -172,13 +172,13 @@ def onMessage(self, msg, binary):
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
 
       if binary != self.TESTDATA['binary']:
-         self.result = "Echo'ed message type differs from what I sent (got binary {}, expected binary {}).".format(binary, self.TESTDATA['binary'])
+         self.result = "Echo'ed message type differs from what I sent (got binary {0}, expected binary {1}).".format(binary, self.TESTDATA['binary'])
 
       elif len(msg) != self.LEN:
-         self.result = "Echo'ed message length differs from what I sent (got length {}, expected length {}).".format(len(msg), self.LEN)
+         self.result = "Echo'ed message length differs from what I sent (got length {0}, expected length {1}).".format(len(msg), self.LEN)
 
       elif received_hash != self._expected_hash:
-         self.result = "Echo'ed message contents differs from what I sent (got SHA1 {}, expected SHA1 {}).".format(binascii.hexlify(received_hash), binascii.hexlify(self._expected_hash))
+         self.result = "Echo'ed message contents differs from what I sent (got SHA1 {0}, expected SHA1 {1}).".format(binascii.hexlify(received_hash), binascii.hexlify(self._expected_hash))
 
       else:
          ## should not arrive here
@@ -344,7 +344,7 @@ for dp in DEFLATE_PARAMS:
    fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA['file'])
    fileSize = os.path.getsize(fn)
 
-   co_desc = "client offers (requestNoContextTakeover, requestMaxWindowBits): {}".format([(x.requestNoContextTakeover, x.requestMaxWindowBits) for x in co])
+   co_desc = "client offers (requestNoContextTakeover, requestMaxWindowBits): {0}".format([(x.requestNoContextTakeover, x.requestMaxWindowBits) for x in co])
    sa_desc = sa.__doc__.strip()
 
    Case13_X_X_CaseSubCategories['13.%d' % j] = TEST_DATA["desc"] + (" (%s, %s bytes)" % ("binary" if isBinary else "utf8", fileSize)) + " - " + co_desc + " / " + sa_desc
