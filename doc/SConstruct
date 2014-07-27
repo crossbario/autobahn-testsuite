@@ -16,9 +16,37 @@
 ##
 ###############################################################################
 
+## Image file names to process
+SVG_FILES = [
+   "autobahntestsuite.svg"
+]
+
+## Directory with image files to process
+IMG_SOURCE_DIR = "design"
+
+## Processed image files are placed here
+IMG_GEN_DIR    = "_static/img/gen"
+
+## Directory to upload
+DOCSDIR = '_build'
+
+## Contains fingerprints of uploaded files
+UPLOADED = '_build_uploaded'
+
+## The Tavendo S3 Bucket to upload to
+BUCKET = 'autobahn.ws'
+
+## The Bucket Prefix to upload files to
+BUCKET_PREFIX = 'testsuite'
+
+### END OF CONFIG #############################################################
+
+
 import os
 import json
 import pkg_resources
+
+os.environ['PYTHONPATH'] = '../autobahn'
 
 taschenmesser = pkg_resources.resource_filename('taschenmesser', '..')
 #taschenmesser = "../../../infrequent/taschenmesser"
@@ -26,39 +54,40 @@ env = Environment(tools = ['default', 'taschenmesser'],
                   toolpath = [taschenmesser],
                   ENV = os.environ)
 
-DOCSDIR = '_build'
-S3DIR = '_upload'
-
+## Process SVGs
 ##
+imgs = env.process_svg(SVG_FILES, IMG_SOURCE_DIR, IMG_GEN_DIR)
+
+Alias("img", imgs)
+
+
 ## Sphinx Build
 ##
 docs = env.Command(DOCSDIR, [], "sphinx-build -b html . $TARGET")
+
 env.AlwaysBuild(docs)
 Clean(docs, DOCSDIR)
-Default(docs)
+Alias("doc", docs)
+
+Default([imgs, docs])
 
 
-##
 ## Upload to Amazon S3
 ##
-env['S3_RELPATH'] = DOCSDIR
-env['S3_BUCKET'] = 'autobahn.ws'
-env['S3_BUCKET_PREFIX'] = 'testsuite/' # note the trailing slash!
-env['S3_OBJECT_ACL'] = 'public-read'
-
-
-uploaded = []
-import fnmatch
-
-for root, dirnames, filenames in os.walk(DOCSDIR):
-   if not root.endswith('.doctrees'):
-      for filename in filenames:
-         if not fnmatch.fnmatch(filename, '*.s3'):
-            source = os.path.join(root, filename)
-            target = os.path.join(S3DIR, source)
-            uploaded.append(env.S3('{}.s3'.format(target), source))
+uploaded = env.s3_dir_uploader(UPLOADED, DOCSDIR, BUCKET, BUCKET_PREFIX)
 
 Depends(uploaded, docs)
-Clean(docs, S3DIR)
+Depends(uploaded, imgs)
+
+Clean(uploaded, UPLOADED)
+
 Alias("publish", uploaded)
 
+
+## Run a test Web server
+##
+test = env.Command(None, [imgs, docs], 'twistd.py web -n -p 8080 --path="./_build/"')
+#test = env.Command(None, [imgs, docs], 'python -m SimpleHTTPServer 8080') # cannot set path here =(
+
+env.AlwaysBuild(test)
+Alias("test", test)
