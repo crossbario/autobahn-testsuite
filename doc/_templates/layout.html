@@ -60,11 +60,13 @@
 
    {% if True and widgeturl %}
 
-      <!-- add community widget -->
-      <div id="widgetAnchor"></div>
+      <!-- community widget iframe -->
+      <div id="cdn_widget"></div>
       <script src="{{ widgeturl }}/js/communitywidget.js"></script>
       <script>
-         clandeck.create_widget({community: "tavendo", topOffset: "60px"});
+         if (clandeck) {
+            clandeck.create_widget({community: "tavendo", container: "cdn_widget", topOffset: "60px"});
+         }
       </script>
 
    {% else %}
