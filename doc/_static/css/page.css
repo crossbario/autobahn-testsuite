@@ -54,6 +54,18 @@ code, kbd, pre, samp, span.pre {
    font-size: 13px;
 }
 
+/* scrolling for both code with and without line numbers  */
+[class^="highlight-"],
+[class*=" highlight-"] {
+   overflow: auto;
+   margin-bottom: 1em;
+}
+.highlight {
+   display: table;
+}
+
+
+
 ul, ol {
    line-height: 1.6em;
 }
@@ -283,12 +295,31 @@ li.hidden-sm {
 
 /* pygments code block shouldn't word wrap, but show overflow on scroll */
 
-div.highlight {
+div.highlight, table.highlighttable {
    width: 100%;
+   margin-left: 0;
+}
+
+td.linenos {
+   width: 1px;
+}
+
+table.highlighttable td {
+   padding-right: 0;
+}
+
+.highlighttable .linenos pre {
+   font-size: 13px;
+   color: #B6B62C;
+}
+
+.highlighttable .code pre {
+   font-size: 13px;
 }
 
 .highlight pre {
    word-wrap: normal;
+   margin: 0;
 }
 
 .highlight .hll {
@@ -343,7 +374,7 @@ p.admonition-title {
 }
 
 .note p.admonition-title {
-   color: #027eae;   
+   color: #027eae;
 }
 
 .warning {
