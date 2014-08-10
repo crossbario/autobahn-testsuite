@@ -23,6 +23,7 @@ unserialized
 unserialize
 serializable
 Testee
+testees
 Jython
 wallclock
 walltime
@@ -125,3 +126,6 @@ unsubscribe
 unsubscribed
 deserialization
 deserialize
+fuzzingserver
+fuzzingclient
+testee

@@ -221,7 +221,7 @@ A test spec must provide a list of *servers* and a list of *testsets*. Each *tes
 
 * ``outfile`` - name of the output file to write results
 * ``digits`` - numbers of digits to round results to
-* ``sep`` - seperator character used for writing results
+* ``sep`` - separator character used for writing results
 * ``rtts`` - output Round-trip times of each and every message
 * ``quantile_count`` - number of quantiles in result statistics
 
@@ -300,7 +300,7 @@ The ramp up of WebSocket connections is controlled via 3 parameters:
 
 Depending on network settings and server, this can quickly overwhelm a server, and the server will deny/fail connections. Those are retried after ``retrydelay`` ms. Thus, **wstest** will not give up until ``connections`` is reached.
 
-The number of connections **wstest** can open on a server is limited by the number of epheremal ports on the machine on the outgoing interface / IP. Something like 64k at most. If you need to test the server with more connections, currently you will need to run multiple instances of **wstest** (on different machines).
+The number of connections **wstest** can open on a server is limited by the number of ephemeral ports on the machine on the outgoing interface / IP. Something like 64k at most. If you need to test the server with more connections, currently you will need to run multiple instances of **wstest** (on different machines).
 
 On Windows, you will need to tune some settings for large numbers of outgoing TCP connections. Edit the registry entry
 
