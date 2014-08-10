@@ -18,8 +18,6 @@
 
 ## Image file names to process
 SVG_FILES = [
-   "autobahntestsuite.svg",
-   "autobahn.svg"
 ]
 
 ## Directory with image files to process
@@ -40,6 +38,11 @@ BUCKET = 'autobahn.ws'
 ## The Bucket Prefix to upload files to
 BUCKET_PREFIX = 'testsuite'
 
+## Tavendo shared static assets
+CSTATIC = "//tavendo-common-static.s3-eu-west-1.amazonaws.com"
+CSTATIC_LOCAL = "http://127.0.0.1:8888"
+
+
 ### END OF CONFIG #############################################################
 
 
@@ -50,7 +53,10 @@ import pkg_resources
 os.environ['PYTHONPATH'] = '../autobahn'
 
 taschenmesser = pkg_resources.resource_filename('taschenmesser', '..')
-#taschenmesser = "../../../infrequent/taschenmesser"
+
+AddOption('--no_network', dest = 'no_network', action = 'store_true', default = False,
+   help = "Run locally and disable anything doing network access")
+
 env = Environment(tools = ['default', 'taschenmesser'],
                   toolpath = [taschenmesser],
                   ENV = os.environ)
@@ -64,14 +70,20 @@ Alias("img", imgs)
 
 ## Sphinx Build
 ##
-docs = env.Command(DOCSDIR, [], "sphinx-build -b html . $TARGET")
+if GetOption('no_network'):
+   print("Building for no network")
+   docs = env.Command(DOCSDIR, [], 'sphinx-build -A no_network=1 -D no_network=1 -A cstatic="{}" -b html . $TARGET'.format(CSTATIC_LOCAL))
+else:
+   docs = env.Command(DOCSDIR, [], 'sphinx-build -A cstatic="{}" -b html . $TARGET'.format(CSTATIC))
+
+
+# sphinx-build -b spelling . _spelling
 
 env.AlwaysBuild(docs)
 Clean(docs, DOCSDIR)
 Alias("doc", docs)
 
 Default([imgs, docs])
-
 
 ## Upload to Amazon S3
 ##
@@ -83,12 +95,3 @@ Depends(uploaded, imgs)
 Clean(uploaded, UPLOADED)
 
 Alias("publish", uploaded)
-
-
-# ## Run a test Web server
-# ##
-# test = env.Command(None, [imgs, docs], 'twistd.py web -n -p 8080 --path="./_build/"')
-# #test = env.Command(None, [imgs, docs], 'python -m SimpleHTTPServer 8080') # cannot set path here =(
-
-# env.AlwaysBuild(test)
-# Alias("test", test)

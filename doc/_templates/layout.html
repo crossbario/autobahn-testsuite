@@ -4,17 +4,19 @@
 
    {{ super() }}
 
-   <link rel="stylesheet" href="{{ pathto('_static/css/page.css', 1) }}">
-   <link rel="stylesheet" href="{{ pathto('_static/css/local.css', 1) }}">
+   <link rel="stylesheet" href="{{ cstatic }}/css/tavendo.css">
+   <link rel="stylesheet" href="{{ cstatic }}/css/autobahn.css">
 
-   <script>
-     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-     })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-     ga('create', 'UA-23019220-3', 'autobahn.ws');
-     ga('send', 'pageview');
-   </script>
+   <style>
+      .navbar-brand {
+         width: 230px;
+         height: 50px;
+      }
+
+      .navbar-brand::after {
+         content: url({{ cstatic }}/img/gen/autobahntestsuite.svg.gz);
+      }
+   </style>
 
 {% endblock %}
 
@@ -25,13 +27,17 @@
    <div class="extendedFooter">
       <div class="logoblock">
          <p class="logo">
-           <a href="{{ pathto('pages/index') }}"><img class="logo" src="{{ pathto('_static/img/gen/autobahn.svg', 1) }}" height="200" width="200" alt="Autobahn|Testsuite"/></a>
+           <a href="/"><img class="logo" src="{{ cstatic }}/img/gen/autobahn.svg.gz" height="200" width="200" alt="Autobahn|Testsuite"/></a>
          </p>
          <h3><strong>Autobahn</strong>|Testsuite</h3>
+         {% if not no_network %}
          <p>
            <iframe src="http://ghbtns.com/github-btn.html?user=tavendo&repo=AutobahnTestsuite&type=watch&count=true&size=large"
              allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
          </p>
+         {% else %}
+         <!-- GitHub stripped! -->
+         {% endif %}
       </div>
       <div class="side_toc sidebar_block" id="quicklinks">
          <h4><a href="https://pypi.python.org/pypi/autobahntestsuite/0.6.2">Download</a></h4>
@@ -41,7 +47,6 @@
          <h4><a href="http://stackoverflow.com/questions/tagged/autobahn?sort=newest">StackOverflow</a></h4>
       </div>
    </div>
-   <!-- <div class="clearBoth"></div> -->
 
     <p class="pull-right">
       <a href="#">Back to top</a>
@@ -72,5 +77,23 @@
    {% else %}
       <!-- Community Widget stripped! -->
    {% endif %}
+
+<a id="manifesto" href="http://www.reactivemanifesto.org/">
+   <!-- <img src="//d379ifj7s9wntv.cloudfront.net/reactivemanifesto/images/ribbons/we-are-reactive-black-right.png"> -->
+   <img src="{{ cstatic }}/img/gen/we_are_reactive.svg.gz" height="144" width="144" alt="Reactive Manifesto: We are reactive banner"/>
+</a>
+
+{% if not no_network %}
+   <script>
+     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+     m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+     })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+     ga('create', 'UA-23019220-3', 'autobahn.ws');
+     ga('send', 'pageview');
+   </script>
+{% else %}
+   <!-- Google Analytics stripped! -->
+{% endif %}
 
 {% endblock %}

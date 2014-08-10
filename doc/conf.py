@@ -14,21 +14,8 @@
 
 import sys
 import os
+import sphinx_bootstrap_theme
 
-try:
-   import sphinx_rtd_theme
-except ImportError:
-   sphinx_rtd_theme = None
-
-try:
-   from sphinxcontrib import spelling
-except ImportError:
-   spelling = None
-
-try:
-   import sphinx_bootstrap_theme
-except ImportError:
-   sphinx_bootstrap_theme = None
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -49,10 +36,13 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'sphinx.ext.ifconfig',
+    'sphinxcontrib.spelling',
 ]
 
-if spelling is not None:
-   extensions.append('sphinxcontrib.spelling')
+spelling_lang = 'en_US'
+spelling_show_suggestions = False
+spelling_word_list_filename = 'spelling_wordlist.txt'
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -68,7 +58,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'AutobahnTestsuite'
-copyright = u'2011-2014 <a href="http://tavendo.com">Tavendo GmbH</a>, <a href="http://creativecommons.org/licenses/by-sa/3.0/">Creative Commons CC-BY-SA</a><br>Tavendo, WAMP and "Autobahn WebSocket" are trademarks of <a href="http://tavendo.com">Tavendo GmbH</a>'
+copyright = None
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -91,7 +81,7 @@ release = '0.6.1'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = ['_build']
+exclude_patterns = ['_build', 'work']
 
 # The reST default role (used for this markup: `text`) to use for all
 # documents.
@@ -126,8 +116,8 @@ pygments_style = 'sphinx'
 #html_theme = 'default'
 
 # sys.path.append(os.path.abspath('_themes'))
-# html_theme_path = ['_themes']
-# html_theme = 'kr'
+html_theme = 'bootstrap'
+html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
 
 ## Sphinx-Bootstrap Theme
 ##
@@ -139,7 +129,6 @@ if sphinx_bootstrap_theme:
    html_theme_path = sphinx_bootstrap_theme.get_html_theme_path()
    # (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
    # Path should be relative to the ``_static`` files directory.
-   html_logo = "_static/img/gen/autobahntestsuite.svg"
 
    html_theme_options = {
        # Navigation bar title. (Default: ``project`` value)
@@ -203,16 +192,13 @@ if sphinx_bootstrap_theme:
 
        # Choose Bootstrap version.
        # Values: "3" (default) or "2" (in quotes)
-       #'bootstrap_version': "3",
+       'bootstrap_version': "3",
    }
 
 # if sphinx_rtd_theme:
 #    html_theme = "sphinx_rtd_theme"
 #    html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
-if not html_theme:
-   #html_theme = "default"
-   html_theme = 'sphinxdoc'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the
@@ -229,9 +215,7 @@ if not html_theme:
 # A shorter title for the navigation bar.  Default is the same as html_title.
 #html_short_title = None
 
-# The name of an image file (relative to this directory) to place at the top
-# of the sidebar.
-#html_logo = None
+
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -248,10 +232,28 @@ html_static_path = ['_static']
 # directly to the root of the documentation.
 #html_extra_path = []
 
-# additional variables which become accessible in the template engine's context for
-# all pages
-# html_context = {'widgeturl': 'http://192.168.1.147:8090/widget'}
-html_context = {'widgeturl': 'https://demo.crossbar.io/clandeckwidget'}
+## additional variables which become accessible in RST (e.g. .. ifconfig:: not no_network)
+##
+def setup(app):
+   app.add_config_value('no_network', False, True)
+
+no_network = None
+
+## additional variables which become accessible in the template engine's
+## context for all pages
+##
+html_context = {
+   #'widgeturl': 'https://demo.crossbar.io/clandeckwidget'
+   #'widgeturl': 'http://127.0.0.1:8090/widget'
+   'widgeturl': None,
+   'no_network': False,
+   #'cstatic': 'http://127.0.0.1:8888',
+   'cstatic': '//tavendo-common-static.s3-eu-west-1.amazonaws.com',
+}
+
+# (Optional) Logo. Should be small enough to fit the navbar (ideally 24x24).
+# Path should be relative to the ``_static`` files directory.
+html_logo = None
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

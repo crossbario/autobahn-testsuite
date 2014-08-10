@@ -1,12 +1,16 @@
 <div id="logoblock">
    <p class="logo">
-     <a href="{{ pathto('pages/index') }}"><img class="logo" src="{{ pathto('_static/img/gen/autobahn.svg', 1) }}" height="200" width="200" alt="Autobahn|Testuite"/></a>
+     <a href="/"><img class="logo" src="{{ cstatic }}/img/gen/autobahn.svg.gz" height="200" width="200" alt="Autobahn|Testuite"/></a>
    </p>
    <h3><strong>Autobahn</strong>|Testsuite</h3>
+   {% if not no_network %}
    <p>
      <iframe src="http://ghbtns.com/github-btn.html?user=tavendo&repo=AutobahnTestsuite&type=watch&count=true&size=large"
        allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
    </p>
+   {% else %}
+      <!-- GitHub stripped! -->
+   {% endif %}
 </div>
 <div class="side_toc sidebar_block" id="quicklinks">
    <h4><a href="https://pypi.python.org/pypi/autobahntestsuite/0.6.2">Download</a></h4>
@@ -26,5 +30,3 @@
    <h4><a href="{{ pathto('pages/reference/autobahn') }}">API Reference</a></h4>
    <h4><a href="{{ pathto('genindex') }}">Index</a></h4>
 </div>
-
-<img src="" alt="">
