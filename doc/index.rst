@@ -161,7 +161,6 @@ Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing 
    Home <self>
    installation
    usage
-   table_of_contents
 
 
 
