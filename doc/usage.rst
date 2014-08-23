@@ -61,7 +61,7 @@ Reports will be generated as a set of HTML files. To create reports for multiple
 Mode testeeserver/testeeclient
 ------------------------------
 
-These modes are for testing `AutobahnPython <http://autobahn.ws/python>`_ against the test suite.
+These modes are for testing `AutobahnPython <http://autobahn.ws/python>`__ against the test suite.
 
 The ``testeeserver`` can be tested using a 2nd instance of **wstest** running in ``fuzzingclient`` mode.
 

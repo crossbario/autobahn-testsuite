@@ -15,19 +15,23 @@ Reports
 
 Check out the test reports:
 
-* older, but more testees
+* older, but more testees (`test setup <https://github.com/tavendo/AutobahnTestSuite/tree/master/examples/publicreports>`__):
 
-  + `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`_
-  + `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`_
-  + `Servers <http://autobahn.ws/testsuite/reports/servers/index.html>`_
+  + `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`__
+  + `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`__
+  + `Servers <http://autobahn.ws/testsuite/reports/servers/index.html>`__
 
-* newer, including WebSocket compression, fewer testees
+* newer (2013/10), including WebSocket compression, fewer testees:
 
-  + `Browsers & Clients (2013/10) <http://autobahn.ws/testsuite/reports_20131013/clients/index.html>`_
-  + `Servers (2013/10) <http://autobahn.ws/testsuite/reports_20131013/servers/index.html>`_
-  + `Browsers & Clients (2014/03) <http://autobahn.ws/testsuite/reports_20140314/clients/index.html>`_
+  + `Browsers & Clients <http://autobahn.ws/testsuite/reports_20131013/clients/index.html>`__
+  + `Servers <http://autobahn.ws/testsuite/reports_20131013/servers/index.html>`__
+  + `Browsers & Clients <http://autobahn.ws/testsuite/reports_20140314/clients/index.html>`__
 
-`Details on the test setup <https://github.com/tavendo/AutobahnTestSuite/tree/master/examples/publicreports>`_ used with creating the above reports.
+* newer (2014/08), only `AutobahnPython <http://autobahn.ws/python>`__:
+
+  + `Client <http://autobahn.ws/testsuite/reports_20140823/clients/index.html>`__
+  + `Server <http://autobahn.ws/testsuite/reports_20140823/servers/index.html>`__
+
 
 
 
@@ -141,7 +145,7 @@ Besides the automated testsuite (aka "fuzzing" server/client), **wstest** also i
 
 * WebSocket echo server and client
 * WebSocket broadcast server (and client driver)
-* Testee modes to test `AutobahnPython <http://autobahn.ws/python>`_ against the test suite
+* Testee modes to test `AutobahnPython <http://autobahn.ws/python>`__ against the test suite
 * **wsperf** controller and master (see below for more)
 * WAMP server and client, for developing WAMP implementations
 * WebSocket Mass-Connect
@@ -152,7 +156,7 @@ Please see the :ref:`usage` for further information.
 Contact
 -------
 
-Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing list <http://groups.google.com/group/autobahnws>`_.
+Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing list <http://groups.google.com/group/autobahnws>`__.
 
 
 .. toctree::
