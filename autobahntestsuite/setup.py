@@ -30,32 +30,32 @@ performance and limits testing.
 
 Contains over 500 test cases covering
 
-   * Framing
-   * Pings/Pongs
-   * Reserved Bits
-   * Opcodes
-   * Fragmentation
-   * UTF-8 Handling
-   * Limits/Performance
-   * Closing Handshake
-   * Opening Handshake (under development)
-   * WebSocket compression (permessage-deflate extension)
+* Framing
+* Pings/Pongs
+* Reserved Bits
+* Opcodes
+* Fragmentation
+* UTF-8 Handling
+* Limits/Performance
+* Closing Handshake
+* Opening Handshake (under development)
+* WebSocket compression (permessage-deflate extension)
 
 Besides the automated test suite, wstest also includes a number
 of other handy developer tools:
 
-   * WebSocket echo server and client
-   * WebSocket broadcast server (and client driver)
-   * Testee modes to test Autobahn itself against the test suite
-   * wsperf controller and master (see http://www.zaphoyd.com/wsperf)
-   * WAMP server and client, for developing WAMP implementations
+* WebSocket echo server and client
+* WebSocket broadcast server (and client driver)
+* Testee modes to test Autobahn itself against the test suite
+* wsperf controller and master (see http://www.zaphoyd.com/wsperf)
+* WAMP server and client, for developing WAMP implementations
 
 More information:
 
-   * http://autobahn.ws/testsuite
-   * https://github.com/tavendo/AutobahnTestSuite
-   * http://tools.ietf.org/html/rfc6455
-   * http://wamp.ws
+* http://autobahn.ws/testsuite
+* https://github.com/tavendo/AutobahnTestSuite
+* http://tools.ietf.org/html/rfc6455
+* http://wamp.ws
 """
 
 
@@ -84,7 +84,7 @@ setup (
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
    install_requires = ['setuptools',
-                       'autobahn[twisted]>=0.8.7',
+                       'autobahn[twisted]>=0.8.15',
                        'jinja2>=2.6',
                        'markupsafe>=0.19',
                        'Werkzeug>=0.9.4',

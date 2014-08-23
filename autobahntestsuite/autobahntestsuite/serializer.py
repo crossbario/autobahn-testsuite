@@ -23,7 +23,7 @@ __all__ = ['start']
 import json
 import binascii
 from autobahn import wamp
-from autobahn.wamp.tests.test_serializer import generate_test_messages
+from autobahn.wamp.test.test_serializer import generate_test_messages
 
 
 def start(outfilename, debug = False):

@@ -36,7 +36,7 @@ class Case7_3_5(Case):
          self.result = self.resultClose 
          
    def onOpen(self):
-      self.payload = "*" * 123
+      self.payload = u"*" * 123
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL,self.payload)
