@@ -24,13 +24,13 @@ import wstest
 import echo
 import broadcast
 import testee
-import wsperfcontrol
-import wsperfmaster
+#import wsperfcontrol
+#import wsperfmaster
 import case
 import caseset
 import report
 import spectemplate
 import fuzzing
-import wampfuzzing
-import wamptestserver
+#import wampfuzzing
+#import wamptestserver
 import massconnect

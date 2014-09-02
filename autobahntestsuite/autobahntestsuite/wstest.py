@@ -37,15 +37,15 @@ import testee
 import fuzzing
 
 ## WAMP testing modes
-import wamptestee
-import wampfuzzing
+#import wamptestee
+#import wampfuzzing
 
 ## Misc testing modes
 import echo
 import broadcast
 import massconnect
-import wsperfcontrol
-import wsperfmaster
+#import wsperfcontrol
+#import wsperfmaster
 import serializer
 
 
