@@ -86,7 +86,7 @@ class FuzzingProtocol:
 
    def connectionMade(self):
 
-      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted']
+      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted', 'connectionWasOpen']
 
       for attr in attrs:
          if not hasattr(self, attr):
@@ -276,6 +276,8 @@ class FuzzingProtocol:
 
 
    def onOpen(self):
+
+      self.connectionWasOpen = True
 
       if self.runCase:
 

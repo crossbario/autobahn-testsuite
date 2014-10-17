@@ -38,7 +38,10 @@ class Case7_5_1(Case):
 
       ## the close reason we sent was invalid UTF8, so we
       ## convert to HEX representation for later case reporting
-      self.p.localCloseReason = binascii.b2a_hex(self.p.localCloseReason)
+      if self.p.localCloseReason:
+         self.p.localCloseReason = binascii.b2a_hex(self.p.localCloseReason)
+      else:
+         self.p.localCloseReason = "?"
 
    def onOpen(self):
       self.payload = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5\xed\xa0\x80\x65\x64\x69\x74\x65\x64'

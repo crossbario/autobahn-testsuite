@@ -34,14 +34,18 @@ class Case10_1_1(Case):
 
    def onConnectionLost(self, failedByMe):
       Case.onConnectionLost(self, failedByMe)
-      frames_expected = {}
-      frames_expected[0] = len(self.payload) / self.p.autoFragmentSize
-      frames_expected[1] = 1 if len(self.payload) % self.p.autoFragmentSize > 0 else 0
-      frames_got = {}
-      frames_got[0] = self.p.txFrameStats[0]
-      frames_got[1] = self.p.txFrameStats[1]
-      if frames_expected == frames_got:
-         pass
+      if self.p.connectionWasOpen:
+         frames_expected = {}
+         frames_expected[0] = len(self.payload) / self.p.autoFragmentSize
+         frames_expected[1] = 1 if len(self.payload) % self.p.autoFragmentSize > 0 else 0
+         frames_got = {}
+         frames_got[0] = self.p.txFrameStats[0]
+         frames_got[1] = self.p.txFrameStats[1]
+         if frames_expected == frames_got:
+            pass
+         else:
+            self.behavior = Case.FAILED
+            self.result = "Frames transmitted %s does not match what we expected %s." % (str(frames_got), str(frames_expected))
       else:
          self.behavior = Case.FAILED
-         self.result = "Frames transmitted %s does not match what we expected %s." % (str(frames_got), str(frames_expected))
+         self.result = "WebSocket connection was never open"
