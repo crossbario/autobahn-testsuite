@@ -140,7 +140,7 @@ Mode wsperfcontrol
 
 This mode is used to control **wsperf** running in master mode. **wsperf** is a WebSocket performance probe developed as part of WebSocket++.
 
-* http://www.zaphoyd.com/wsperf
+* https://github.com/zaphoyd/wsperf
 * https://github.com/zaphoyd/websocketpp
 * https://github.com/zaphoyd/websocketpp/wiki/wsperf
 * https://github.com/zaphoyd/websocketpp/wiki/wsperf:-stress_test
