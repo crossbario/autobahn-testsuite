@@ -28,7 +28,6 @@ SPEC_FUZZINGSERVER = """
 {
    "url": "ws://127.0.0.1:9001",
    "outdir": "./reports/clients",
-   "webport": 8080,
    "cases": ["*"],
    "exclude-cases": [],
    "exclude-agent-cases": {}

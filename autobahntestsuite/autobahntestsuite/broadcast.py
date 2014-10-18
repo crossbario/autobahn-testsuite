@@ -108,7 +108,7 @@ def startClient(wsuri, debug = False):
 
 
 
-def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+def startServer(wsuri, webport, sslKey = None, sslCert = None, debug = False):
    factory = BroadcastServerFactory(wsuri, debug)
    if sslKey and sslCert:
       sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
@@ -116,8 +116,9 @@ def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
       sslContext = None
    listenWS(factory, sslContext)
 
-   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/broadcastserver"))
-   web = Site(webdir)
-   reactor.listenTCP(8080, web)
+   if webport:
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/broadcastserver"))
+      web = Site(webdir)
+      reactor.listenTCP(webport, web)
 
    return True

@@ -257,7 +257,7 @@ class WsPerfMasterUiFactory(WampServerFactory):
 
 
 
-def startServer(self, debug = False):
+def startServer(self, webport, debug = False):
    ## WAMP Server for wsperf slaves
    ##
    wsperf = WsPerfMasterFactory("ws://localhost:9090")
@@ -266,9 +266,10 @@ def startServer(self, debug = False):
 
    ## Web Server for UI static files
    ##
-   webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wsperfmaster"))
-   web = Site(webdir)
-   reactor.listenTCP(8080, web)
+   if webport:
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/wsperfmaster"))
+      web = Site(webdir)
+      reactor.listenTCP(webport, web)
 
    ## WAMP Server for UI
    ##

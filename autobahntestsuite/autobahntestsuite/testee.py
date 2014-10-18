@@ -20,6 +20,8 @@ __all__ = ['startClient', 'startServer']
 
 
 from twisted.internet import reactor
+from twisted.web.server import Site
+from twisted.web.static import File
 
 import autobahn
 
@@ -177,11 +179,17 @@ def startClient(wsuri, ident = None, debug = False):
 
 
 
-def startServer(wsuri, sslKey = None, sslCert = None, debug = False):
+def startServer(wsuri, webport, sslKey = None, sslCert = None, debug = False):
    factory = TesteeServerFactory(wsuri, debug)
    if sslKey and sslCert:
       sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
    else:
       sslContext = None
    listenWS(factory, sslContext)
+
+   if webport:
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite", "web/echoserver"))
+      web = Site(webdir)
+      reactor.listenTCP(webport, web)
+
    return True

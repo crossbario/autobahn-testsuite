@@ -121,6 +121,7 @@ class WsTestOptions(usage.Options):
       ['spec', 's', None, 'Test specification file [required in some modes].'],
       ['outfile', 'o', None, 'Output filename for modes that generate testdata.'],
       ['wsuri', 'w', None, 'WebSocket URI [required in some modes].'],
+      ['webport', 'u', 8080, 'Web port for running an embedded HTTP Web server; defaults to 8080; set to 0 to disable. [optionally used in some modes: fuzzingserver, echoserver, broadcastserver, wsperfmaster].'],
       ['ident', 'i', None, ('Testee client identifier [optional for client testees].')],
       ['key', 'k', None, ('Server private key file for secure WebSocket (WSS) [required in server modes for WSS].')],
       ['cert', 'c', None, ('Server certificate file for secure WebSocket (WSS) [required in server modes for WSS].')]
@@ -151,6 +152,14 @@ class WsTestOptions(usage.Options):
 
       if (self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and not self['wsuri']):
          raise usage.UsageError, "mode needs a WebSocket URI!"
+
+      if self['webport'] is not None:
+         try:
+            self['webport'] = int(self['webport'])
+            if self['webport'] < 0 or self['webport'] > 65535:
+               raise ValueError()
+         except:
+            raise usage.UsageError, "invalid Web port %s" % self['webport']
 
 
 
@@ -203,25 +212,25 @@ class WsTestRunner(object):
          return broadcast.startClient(self.options['wsuri'], debug = self.debug)
 
       elif self.mode == "broadcastserver":
-         return broadcast.startServer(self.options['wsuri'], debug = self.debug)
+         return broadcast.startServer(self.options['wsuri'], self.options['webport'], debug = self.debug)
 
       elif self.mode == "echoclient":
          return echo.startClient(self.options['wsuri'], debug = self.debug)
 
       elif self.mode == "echoserver":
-         return echo.startServer(self.options['wsuri'], debug = self.debug)
+         return echo.startServer(self.options['wsuri'], self.options['webport'], debug = self.debug)
 
       elif self.mode == "fuzzingclient":
          return fuzzing.startClient(self.spec, debug = self.debug)
 
       elif self.mode == "fuzzingserver":
-         return fuzzing.startServer(self.spec, debug = self.debug)
+         return fuzzing.startServer(self.spec, self.options['webport'], debug = self.debug)
 
       elif self.mode == "wsperfcontrol":
          return wsperfcontrol.startClient(self.options['wsuri'], self.spec, debug = self.debug)
 
       elif self.mode == "wsperfmaster":
-         return wsperfmaster.startServer(debug = self.debug)
+         return wsperfmaster.startServer(self.options['webport'], debug = self.debug)
 
       elif self.mode == "massconnect":
          return massconnect.startClient(self.spec, debug = self.debug)

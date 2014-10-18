@@ -1278,7 +1278,7 @@ def startClient(spec, debug = False):
 
 
 
-def startServer(spec, sslKey = None, sslCert = None, debug = False):
+def startServer(spec, webport, sslKey = None, sslCert = None, debug = False):
    ## use TLS server key/cert from spec, but allow overriding
    ## from cmd line
    if not sslKey:
@@ -1295,14 +1295,15 @@ def startServer(spec, sslKey = None, sslCert = None, debug = False):
 
    listenWS(factory, sslContext)
 
-   webdir = File(pkg_resources.resource_filename("autobahntestsuite",
-                                                 "web/fuzzingserver"))
-   curdir = File('.')
-   webdir.putChild('cwd', curdir)
-   web = Site(webdir)
-   if factory.isSecure:
-      reactor.listenSSL(spec.get("webport", 8080), web, sslContext)
-   else:
-      reactor.listenTCP(spec.get("webport", 8080), web)
+   if webport:
+      webdir = File(pkg_resources.resource_filename("autobahntestsuite",
+                                                    "web/fuzzingserver"))
+      curdir = File('.')
+      webdir.putChild('cwd', curdir)
+      web = Site(webdir)
+      if factory.isSecure:
+         reactor.listenSSL(webport, web, sslContext)
+      else:
+         reactor.listenTCP(webport, web)
 
    return True
