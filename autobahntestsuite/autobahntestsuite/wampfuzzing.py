@@ -420,7 +420,7 @@ def startWeb(self, port = 7070, debug = False):
       d2.addCallback(process)
       return d1
 
-   ## serve statuc stuff from a standard File resource
+   ## serve status stuff from a standard File resource
    static_resource = File("autobahntestsuite/static")
 
    ## serve a WAMP server to access the testsuite
