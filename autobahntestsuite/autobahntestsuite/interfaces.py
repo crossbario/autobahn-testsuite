@@ -50,7 +50,7 @@ class ITestDb(Interface):
       Closes a testsuite run. After a testsuite run is closed,
       the test result data cannot be changed or new data added.
 
-      :param testRunId: ID of test run as previsouly returned by newRun().
+      :param testRunId: ID of test run as previously returned by newRun().
       :type testRunId: str
       """
 
