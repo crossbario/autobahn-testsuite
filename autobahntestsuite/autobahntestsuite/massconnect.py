@@ -31,13 +31,13 @@ from autobahn.twisted.websocket import connectWS, \
 
 class MassConnectProtocol(WebSocketClientProtocol):
 
-   wasHandshaked = False
+   didHandshake = False
 
    def onOpen(self):
       ## WebSocket opening handshake complete => log
       self.factory.test.onConnected()
       self.factory.test.protos.append(self)
-      self.wasHandshaked = True
+      self.didHandshake = True
 
 
 class MassConnectFactory(WebSocketClientFactory):
