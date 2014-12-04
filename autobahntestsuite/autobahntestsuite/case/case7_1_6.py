@@ -22,7 +22,7 @@ class Case7_1_6(Case):
 
    DESCRIPTION = """Send 256K message followed by close then a ping"""
 
-   EXPECTATION = """Case outcome depends on implimentation defined close behavior. Message and close frame are sent back to back. If the close frame is processed before the text message write is complete (as can happen in asynchronous processing models) the close frame is processed first and the text message may not be recieved or may only be partially recieved."""
+   EXPECTATION = """Case outcome depends on implementation defined close behavior. Message and close frame are sent back to back. If the close frame is processed before the text message write is complete (as can happen in asynchronous processing models) the close frame is processed first and the text message may not be recieved or may only be partially recieved."""
    
    def init(self):
       self.suppressClose = True
