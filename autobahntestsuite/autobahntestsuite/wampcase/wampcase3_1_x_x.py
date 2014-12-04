@@ -97,7 +97,7 @@ class WampCase3_1_x_x_Params(AttributeBag):
 
    peers: a list with one item per WAMP session run during the test, where each item contains a list of topics each peer _subscribes_ to. The publisher that publishes during the test is always the first item in the list.
 
-   publicationTopic, excludeMe, exclude, eligible: paramters controlling how events are published during the test.
+   publicationTopic, excludeMe, exclude, eligible: parameters controlling how events are published during the test.
 
    eventPayloads: a list of payloads each tested as event payload to the test at hand.
 
