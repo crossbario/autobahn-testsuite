@@ -56,7 +56,7 @@ TOPIC_PUBLISHED_TO = "http://example.com/simple"
 TOPIC_NOT_PUBLISHED_TO = "http://example.com/foobar"
 
 ## topic that we will publish to, but that is not
-## reigstered on the testee, and hence no events
+## registered on the testee, and hence no events
 ## shalle be dispatched
 ##
 TOPIC_NOT_REGISTERED = "http://example.com/barbaz"
