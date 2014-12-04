@@ -22,7 +22,7 @@ class Case3_1(Case):
 
    DESCRIPTION = """Send small text message with <b>RSV = 1</b>."""
 
-   EXPECTATION = """The connection is failed immediately (1002/protocol error), since RSV must be 0, when no extension defining RSV meaning has been negoiated."""
+   EXPECTATION = """The connection is failed immediately (1002/protocol error), since RSV must be 0, when no extension defining RSV meaning has been negotiated."""
 
    def onOpen(self):
       self.expected[Case.OK] = []
