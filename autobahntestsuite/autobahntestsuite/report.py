@@ -442,13 +442,13 @@ class HtmlReportGenerator(object):
 
     def writeReportIndexFile(self, runId, file = None):
        # return a Deferred that yields the automatically
-       # chose filename if no file-like objct was provided,
+       # choose filename if no file-like object was provided,
        # and None otherwise
        raise Exception("implement me")
        
     def writeReportFile(self, resultId, file = None):
        # return a Deferred that yields the automatically
-       # chose filename if no file-like objct was provided,
+       # choose filename if no file-like object was provided,
        # and None otherwise
        raise Exception("implement me")
        

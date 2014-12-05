@@ -22,7 +22,7 @@
 
 ## v0.5.6
 
-* compatiblity with AutobahnPython 0.6.3
+* compatibility with AutobahnPython 0.6.3
 * new test section for testing WebSocket compression extension (`permessage-deflate` etc)
 * beginning of WAMP testsuite
 * more UTF8 test strings
