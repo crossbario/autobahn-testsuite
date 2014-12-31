@@ -179,7 +179,7 @@ def startClient(wsuri, ident = None, debug = False):
 
 
 
-def startServer(wsuri, webport, sslKey = None, sslCert = None, debug = False):
+def startServer(wsuri, webport = None, sslKey = None, sslCert = None, debug = False):
    factory = TesteeServerFactory(wsuri, debug)
    if sslKey and sslCert:
       sslContext = ssl.DefaultOpenSSLContextFactory(sslKey, sslCert)
