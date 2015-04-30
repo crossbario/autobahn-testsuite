@@ -881,7 +881,7 @@ class FuzzingFactory:
       f.write('      <table>\n')
       f.write('         <tr class="stats_header"><td>Key</td><td class="left">Value</td><td class="left">Description</td></tr>\n')
       for c in cbv:
-         f.write('         <tr class="stats_row"><td>%s</td><td class="left">%s</td><td class="left">%s</td></tr>\n' % (c[0], case[c[0]], c[1]))
+         f.write(('         <tr class="stats_row"><td>%s</td><td class="left">%s</td><td class="left">%s</td></tr>\n' % (c[0], case[c[0]], c[1])).encode("utf-8"))
       f.write('      </table>')
       f.write("      <br/><hr/>\n")
 
