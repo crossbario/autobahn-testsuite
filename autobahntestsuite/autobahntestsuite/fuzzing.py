@@ -1059,6 +1059,16 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
          #raise Exception("no agent specified")
          self.caseAgent = None
 
+      if connectionRequest.params.has_key("casetuple"):
+         if len(connectionRequest.params["casetuple"]) > 1:
+            raise Exception("multiple test cases specified")
+         try:
+            casetuple = connectionRequest.params["casetuple"][0]
+            casetuple = casetuple.strip()
+            self.case = self.factory.specCases.index(casetuple) + 1
+         except:
+            raise Exception("invalid test case tuple %s" % connectionRequest.params["casetuple"][0])
+
       if connectionRequest.params.has_key("case"):
          if len(connectionRequest.params["case"]) > 1:
             raise Exception("multiple test cases specified")
