@@ -53,7 +53,7 @@ of other handy developer tools:
 More information:
 
 * http://autobahn.ws/testsuite
-* https://github.com/tavendo/AutobahnTestSuite
+* https://github.com/crossbario/autobahn-testsuite
 * http://tools.ietf.org/html/rfc6455
 * http://wamp.ws
 """

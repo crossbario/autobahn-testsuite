@@ -45,7 +45,7 @@ Alternatively, install from sources:
 
 ::
 
-   git clone git://github.com/tavendo/AutobahnTestSuite.git
+   git clone git://github.com/crossbario/autobahn-testsuite.git
    cd AutobahnTestSuite
    git checkout v0.6.1
    cd autobahntestsuite

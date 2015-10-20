@@ -15,7 +15,7 @@ Reports
 
 Check out the test reports:
 
-* older, but more testees (`test setup <https://github.com/tavendo/AutobahnTestSuite/tree/master/examples/publicreports>`__):
+* older, but more testees (`test setup <https://github.com/crossbario/autobahn-testsuite/tree/master/examples/publicreports>`__):
 
   + `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`__
   + `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`__

@@ -31,7 +31,7 @@ The VMs are (for testing traffic) connected via a VirtualBox host only network.
 There are dozens of WebSocket capable servers. We cannot test all, too much work.
 Hence, we selected a few (subjective):
 
- * [Autobahn](https://github.com/tavendo/AutobahnPython) - Python/Twisted
+ * [Autobahn](https://github.com/crossbario/autobahn-python) - Python/Twisted
  * [Jetty](http://eclipse.org/jetty/) - Java/NIO
  * [Cowboy](https://github.com/extend/cowboy) - Erlang/OTP
  * [WebSocket++](https://github.com/zaphoyd/websocketpp) - C++/ASIO
@@ -204,7 +204,7 @@ This will run the server on WebSocket URL `ws://localhost:9009/websocket`.
 
 ### Autobahn
 
-[Autobahn](https://github.com/tavendo/AutobahnPython) is a Python/Twisted based WebSocket/WAMP library.
+[Autobahn](https://github.com/crossbario/autobahn-python) is a Python/Twisted based WebSocket/WAMP library.
 
 We will test Autobahn running under 3 run-time environments:
 
