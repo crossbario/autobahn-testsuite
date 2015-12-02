@@ -86,7 +86,7 @@ class FuzzingProtocol:
 
    def connectionMade(self):
 
-      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted', 'connectionWasOpen']
+      attrs = ['case', 'runCase', 'caseAgent', 'caseStarted', 'connectionWasOpen', 'shutdownOnComplete']
 
       for attr in attrs:
          if not hasattr(self, attr):
@@ -113,6 +113,8 @@ class FuzzingProtocol:
       self.txOctetStats = {}
       self.txFrameStats = {}
 
+      ## ability to shut down server once reports are generated
+      self.shutdownOnComplete = False
 
    def connectionLost(self, reason):
       if self.runCase:
@@ -294,6 +296,11 @@ class FuzzingProtocol:
       elif self.path == "/updateReports":
          self.factory.createReports()
          self.sendClose()
+         if self.shutdownOnComplete:
+            print "Report generation complete; shutting down server."
+            reactor.stop()
+         else:
+            print "Report generation complete."
 
       elif self.path == "/getCaseCount":
          self.sendMessage(json.dumps(len(self.factory.specCases)))
@@ -314,6 +321,10 @@ class FuzzingProtocol:
             'description': self.factory.CaseSet.caseClassToPrettyDescription(self.Case),
          }))
          self.sendClose()
+
+      elif self.path == "/stopServer":
+         print "Shutting down server."
+         reactor.stop()
 
       else:
          pass
@@ -1066,6 +1077,18 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
             self.case = int(connectionRequest.params["case"][0])
          except:
             raise Exception("invalid test case ID %s" % connectionRequest.params["case"][0])
+
+      if connectionRequest.params.has_key("shutdownOnComplete"):
+         if len(connectionRequest.params["shutdownOnComplete"]) > 1:
+            raise Exception("shutdownOnComplete only supports a single Boolean value")
+         try:
+            val = connectionRequest.params["shutdownOnComplete"][0]
+            if val.lower() in ['true', 'yes']:
+               self.shutdownOnComplete = True
+            else:
+               self.shutdownOnComplete = False
+         except:
+            raise Exception("invalid shutdownOnComplete parameter %s" % connectionRequest.params["shutdownOnComplete"][0])
 
       if self.case:
          if self.case >= 1 and self.case <= len(self.factory.specCases):
