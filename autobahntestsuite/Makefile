@@ -26,8 +26,6 @@ upload:
 publish:
 	python setup.py register
 	python setup.py sdist upload
-	python setup.py bdist_egg upload
-	python setup.py bdist_wininst upload
 
 test_sql:
 	echo "select count(*) from testresult;" | sqlite3 .wstest.db
