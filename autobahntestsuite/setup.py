@@ -84,6 +84,7 @@ setup (
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
    install_requires = ['setuptools',
+                       'txaio<=2.1.0', # https://github.com/crossbario/autobahn-testsuite/issues/55
                        'autobahn[twisted,accelerate]>=0.9.2,<0.11',
                        'jinja2>=2.6',
                        'markupsafe>=0.19',
