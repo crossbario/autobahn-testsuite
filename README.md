@@ -99,15 +99,35 @@ Options:
 
 ### Testing WebSocket server implementations
 
-To test a **WebSocket server implementation** and generate compliance test reports, start `wstest` in **fuzzing client mode**:
+To test a **WebSocket server implementation** and generate compliance test reports, first start the WebSocket server that you want to test. Here, we are using a example from Autobahn|Python:
+
+```console
+(python279_1)oberstet@thinkpad-t430s:~/scm/crossbario/autobahn-python/examples/twisted/websocket/testee$ python testee_server.py
+2015-12-21 21:31:54+0100 [-] Log opened.
+2015-12-21 21:31:54+0100 [-] TesteeServerFactory starting on 9001
+2015-12-21 21:31:54+0100 [-] Starting factory <__main__.TesteeServerFactory object at 0x7faf23551210>
+```
+
+Then, run `wstest` in **fuzzing client mode**:
 
 ```console
 cd ~
 mkdir test
 cd test
-wstest -m fuzzingclient -m
+wstest -m fuzzingclient
 ```
 
+The testsuite will now start a WebSocket fuzzing client connecting on TCP port 9001 to the WebSocket servers to be tested:
+
+```console
+(wstest)oberstet@thinkpad-t430s:~/test$ wstest -m fuzzingclient
+Auto-generating spec file 'fuzzingclient.json'
+Loading spec from /home/oberstet/test/fuzzingclient.json
+...
+Autobahn Fuzzing WebSocket Client (Autobahn Version 0.7.4 / Autobahn Testsuite Version 0.10.9)
+Ok, will run 521 test cases against 1 servers
+...
+```
 
 ### Testing WebSocket client implementations
 
@@ -132,7 +152,24 @@ Ok, will run 521 test cases for any clients connecting
 ...
 ```
 
-> Note: The fuzzingserver mode will also start a Web server on port 8080 which renders a HTML page that allows browser WebSocket clients to be tested.
+> Note: The fuzzing server mode will also start a Web server on port 8080 that renders a HTML page for browser WebSocket clients to be tested.
+
+
+On first run, the tool will auto-generated a test configuration file:
+
+```console
+(wstest)oberstet@thinkpad-t430s:~/test$ cat fuzzingserver.json
+
+{
+   "url": "ws://127.0.0.1:9001",
+   "outdir": "./reports/clients",
+   "cases": ["*"],
+   "exclude-cases": [],
+   "exclude-agent-cases": {}
+}
+```
+
+You can tweak that file to run only some tests, e.g. `"cases: ["1.*", "2.1.*"]"` will run only the tests under section 1.* and subsection 2.1.*.
 
 
 ## More Information
