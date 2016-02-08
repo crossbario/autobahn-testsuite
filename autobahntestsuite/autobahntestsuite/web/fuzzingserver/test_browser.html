@@ -18,6 +18,7 @@
          var ua = null;
          var webSocket = null;
          var currentCaseId = null;
+         var currentCaseTuple = null;
          var caseCount = null;
 
          window.onload =
@@ -122,7 +123,17 @@
             updateStatus("Running test suite ..");
             document.getElementById('resultlink').innerHTML = '';
             currentCaseId = 1;
-            getCaseCount(runNextCase);
+            currentCaseTuple = null;
+            if (document.getElementById('singletest').checked)
+            {
+               currentCaseTuple = document.getElementById('casetuple').value;
+               caseCount = 1;
+               runNextCase();
+            }
+            else
+            {
+               getCaseCount(runNextCase);
+            }
          }
 
          function updateStatus(msg)
@@ -190,7 +201,16 @@
 
          function runNextCase()
          {
-            var ws_uri = wsuri + "/runCase?case=" + currentCaseId + "&agent=" + agent;
+            var ws_uri = null;
+
+            if (currentCaseTuple)
+            {
+               ws_uri = wsuri + "/runCase?casetuple=" + currentCaseTuple + "&agent=" + agent;
+            }
+            else
+            {
+               ws_uri = wsuri + "/runCase?case=" + currentCaseId + "&agent=" + agent;
+            }
 
             webSocket = openWebSocket(ws_uri);
             webSocket.binaryType = "arraybuffer";
@@ -237,6 +257,10 @@
          <p>Fuzzing Server URI<br/><input id="wsuri" type="text" size="20" maxlength="40"></p>
          <p>User Agent Identifier<br/><input id="agent" type="text" size="30" maxlength="30"><br/>
          <span style="font-size: 0.7em;" id="ua-detected"></span></p>
+         <p>
+            <input type="radio" id="alltests" name="runtests" value="all" checked="checked" onclick="document.getElementById('casetuple').disabled=true;"><label for="alltests">All tests</label>
+            <input type="radio" id="singletest" name="runtests" value="singletest" onclick="document.getElementById('casetuple').disabled=false;"><label for="singletest">Single test:</label> <input id="casetuple" type="text" size="10" maxlength="10" disabled="disabled">
+         </p>
       </form>
       <br/>
       <p><button onclick='startTestRun();'>Start Tests</button> &nbsp;&nbsp; <i>Status:</i> <span id="statusline">Ready</span></p>
