@@ -38,11 +38,10 @@ SPEC_FUZZINGCLIENT = """
 {
    "outdir": "./reports/servers",
    "servers": [
-                  {
-                     "agent": "AutobahnPython",
-                     "url": "ws://127.0.0.1:9001"
-                  }
-              ],
+      {
+         "url": "ws://127.0.0.1:9001"
+      }
+   ],
    "cases": ["*"],
    "exclude-cases": [],
    "exclude-agent-cases": {}
@@ -52,10 +51,8 @@ SPEC_FUZZINGCLIENT = """
 SPEC_FUZZINGWAMPSERVER = """
 {
    "url": "ws://127.0.0.1:9001",
-
    "options": {},
    "outdir": "./reports/wampclients",
-
    "cases": ["*"],
    "exclude-cases": [],
    "exclude-agent-cases": {}
