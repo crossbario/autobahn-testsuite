@@ -69,7 +69,7 @@ For example, to test Autobahn along other WebSocket servers, do
 
 ::
 
-   wstest -m testeeserver ws://localhost:9001
+   wstest -m testeeserver -w ws://localhost:9001
 
 start your other WebSocket servers on other ports, and then run the testsuite against all:
 
