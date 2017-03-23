@@ -221,6 +221,14 @@ class WsTestRunner(object):
          return echo.startServer(self.options['wsuri'], self.options['webport'], debug = self.debug)
 
       elif self.mode == "fuzzingclient":
+         # allow overriding servers from command line option, providing 1 server
+         # this is semi-useful, as you cannot accumulate a combined report for
+         # multiple servers by running wstest over and over again. the generated
+         # report is only for the last invocation - it would require a massive
+         # code restructering / rewriting to change that. no time for that unfort.
+         servers = self.spec.get("servers", [])
+         if len(servers) == 0:
+             self.spec["servers"] = [{"url": self.options['wsuri']}]
          return fuzzing.startClient(self.spec, debug = self.debug)
 
       elif self.mode == "fuzzingserver":
