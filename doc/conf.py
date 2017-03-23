@@ -322,7 +322,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
   ('index', 'AutobahnTestsuite.tex', u'AutobahnTestsuite Documentation',
-   u'Tavendo GmbH', 'manual'),
+   u'Crossbar.io Technologies GmbH', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -352,7 +352,7 @@ latex_documents = [
 # (source start file, name, description, authors, manual section).
 man_pages = [
     ('index', 'autobahntestsuite', u'AutobahnTestsuite Documentation',
-     [u'Tavendo GmbH'], 1)
+     [u'Crossbar.io Technologies GmbH'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -366,7 +366,7 @@ man_pages = [
 #  dir menu entry, description, category)
 texinfo_documents = [
   ('index', 'AutobahnTestsuite', u'AutobahnTestsuite Documentation',
-   u'Tavendo GmbH', 'AutobahnTestsuite', 'One line description of project.',
+   u'Crossbar.io Technologies GmbH', 'AutobahnTestsuite', 'One line description of project.',
    'Miscellaneous'),
 ]
 

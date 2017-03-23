@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright (C) 2011-2014 Tavendo GmbH
+##  Copyright (c) Crossbar.io Technologies GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -79,12 +79,12 @@ setup (
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
-   author = 'Tavendo GmbH',
+   author = 'Crossbar.io Technologies GmbH',
    author_email = 'autobahnws@googlegroups.com',
    url = 'http://autobahn.ws/testsuite',
    platforms = ('Any'),
    install_requires = ['setuptools',
-                       'txaio<=2.1.0', # https://github.com/crossbario/autobahn-testsuite/issues/55
+                       'txaio<=2.1.0',
                        'autobahn[twisted,accelerate]>=0.9.2,<0.11',
                        'jinja2>=2.6',
                        'markupsafe>=0.19',
