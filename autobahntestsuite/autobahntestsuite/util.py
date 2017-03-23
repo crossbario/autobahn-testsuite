@@ -266,7 +266,7 @@ def _createWssContext(self, options, factory):
    try:
       from twisted.internet import ssl
    except ImportError, e:
-      print ("You need OpenSSL/pyOpenSSL installed for secure WebSockets"
+      print ("You need OpenSSL/pyOpenSSL installed for secure WebSocket"
              "(wss)!")
       sys.exit(1)
 

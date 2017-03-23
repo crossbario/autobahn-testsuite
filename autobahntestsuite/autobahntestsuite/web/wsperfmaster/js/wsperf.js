@@ -98,7 +98,7 @@ function connect() {
       );
    } else {
       //window.location = "/appliance/unsupportedbrowser";
-      alert("Browser does not support WebSockets");
+      alert("Browser does not support WebSocket");
    }
 }
 

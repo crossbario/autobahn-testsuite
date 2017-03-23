@@ -85,7 +85,7 @@ setup (
    platforms = ('Any'),
    install_requires = ['setuptools',
                        'txaio<=2.1.0',
-                       'autobahn[twisted,accelerate]>=0.9.2,<0.11',
+                       'autobahn[twisted,accelerate]==0.10.9',
                        'jinja2>=2.6',
                        'markupsafe>=0.19',
                        'Werkzeug>=0.9.4',

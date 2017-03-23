@@ -565,13 +565,13 @@ class FuzzingFactory:
       f.write('      <br/>\n')
 
       ## top logos
-      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSockets Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSockets Testsuite Report"></img></a></center>\n')
-      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSockets">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSockets">                 </img></a></center>\n')
+      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSocket Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
+      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSocket">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
 
       ## write report header
       ##
       f.write('      <div id="master_report_header" class="block">\n')
-      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSockets Testsuite</a> v%s/v%s.</p>\n' % (utcnow(), "http://autobahn.ws/testsuite", autobahntestsuite.version, autobahn.version))
+      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSocket Testsuite</a> v%s/v%s.</p>\n' % (utcnow(), "http://autobahn.ws/testsuite", autobahntestsuite.version, autobahn.version))
       f.write("""
       <table id="case_outcome_desc">
          <tr>
@@ -828,8 +828,8 @@ class FuzzingFactory:
       f.write('      <br/>\n')
 
       ## top logos
-      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSockets Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSockets Testsuite Report"></img></a></center>\n')
-      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSockets">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSockets">                 </img></a></center>\n')
+      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSocket Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
+      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSocket">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
       f.write('      <br/>\n')
 
 
@@ -878,7 +878,7 @@ class FuzzingFactory:
              ("closedByMe", "True, iff I have initiated closing handshake (that is, did send close first)."),
              ("failedByMe", "True, iff I have failed the WS connection (i.e. due to protocol error). Failing can be either by initiating closing handshake or brutal drop TCP."),
              ("droppedByMe", "True, iff I dropped the TCP connection."),
-             ("wasClean", "True, iff full WebSockets closing handshake was performed (close frame sent and received) _and_ the server dropped the TCP (which is its responsibility)."),
+             ("wasClean", "True, iff full WebSocket closing handshake was performed (close frame sent and received) _and_ the server dropped the TCP (which is its responsibility)."),
              ("wasNotCleanReason", "When wasClean == False, the reason what happened."),
              ("wasServerConnectionDropTimeout", "When we are a client, and we expected the server to drop the TCP, but that didn't happen in time, this gets True."),
              ("wasOpenHandshakeTimeout", "When performing the opening handshake, but the peer did not finish in time, this gets True."),
@@ -1060,7 +1060,7 @@ class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
    def onConnect(self, connectionRequest):
       if self.debug:
-         log.msg("connection received from %s speaking WebSockets protocol %d - upgrade request for host '%s', path '%s', params %s, origin '%s', protocols %s, headers %s" % (connectionRequest.peer, connectionRequest.version, connectionRequest.host, connectionRequest.path, str(connectionRequest.params), connectionRequest.origin, str(connectionRequest.protocols), str(connectionRequest.headers)))
+         log.msg("connection received from %s speaking WebSocket protocol %d - upgrade request for host '%s', path '%s', params %s, origin '%s', protocols %s, headers %s" % (connectionRequest.peer, connectionRequest.version, connectionRequest.host, connectionRequest.path, str(connectionRequest.params), connectionRequest.origin, str(connectionRequest.protocols), str(connectionRequest.headers)))
 
       if connectionRequest.params.has_key("agent"):
          if len(connectionRequest.params["agent"]) > 1:
@@ -1173,7 +1173,7 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
       self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
-      print "Autobahn WebSockets %s/%s Fuzzing Server (Port %d%s)" % (autobahntestsuite.version, autobahn.version, self.port, ' TLS' if self.isSecure else '')
+      print "Autobahn WebSocket %s/%s Fuzzing Server (Port %d%s)" % (autobahntestsuite.version, autobahn.version, self.port, ' TLS' if self.isSecure else '')
       print "Ok, will run %d test cases for any clients connecting" % len(self.specCases)
       print "Cases = %s" % str(self.specCases)
 
@@ -1218,7 +1218,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
       self.specCases = self.CaseSet.parseSpecCases(self.spec)
       self.specExcludeAgentCases = self.CaseSet.parseExcludeAgentCases(self.spec)
-      print "Autobahn Fuzzing WebSocket Client (Autobahn Version %s / Autobahn Testsuite Version %s)" % (autobahntestsuite.version, autobahn.version)
+      print "Autobahn Fuzzing WebSocket Client (Autobahn Testsuite Version %s / Autobahn Version %s)" % (autobahntestsuite.version, autobahn.version)
       print "Ok, will run %d test cases against %d servers" % (len(self.specCases), len(spec["servers"]))
       print "Cases = %s" % str(self.specCases)
       print "Servers = %s" % str([x["url"] for x in spec["servers"]])
