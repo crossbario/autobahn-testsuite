@@ -171,5 +171,5 @@ Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing 
 Next
 ----
 
-* `Installation <installation>`_
-* `Usage <usage>`_
+* `Installation <installation.rst>`_
+* `Usage <usage.rst>`_
