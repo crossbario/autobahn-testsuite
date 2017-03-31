@@ -6,34 +6,7 @@ The Autobahn|Testsuite provides a fully automated test suite to verify client an
 Autobahn|Testsuite also provides a couple of other tools useful for WebSocket (and `WAMP <http://wamp.ws/>`_) implementors and developers.
 
 
-For installation, see :ref:`installation`. For usage, please see :ref:`usage`.
-
-.. _reports:
-
-Reports
--------
-
-Check out the test reports:
-
-* older, but more testees (`test setup <https://github.com/crossbario/autobahn-testsuite/tree/master/examples/publicreports>`__):
-
-  + `Browsers & Clients <http://autobahn.ws/testsuite/reports/clients/index.html>`__
-  + `Mobile <http://autobahn.ws/testsuite/reports/mobileclients/index.html>`__
-  + `Servers <http://autobahn.ws/testsuite/reports/servers/index.html>`__
-
-* newer (2013/10), including WebSocket compression, fewer testees:
-
-  + `Browsers & Clients <http://autobahn.ws/testsuite/reports_20131013/clients/index.html>`__
-  + `Servers <http://autobahn.ws/testsuite/reports_20131013/servers/index.html>`__
-  + `Browsers & Clients <http://autobahn.ws/testsuite/reports_20140314/clients/index.html>`__
-
-* newer (2014/08), only `AutobahnPython <http://autobahn.ws/python>`__:
-
-  + `Client <http://autobahn.ws/testsuite/reports_20140823/clients/index.html>`__
-  + `Server <http://autobahn.ws/testsuite/reports_20140823/servers/index.html>`__
-
-
-
+For further information, see `Installation <installation.rst>`_ and `Usage <usage.rst>`_.
 
 Users
 -----
@@ -150,7 +123,7 @@ Besides the automated testsuite (aka "fuzzing" server/client), **wstest** also i
 * WAMP server and client, for developing WAMP implementations
 * WebSocket Mass-Connect
 
-Please see the :ref:`usage` for further information.
+Please see `Usage <usage.rst>`_ for further information.
 
 
 Contact
@@ -159,17 +132,8 @@ Contact
 Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing list <http://groups.google.com/group/autobahnws>`__.
 
 
-.. toctree::
-   :hidden:
+Next
+----
 
-   Home <self>
-   installation
-   usage
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`search`
+* `Installation <installation.rst>`_
+* `Usage <usage.rst>`_
