@@ -5,6 +5,13 @@ The **Autobahn**|Testsuite provides a fully automated test suite to verify clien
 **Autobahn**|Testsuite also provides a couple of other tools useful for WebSocket
 (and [WAMP](http://wamp.ws)) implementors and developers.
 
+## Reports
+
+For some current reports on the test coverage of [Autobahn|Python](http://github.com/crossbario/autobahn-python) see
+
+* [WebSocket client functionality](http://autobahn.ws/reports/clients/)
+* [WebSocket server functionality](http://autobahn.ws/reports/servers/)
+
 
 ## Test Suite Coverage
 
