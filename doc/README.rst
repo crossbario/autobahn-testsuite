@@ -6,9 +6,7 @@ The Autobahn|Testsuite provides a fully automated test suite to verify client an
 Autobahn|Testsuite also provides a couple of other tools useful for WebSocket (and `WAMP <http://wamp.ws/>`_) implementors and developers.
 
 
-For installation, see :ref:`installation`. For usage, please see :ref:`usage`.
-
-.. _reports:
+For further information, see * `Installation <installation.rst>`_ and `Usage <usage.rst>`_.
 
 Reports
 -------
@@ -150,22 +148,13 @@ Besides the automated testsuite (aka "fuzzing" server/client), **wstest** also i
 * WAMP server and client, for developing WAMP implementations
 * WebSocket Mass-Connect
 
-Please see the :ref:`usage` for further information.
+Please see `Usage <usage.rst>`_ for further information.
 
 
 Contact
 -------
 
 Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing list <http://groups.google.com/group/autobahnws>`__.
-
-
-.. toctree::
-   :hidden:
-
-   Home <self>
-   installation
-   usage
-
 
 
 Next
