@@ -174,11 +174,11 @@ You can tweak that file to run only some tests, e.g. `"cases: ["1.*", "2.1.*"]"`
 
 ## More Information
 
-For more information take a look at the [project documentation](http://autobahn.ws/testsuite). This provides:
+For more information take a look at the following information
 
-* [test reports](http://autobahn.ws/testsuite#reports)
-* [installation instructions](http://autobahn.ws/testsuite/installation.html)
-* [usage instructions](http://autobahn.ws/testsuite/usage.html)
+* [users and coverage](/doc/README.rst)
+* [installation instructions](/doc/installation.rst)
+* [usage instructions](/doc/usage.rst)
 
 
 ## Get in Touch
