@@ -168,8 +168,8 @@ Get in touch on IRC ``#autobahn`` on ``chat.freenode.net`` or join the `mailing 
 
 
 
-Indices and tables
-==================
+Next
+----
 
-* :ref:`genindex`
-* :ref:`search`
+* `Installation <installation>`_
+* `Usage <usage>`_
