@@ -48,6 +48,8 @@ also includes a number of other handy modes:
 
 ## How to install
 
+**The following recipe still works, but the new, recommended way is using a Docker toolchain image we provide. Please checkout [this](https://github.com/crossbario/crossbar-docker/tree/master/autobahn-testsuite#usage) - much easier and repeatable.**
+
 The testsuite comes as a single command line tool, `wstest`. You will need Python 2 or PyPy (recommended).
 
 > Right now we only support Python 2 and Python 3 will *not* work. The testsuite is developed and tested on CPython 2 and PyPy. The latter is a high-performance Python implementation.
