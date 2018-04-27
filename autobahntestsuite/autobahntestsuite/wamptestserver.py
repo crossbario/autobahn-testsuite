@@ -17,6 +17,8 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import object
 import math, shelve, decimal
 
 from twisted.internet import reactor, defer
@@ -29,7 +31,7 @@ from autobahn.wamp1.protocol import exportRpc, \
 from functools import reduce
 
 
-class Simple:
+class Simple(object):
    """
    A simple calc service we will export for Remote Procedure Calls (RPC).
 
@@ -85,7 +87,7 @@ class Simple:
       return d
 
 
-class KeyValue:
+class KeyValue(object):
    """
    Simple, persistent key-value store.
    """
@@ -108,17 +110,17 @@ class KeyValue:
    @exportRpc
    def get(self, key = None):
       if key is None:
-         return self.store.items()
+         return list(self.store.items())
       else:
          return self.store.get(str(key), None)
 
    @exportRpc
    def keys(self):
-      return self.store.keys()
+      return list(self.store.keys())
 
 
 
-class Calculator:
+class Calculator(object):
    """
    Woooohoo. Simple decimal arithmetic calculator.
    """
@@ -161,7 +163,7 @@ class Calculator:
       return res
 
 
-class MyTopicService:
+class MyTopicService(object):
 
    def __init__(self, allowedTopicIds):
       self.allowedTopicIds = allowedTopicIds

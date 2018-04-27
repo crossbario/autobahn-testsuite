@@ -16,12 +16,14 @@
 ##
 ###############################################################################
 
+from builtins import map
+from builtins import object
 import pickle
 
 from autobahn.websocket.protocol import WebSocketProtocol
 
 
-class Case:
+class Case(object):
 
    FAILED = "FAILED"
    OK = "OK"

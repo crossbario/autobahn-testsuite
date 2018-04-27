@@ -18,6 +18,8 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
 __all__ = ['Cases']
 
 ## The set of cases we construct and export from this module.
@@ -56,7 +58,7 @@ class WampCase4_1_1_Protocol(WampCaseProtocol):
       expected = self.factory.result.expected
       observed = self.factory.result.observed
 
-      for i in xrange(self.factory.test.params.subsCount):
+      for i in range(self.factory.test.params.subsCount):
 
          topic = "http://example.com/simple#" + str(random.randint(0, self.factory.test.params.topicCount))
          self.subscribe(topic, self.onEvent)
@@ -127,7 +129,7 @@ class WampCase4_1_1(WampCase):
       log(msg)
       print(msg)
 
-      for i in xrange(self.params.pubsCount):
+      for i in range(self.params.pubsCount):
          j = random.randint(0, len(clients) - 1)
          clients[j].proto.monkeyPublish("Hello, world!")
       result.passed = True

@@ -20,6 +20,8 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
+from builtins import chr
+from builtins import range
 import binascii
 from .case import Case
 from autobahn.websocket.utf8validator import Utf8Validator
@@ -46,7 +48,7 @@ def createUtf8TestSequences():
    # All prefixes of correct UTF-8 text
    vs = ["All prefixes of a valid UTF-8 string that contains multi-byte code points", []]
    v = Utf8Validator()
-   for i in xrange(1, len(vss) + 1):
+   for i in range(1, len(vss) + 1):
       v.reset()
       res = v.validate(vss[:i])
       vs[1].append((res[0] and res[1], vss[:i]))
@@ -102,7 +104,7 @@ def createUtf8TestSequences():
    vs[1].append((False, '\x80\xbf\x80\xbf\x80'))
    vs[1].append((False, '\x80\xbf\x80\xbf\x80\xbf'))
    s = ""
-   for i in xrange(0x80, 0xbf):
+   for i in range(0x80, 0xbf):
       s += chr(i)
    vs[1].append((False, s))
    UTF8_TEST_SEQUENCES.append(vs)
@@ -112,7 +114,7 @@ def createUtf8TestSequences():
    m = [(0xc0, 0xdf), (0xe0, 0xef), (0xf0, 0xf7), (0xf8, 0xfb), (0xfc, 0xfd)]
    for mm in m:
       s = ''
-      for i in xrange(mm[0], mm[1]):
+      for i in range(mm[0], mm[1]):
          s += chr(i)
          s += chr(0x20)
       vs[1].append((False, s))
@@ -242,23 +244,23 @@ def test_utf8(validator):
       vs.extend(k[1])
 
    # All Unicode code points
-   for i in xrange(0, 0xffff): # should by 0x10ffff, but non-wide Python build is limited to 16-bits
+   for i in range(0, 0xffff): # should by 0x10ffff, but non-wide Python build is limited to 16-bits
       if i < 0xD800 or i > 0xDFFF: # filter surrogate code points, which are disallowed to encode in UTF-8
-         vs.append((True, unichr(i).encode("utf-8")))
+         vs.append((True, chr(i).encode("utf-8")))
 
    # 5.1 Single UTF-16 surrogates
-   for i in xrange(0xD800, 0xDBFF): # high-surrogate
-      ss = unichr(i).encode("utf-8")
+   for i in range(0xD800, 0xDBFF): # high-surrogate
+      ss = chr(i).encode("utf-8")
       vs.append((False, ss))
-   for i in xrange(0xDC00, 0xDFFF): # low-surrogate
-      ss = unichr(i).encode("utf-8")
+   for i in range(0xDC00, 0xDFFF): # low-surrogate
+      ss = chr(i).encode("utf-8")
       vs.append((False, ss))
 
    # 5.2 Paired UTF-16 surrogates
-   for i in xrange(0xD800, 0xDBFF): # high-surrogate
-      for j in xrange(0xDC00, 0xDFFF): # low-surrogate
-         ss1 = unichr(i).encode("utf-8")
-         ss2 = unichr(j).encode("utf-8")
+   for i in range(0xD800, 0xDBFF): # high-surrogate
+      for j in range(0xDC00, 0xDFFF): # low-surrogate
+         ss1 = chr(i).encode("utf-8")
+         ss2 = chr(j).encode("utf-8")
          vs.append((False, ss1 + ss2))
          vs.append((False, ss2 + ss1))
 

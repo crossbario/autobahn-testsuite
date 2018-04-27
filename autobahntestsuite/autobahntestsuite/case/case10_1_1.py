@@ -1,4 +1,5 @@
 from __future__ import absolute_import
+from __future__ import division
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -17,6 +18,8 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import str
+from past.utils import old_div
 from .case import Case
 
 class Case10_1_1(Case):
@@ -37,7 +40,7 @@ class Case10_1_1(Case):
       Case.onConnectionLost(self, failedByMe)
       if self.p.connectionWasOpen:
          frames_expected = {}
-         frames_expected[0] = len(self.payload) / self.p.autoFragmentSize
+         frames_expected[0] = old_div(len(self.payload), self.p.autoFragmentSize)
          frames_expected[1] = 1 if len(self.payload) % self.p.autoFragmentSize > 0 else 0
          frames_got = {}
          frames_got[0] = self.p.txFrameStats[0]

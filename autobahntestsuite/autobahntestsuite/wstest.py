@@ -19,6 +19,8 @@ from __future__ import absolute_import
 ###############################################################################
 
 ## don't touch: must be first import!
+from builtins import str
+from builtins import object
 from . import choosereactor
 
 import os, json, sys, pkg_resources

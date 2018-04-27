@@ -16,13 +16,15 @@
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import object
 __all__ = ("CaseSet",)
 
 
 import re
 
 
-class CaseSet:
+class CaseSet(object):
 
    def __init__(self, CaseSetName, CaseBaseName, Cases, CaseCategories, CaseSubCategories):
       self.CaseSetName = CaseSetName
@@ -96,7 +98,7 @@ class CaseSet:
             s = c.replace('.', '\.').replace('*', '.*')
             p = re.compile(s)
             t = []
-            for x in self.CasesIndices.keys():
+            for x in list(self.CasesIndices.keys()):
                if p.match(x):
                   t.append(self.caseIdtoIdTuple(x))
             for h in sorted(t):

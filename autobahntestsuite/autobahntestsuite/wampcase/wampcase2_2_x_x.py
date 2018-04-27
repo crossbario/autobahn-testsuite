@@ -17,6 +17,9 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
+from builtins import object
 __all__ = ['Cases']
 
 ## The set of cases we construct and export from this module.
@@ -390,7 +393,7 @@ import random
 
 
 @implementer(ITestCase)
-class WampCase2_2_x_x_Base:
+class WampCase2_2_x_x_Base(object):
 
    def __init__(self, testee, spec):
       self.testee = testee
@@ -419,7 +422,7 @@ class WampCase2_2_x_x_Base:
       peersready = []
       peersgone = []
       i = 1
-      for peerIndex in xrange(len(self.params.peers)):
+      for peerIndex in range(len(self.params.peers)):
          ready = Deferred()
          gone = Deferred()
          client = WampCase2_2_x_x_Factory(self, peerIndex, ready, gone)
@@ -494,7 +497,7 @@ class WampCase2_2_x_x_Base:
             else:
                raise Exception("no such publication method: %s" % self.params.publicationMethod)
 
-            s_args = ["%s=%s" % (k,v) for (k,v) in args.items()]
+            s_args = ["%s=%s" % (k,v) for (k,v) in list(args.items())]
             if len(s_args) > 0:
                s_args = 'with options <pre>%s</pre> ' % ', '.join(s_args)
             else:

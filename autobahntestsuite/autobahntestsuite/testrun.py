@@ -17,6 +17,7 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import object
 __all__ = ("TestRun", "Testee", "TestResult",)
 
 
@@ -55,7 +56,7 @@ class TestResult(AttributeBag):
 
 
 @implementer(ITestRun)
-class TestRun:
+class TestRun(object):
    """
    A TestRun contains an ordered sequence of test case classes.
    A test runner instantiates tests from these test case classes.
@@ -72,7 +73,7 @@ class TestRun:
       self._len = len(_cases)
       self._cases = deque(_cases)
 
-   def next(self):
+   def __next__(self):
       try:
          return self._cases.pop()
       except IndexError:

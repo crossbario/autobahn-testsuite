@@ -17,6 +17,8 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import object
 __all__ = ['Cases']
 
 ## The set of cases we construct and export from this module.
@@ -116,7 +118,7 @@ class WampCase3_1_x_x_Params(AttributeBag):
 
 
 @implementer(ITestCase)
-class WampCase3_1_x_x_Base:
+class WampCase3_1_x_x_Base(object):
 
    DESCRIPTION = "Undefined."
    EXPECTATION = "Undefined."

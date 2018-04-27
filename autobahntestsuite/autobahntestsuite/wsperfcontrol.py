@@ -17,6 +17,8 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
 __all__ = ['startClient', 'startServer']
 
 
@@ -148,7 +150,7 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
 
             quantile_count = testset[0]['options']['quantile_count']
 
-            for i in xrange(quantile_count):
+            for i in range(quantile_count):
                outfile.write(sep)
                outfile.write("q%d" % i)
             outfile.write('\n')
@@ -176,7 +178,7 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
                                                            self.getMicroSec(result, 'avg', digits),
                                                            self.getMicroSec(result, 'stddev', digits),
                                                            ]]))
-                  for i in xrange(quantile_count):
+                  for i in range(quantile_count):
                      outfile.write(sep)
                      if 'quantiles' in result['data']:
                         outfile.write(self.toMicroSec(result['data']['quantiles'][i][1]))

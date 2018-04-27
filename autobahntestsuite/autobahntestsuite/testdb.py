@@ -18,6 +18,9 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
+from builtins import object
 __all__ = ("TestDb",)
 
 import os, sys
@@ -42,7 +45,7 @@ from .util import envinfo
 
 @implementer(ITestDb)
 @implementer(RITestDb)
-class TestDb:
+class TestDb(object):
    """
    sqlite3 based test database implementing ITestDb. Usually, a single
    instance exists application wide (singleton). Test runners store their
@@ -243,7 +246,7 @@ class TestDb:
          now = utcnow()
 
          ci = []
-         for i in xrange(5):
+         for i in range(5):
             if len(testCase.index) > i:
                ci.append(testCase.index[i])
             else:
@@ -302,10 +305,10 @@ class TestDb:
       if type(spec) != dict:
          raise Exception("test spec must be a dict")
 
-      sig_spec = {'name': (True, [str, unicode]),
-                  'desc': (False, [str, unicode]),
-                  'mode': (True, [str, unicode]),
-                  'caseset': (True, [str, unicode]),
+      sig_spec = {'name': (True, [str, str]),
+                  'desc': (False, [str, str]),
+                  'mode': (True, [str, str]),
+                  'caseset': (True, [str, str]),
                   'cases': (True, [list]),
                   'exclude': (False, [list]),
                   'options': (False, [dict]),
@@ -318,15 +321,15 @@ class TestDb:
                           'randomize': (False, [bool]),
                           'parallel': (False, [bool])}
 
-      sig_spec_testee = {'name': (True, [str, unicode]),
-                         'desc': (False, [str, unicode]),
-                         'url': (True, [str, unicode]),
+      sig_spec_testee = {'name': (True, [str, str]),
+                         'desc': (False, [str, str]),
+                         'url': (True, [str, str]),
                          'auth': (False, [dict]),
                          'exclude': (False, [list]),
                          'options': (False, [dict])}
 
-      sig_spec_testee_auth = {'authKey': (True, [str, unicode, type(None)]),
-                              'authSecret': (False, [str, unicode, type(None)]),
+      sig_spec_testee_auth = {'authKey': (True, [str, str, type(None)]),
+                              'authSecret': (False, [str, str, type(None)]),
                               'authExtra': (False, [dict])}
 
       sig_spec_testee_options = {'rtt': (False, [int, float]),
@@ -335,10 +338,10 @@ class TestDb:
 
       def verifyDict(obj, sig, signame):
          for att in obj:
-            if att not in sig.keys():
+            if att not in list(sig.keys()):
                raise Exception("invalid attribute '%s' in %s" % (att, signame))
 
-         for key, (required, atypes) in sig.items():
+         for key, (required, atypes) in list(sig.items()):
             if required and key not in obj:
                raise Exception("missing mandatory %s attribute '%s'" % (signame, key))
             if key in obj and type(obj[key]) not in atypes:

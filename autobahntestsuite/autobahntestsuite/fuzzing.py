@@ -18,6 +18,8 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import object
 __all__ = ['startClient', 'startServer', 'WS_COMPRESSION_TESTDATA']
 
 
@@ -79,7 +81,7 @@ def asciiLogData(data, maxlen = 64, replace = False):
 
 
 
-class FuzzingProtocol:
+class FuzzingProtocol(object):
    """
    Common mixin-base class for fuzzing server and client protocols.
    """
@@ -410,7 +412,7 @@ class FuzzingProtocol:
 
 
 
-class FuzzingFactory:
+class FuzzingFactory(object):
    """
    Common mixin-base class for fuzzing server and client protocol factory.
    """
@@ -559,7 +561,7 @@ class FuzzingFactory:
       f.write('      <meta charset="utf-8" />\n')
       f.write('      <style lang="css">%s</style>\n' % CSS_COMMON)
       f.write('      <style lang="css">%s</style>\n' % CSS_MASTER_REPORT)
-      f.write('      <script language="javascript">%s</script>\n' % JS_MASTER_REPORT % {"agents_cnt": len(self.agents.keys())})
+      f.write('      <script language="javascript">%s</script>\n' % JS_MASTER_REPORT % {"agents_cnt": len(list(self.agents.keys()))})
       f.write('   </head>\n')
       f.write('   <body>\n')
       f.write('      <a href="#"><div id="toggle_button" class="unselectable" onclick="toggleClose();">Toggle Details</div></a>\n')

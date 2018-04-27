@@ -1,3 +1,4 @@
+from builtins import range
 from twisted.trial import unittest
 from autobahntestsuite import wamptestee
 import types

@@ -17,6 +17,9 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
+from builtins import object
 __all__ = ('WampCase', 'WampCaseProtocol', 'WampCaseFactory',)
 
 
@@ -133,7 +136,7 @@ class WampCaseFactory(WampClientFactory):
 
 
 @implementer(ITestCase)
-class WampCase:
+class WampCase(object):
 
    factory = None
    index = None
@@ -184,7 +187,7 @@ class WampCase:
       peersready = []
       peersgone = []
       i = 1
-      for peerIndex in xrange(self.params.peerCount):
+      for peerIndex in range(self.params.peerCount):
          ready = Deferred()
          gone = Deferred()
          client = self.factory(peerIndex, ready, gone, self, result)

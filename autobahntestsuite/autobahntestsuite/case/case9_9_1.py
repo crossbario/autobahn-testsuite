@@ -19,6 +19,7 @@
 ###############################################################################
 
 from __future__ import absolute_import
+from builtins import object
 from .case import Case
 from autobahn.websocket.protocol import WebSocketProtocol
 import binascii
@@ -26,7 +27,7 @@ from zope.interface import implements
 from twisted.internet import reactor, interfaces
 
 
-class FrameProducer:
+class FrameProducer(object):
 
    implements(interfaces.IPushProducer)
 

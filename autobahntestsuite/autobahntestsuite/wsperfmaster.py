@@ -17,6 +17,7 @@
 ###############################################################################
 
 
+from builtins import str
 __all__ = ['startServer']
 
 
@@ -174,7 +175,7 @@ class WsPerfMasterFactory(WebSocketServerFactory):
          self.uiFactory.slaveDisconnected(id)
 
    def getSlaves(self):
-      return self.slaves.values()
+      return list(self.slaves.values())
 
    def runCase(self, caseDef):
       """

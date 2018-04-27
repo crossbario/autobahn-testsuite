@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -17,6 +18,9 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import range
+from builtins import object
+from past.utils import old_div
 __all__ = ['startClient']
 
 
@@ -47,14 +51,14 @@ class MassConnectFactory(WebSocketClientFactory):
 
    def clientConnectionFailed(self, connector, reason):
       if self.test.onFailed():
-         reactor.callLater(float(self.retrydelay)/1000., connector.connect)
+         reactor.callLater(old_div(float(self.retrydelay),1000.), connector.connect)
 
    def clientConnectionLost(self, connector, reason):
       if self.test.onLost():
-         reactor.callLater(float(self.retrydelay)/1000., connector.connect)
+         reactor.callLater(old_div(float(self.retrydelay),1000.), connector.connect)
 
 
-class MassConnect:
+class MassConnect(object):
 
    def __init__(self, name, uri, connections, batchsize, batchdelay, retrydelay):
       self.name = name
@@ -112,17 +116,17 @@ class MassConnect:
       else:
          c = self.targetCnt - self.currentCnt
          redo = False
-      for i in xrange(0, c):
+      for i in range(0, c):
          factory = MassConnectFactory(self.uri)
          factory.test = self
          factory.retrydelay = self.retrydelay
          connectWS(factory)
          self.currentCnt += 1
       if redo:
-         reactor.callLater(float(self.batchdelay)/1000., self.connectBunch)
+         reactor.callLater(old_div(float(self.batchdelay),1000.), self.connectBunch)
 
 
-class MassConnectTest:
+class MassConnectTest(object):
    def __init__(self, spec):
       self.spec = spec
 

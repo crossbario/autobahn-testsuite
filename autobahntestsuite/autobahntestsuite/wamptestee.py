@@ -17,6 +17,8 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import range
+from builtins import object
 from autobahn.wamp1 import protocol as wamp
 import types
 
@@ -91,7 +93,7 @@ def setupUri(case, ref=None):
 
 
 
-class MyTopicService:
+class MyTopicService(object):
 
    def __init__(self, allowedTopicIds):
       self.allowedTopicIds = allowedTopicIds

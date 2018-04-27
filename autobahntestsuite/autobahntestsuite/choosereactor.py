@@ -17,6 +17,7 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
 import sys, json
 
 ## Install Twisted reactor. This needs to be done here,

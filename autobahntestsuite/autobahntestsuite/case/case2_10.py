@@ -17,6 +17,7 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import range
 from .case import Case
 
 class Case2_10(Case):
@@ -30,7 +31,7 @@ class Case2_10(Case):
 
    def onOpen(self):
       self.expected[Case.OK] = []
-      for i in xrange(0, 10):
+      for i in range(0, 10):
          payload = "payload-%d" % i
          self.expected[Case.OK].append(("pong", payload))
          self.p.sendFrame(opcode = 9, payload = payload, chopsize = self.chopsize)

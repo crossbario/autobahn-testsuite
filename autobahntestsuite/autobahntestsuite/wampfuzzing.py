@@ -18,6 +18,9 @@ from __future__ import absolute_import
 ##
 ###############################################################################
 
+from builtins import next
+from builtins import str
+from builtins import object
 __all__ = ("FuzzingWampClient",)
 
 from zope.interface import implementer

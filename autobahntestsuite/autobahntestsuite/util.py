@@ -1,4 +1,5 @@
 from __future__ import print_function
+from __future__ import division
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -17,6 +18,10 @@ from __future__ import print_function
 ##
 ###############################################################################
 
+from builtins import str
+from builtins import range
+from past.utils import old_div
+from builtins import object
 __all__ = ("AttributeBag", "Tabify", "perf_counter", )
 
 
@@ -46,7 +51,7 @@ else:
    perf_counter = time.perf_counter
 
 
-class AttributeBag:
+class AttributeBag(object):
 
    def __init__(self, **args):
 
@@ -69,7 +74,7 @@ class AttributeBag:
 
 
    def set(self, obj):
-      for attr in obj.keys():
+      for attr in list(obj.keys()):
          if attr in self.ATTRIBUTES:
             setattr(self, attr, obj[attr])
          else:
@@ -84,7 +89,7 @@ class AttributeBag:
       return self.__class__.__name__ + '(' + ', '.join(s) + ')'
 
 
-class Tabify:
+class Tabify(object):
 
    def __init__(self, formats, truncate = 120, filler = ['-', '+']):
       self._formats = formats
@@ -102,7 +107,7 @@ class Tabify:
       totalLen = 0
       flexIndicators = 0
       flexIndicatorIndex = None
-      for i in xrange(len(self._formats)):
+      for i in range(len(self._formats)):
          ffmt = self._formats[i][1:]
          if ffmt != "*":
             totalLen += int(ffmt)
@@ -121,7 +126,7 @@ class Tabify:
          raise Exception("cannot fit content in truncate length %d" % self._truncate)
 
       r = []
-      for i in xrange(len(self._formats)):
+      for i in range(len(self._formats)):
 
          if i == flexIndicatorIndex:
             N = self._truncate - totalLen
@@ -144,7 +149,7 @@ class Tabify:
          elif m == 'r':
             r.append(' ' * l + s)
          elif m == 'c':
-            c1 = l / 2
+            c1 = old_div(l, 2)
             c2 = l - c1
             r.append(' ' * c1 + s + ' ' * c2)
          elif m == '+':
@@ -223,20 +228,20 @@ def pprint_timeago(time = False):
       if second_diff < 120:
          return "a minute ago"
       if second_diff < 3600:
-         return str( second_diff / 60 ) + " minutes ago"
+         return str( old_div(second_diff, 60) ) + " minutes ago"
       if second_diff < 7200:
          return "an hour ago"
       if second_diff < 86400:
-         return str( second_diff / 3600 ) + " hours ago"
+         return str( old_div(second_diff, 3600) ) + " hours ago"
    if day_diff == 1:
       return "Yesterday"
    if day_diff < 7:
       return str(day_diff) + " days ago"
    if day_diff < 31:
-      return str(day_diff/7) + " weeks ago"
+      return str(old_div(day_diff,7)) + " weeks ago"
    if day_diff < 365:
-      return str(day_diff/30) + " months ago"
-   return str(day_diff/365) + " years ago"
+      return str(old_div(day_diff,30)) + " months ago"
+   return str(old_div(day_diff,365)) + " years ago"
 
 
 
