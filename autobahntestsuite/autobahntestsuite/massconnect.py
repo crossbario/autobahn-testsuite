@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -92,7 +93,7 @@ class MassConnect:
       if self.actual == self.targetCnt:
          self.ended = time.clock()
          duration = self.ended - self.started
-         print " connected %d clients to %s at %s in %s seconds (retries %d = failed %d + lost %d)" % (self.currentCnt, self.name, self.uri, duration, self.failed + self.lost, self.failed, self.lost)
+         print(" connected %d clients to %s at %s in %s seconds (retries %d = failed %d + lost %d)" % (self.currentCnt, self.name, self.uri, duration, self.failed + self.lost, self.failed, self.lost))
          result = {'name': self.name,
                    'uri': self.uri,
                    'connections': self.targetCnt,
@@ -127,7 +128,7 @@ class MassConnectTest:
 
    @inlineCallbacks
    def run(self):
-      print self.spec
+      print(self.spec)
       res = []
       for s in self.spec['servers']:
          t = MassConnect(s['name'],

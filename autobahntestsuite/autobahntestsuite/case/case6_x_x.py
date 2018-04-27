@@ -18,8 +18,10 @@
 ##
 ###############################################################################
 
+from __future__ import print_function
+from __future__ import absolute_import
 import binascii
-from case import Case
+from .case import Case
 from autobahn.websocket.utf8validator import Utf8Validator
 
 
@@ -260,7 +262,7 @@ def test_utf8(validator):
          vs.append((False, ss1 + ss2))
          vs.append((False, ss2 + ss1))
 
-   print "testing validator %s on %d UTF8 sequences" % (validator, len(vs))
+   print("testing validator %s on %d UTF8 sequences" % (validator, len(vs)))
 
    # now test and assert ..
    for s in vs:
@@ -269,8 +271,8 @@ def test_utf8(validator):
       res = r[0] and r[1] # no UTF-8 decode error and everything consumed
       assert res == s[0]
 
-   print "ok, validator works!"
-   print
+   print("ok, validator works!")
+   print()
 
 
 def test_utf8_incremental(validator, withPositions = True):
@@ -279,10 +281,10 @@ def test_utf8_incremental(validator, withPositions = True):
    """
    if withPositions:
       k = 4
-      print "testing validator %s on incremental detection with positions" % validator
+      print("testing validator %s on incremental detection with positions" % validator)
    else:
       k = 2
-      print "testing validator %s on incremental detection without positions" % validator
+      print("testing validator %s on incremental detection without positions" % validator)
 
    validator.reset()
    assert (True, True, 15, 15)[:k] == validator.validate("µ@ßöäüàá")[:k]
@@ -303,8 +305,8 @@ def test_utf8_incremental(validator, withPositions = True):
    assert (True, False, 7, 7)[:k] == validator.validate("\x65\x64\x69\x74\x65\x64\xED")[:k]
    assert (False, False, 0, 7)[:k] == validator.validate("\xA0\x80")[:k]
 
-   print "ok, validator works!"
-   print
+   print("ok, validator works!")
+   print()
 
 
 Case6_X_X = []
@@ -406,13 +408,13 @@ def test_encode(testpoints):
    """
    for tp in testpoints:
       if tp[0]:
-         print binascii.b2a_hex(encode(tp[0]))
+         print(binascii.b2a_hex(encode(tp[0])))
       else:
-         print tp[0]
+         print(tp[0])
       if tp[1]:
-         print binascii.b2a_hex(tp[1].encode("utf8"))
+         print(binascii.b2a_hex(tp[1].encode("utf8")))
       else:
-         print tp[1]
+         print(tp[1])
 
 
 if __name__ == '__main__':

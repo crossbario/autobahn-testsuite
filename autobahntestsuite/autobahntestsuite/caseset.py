@@ -111,7 +111,7 @@ class CaseSet:
       Return list of test cases that match against case patterns, minus exclude patterns.
       """
       specCases = self.resolveCasePatternList(spec["cases"])
-      if spec.has_key("exclude-cases"):
+      if "exclude-cases" in spec:
          excludeCases = self.resolveCasePatternList(spec["exclude-cases"])
       else:
          excludeCases = []
@@ -125,7 +125,7 @@ class CaseSet:
       Parses "exclude-agent-cases" from the spec into a list of pairs
       of agent pattern and case pattern list.
       """
-      if spec.has_key("exclude-agent-cases"):
+      if "exclude-agent-cases" in spec:
          ee = spec["exclude-agent-cases"]
          pats1 = []
          for e in ee:

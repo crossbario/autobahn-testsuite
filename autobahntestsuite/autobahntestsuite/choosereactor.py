@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -28,8 +29,8 @@ if 'bsd' in sys.platform or sys.platform.startswith('darwin'):
          raise Exception("Python version too old (%s)" % sys.version)
       from twisted.internet import kqreactor
       kqreactor.install()
-   except Exception, e:
-      print """
+   except Exception as e:
+      print("""
 WARNING: Running on BSD or Darwin, but cannot use kqueue Twisted reactor.
 
  => %s
@@ -42,7 +43,7 @@ To use the kqueue Twisted reactor, you will need:
 Note the use of >= and >.
 
 Will let Twisted choose a default reactor (potential performance degradation).
-""" % str(e)
+""" % str(e))
       pass
 
 
@@ -52,24 +53,24 @@ if False and sys.platform in ['win32']:
    try:
       from twisted.application.reactors import installReactor
       installReactor("iocp")
-   except Exception, e:
-      print """
+   except Exception as e:
+      print("""
 WARNING: Running on Windows, but cannot use IOCP Twisted reactor.
 
  => %s
 
 Will let Twisted choose a default reactor (potential performance degradation).
-""" % str(e)
+""" % str(e))
 
 if sys.platform.startswith('linux'):
    try:
       from twisted.internet import epollreactor
       epollreactor.install()
-   except Exception, e:
-      print """
+   except Exception as e:
+      print("""
 WARNING: Running on Linux, but cannot use Epoll Twisted reactor.
 
  => %s
 
 Will let Twisted choose a default reactor (potential performance degradation).
-""" % str(e)
+""" % str(e))

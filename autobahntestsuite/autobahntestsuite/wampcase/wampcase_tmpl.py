@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -23,7 +25,7 @@ __all__ = ['Cases']
 Cases = []
 
 from autobahntestsuite.util import AttributeBag
-from wampcase import WampCase, WampCaseFactory, WampCaseProtocol
+from .wampcase import WampCase, WampCaseFactory, WampCaseProtocol
 
 
 
@@ -60,7 +62,7 @@ class WampCase4_1_1(WampCase):
    def test(self, log, result, clients):
       msg = "NOP test running using %d sessions\n" % len(clients)
       log(msg)
-      print msg
+      print(msg)
       result.passed = True
 
 

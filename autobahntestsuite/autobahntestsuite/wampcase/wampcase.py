@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -147,9 +148,9 @@ class WampCase:
 
       self._uriSuffix = '#' + str(random.randint(0, 1000000))
 
-      if self.testee.options.has_key('rtt'):
+      if 'rtt' in self.testee.options:
          self._rtt = self.testee.options['rtt']
-      elif self.spec.has_key('options') and self.spec['options'].has_key('rtt'):
+      elif 'options' in self.spec and 'rtt' in self.spec['options']:
          self._rtt = self.spec['options']['rtt']
       else:
          self._rtt = 0.2
@@ -214,7 +215,7 @@ class WampCase:
 
       def error(err):
          ## FIXME
-         print "ERROR", err
+         print("ERROR", err)
          shutdown()
          finished.errback(err)
 

@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -32,10 +34,10 @@ from twisted.internet.defer import Deferred
 from autobahn.util import utcnow, newid
 from autobahn.wamp import exportRpc
 
-from interfaces import ITestDb
-from rinterfaces import RITestDb
-from testrun import TestResult
-from util import envinfo
+from .interfaces import ITestDb
+from .rinterfaces import RITestDb
+from .testrun import TestResult
+from .util import envinfo
 
 
 @implementer(ITestDb)
@@ -78,14 +80,14 @@ class TestDb:
       self._cs = {}
       self._css = {}
       for cs in self._caseSets:
-         if not self._cs.has_key(cs.CaseSetName):
+         if cs.CaseSetName not in self._cs:
             self._cs[cs.CaseSetName] = {}
             self._css[cs.CaseSetName] = cs
          else:
             raise Exception("duplicate case set name")
          for c in cs.Cases:
             idx = tuple(c.index)
-            if not self._cs[cs.CaseSetName].has_key(idx):
+            if idx not in self._cs[cs.CaseSetName]:
                self._cs[cs.CaseSetName][idx] = c
             else:
                raise Exception("duplicate case index")
@@ -214,7 +216,7 @@ class TestDb:
             validTo, mode, caseset, spec = row
             if validTo is not None:
                raise Exception("test spec no longer active")
-            if not self._css.has_key(caseset):
+            if caseset not in self._css:
                raise Exception("case set %s not loaded in database" % caseset)
             spec = json.loads(spec)
             res = self._css[caseset].generateCasesByTestee(spec)
@@ -323,8 +325,8 @@ class TestDb:
                          'exclude': (False, [list]),
                          'options': (False, [dict])}
 
-      sig_spec_testee_auth = {'authKey': (True, [str, unicode, types.NoneType]),
-                              'authSecret': (False, [str, unicode, types.NoneType]),
+      sig_spec_testee_auth = {'authKey': (True, [str, unicode, type(None)]),
+                              'authSecret': (False, [str, unicode, type(None)]),
                               'authExtra': (False, [dict])}
 
       sig_spec_testee_options = {'rtt': (False, [int, float]),
@@ -337,22 +339,22 @@ class TestDb:
                raise Exception("invalid attribute '%s' in %s" % (att, signame))
 
          for key, (required, atypes) in sig.items():
-            if required and not obj.has_key(key):
+            if required and key not in obj:
                raise Exception("missing mandatory %s attribute '%s'" % (signame, key))
-            if obj.has_key(key) and type(obj[key]) not in atypes:
+            if key in obj and type(obj[key]) not in atypes:
                raise Exception("invalid type '%s' for %s attribute '%s'" % (type(sig[key]), signame, key))
 
       verifyDict(spec, sig_spec, 'test specification')
-      if spec.has_key('options'):
+      if 'options' in spec:
          verifyDict(spec['options'], sig_spec_options, 'test options')
 
       for testee in spec['testees']:
          verifyDict(testee, sig_spec_testee, 'testee description')
 
-         if testee.has_key('auth'):
+         if 'auth' in testee:
             verifyDict(testee['auth'], sig_spec_testee_auth, 'testee authentication credentials')
 
-         if testee.has_key('options'):
+         if 'options' in testee:
             verifyDict(testee['options'], sig_spec_testee_options, 'testee options')
 
       if spec['mode'] not in sig_spec_modes:
@@ -558,10 +560,10 @@ class TestDb:
 
             id, testee, passed, duration = row[0], row[1], row[7], row[8]
 
-            if not res.has_key(index):
+            if index not in res:
                res[index] = {}
 
-            if res[index].has_key(testee):
+            if testee in res[index]:
                raise Exception("logic error")
 
             res[index][testee] = {'id': id, 'passed': passed, 'duration': duration}
@@ -587,7 +589,7 @@ class TestDb:
          if res is None:
             raise Exception("no such test run")
          if res[1] is None:
-            print "Warning: test run not closed yet"
+            print("Warning: test run not closed yet")
 
          txn.execute("SELECT testee, SUM(passed), COUNT(*) FROM testresult WHERE testrun_id = ? GROUP BY testee", [runId])
          res = txn.fetchall()

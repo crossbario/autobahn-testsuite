@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -16,21 +17,21 @@
 ##
 ###############################################################################
 
-from _version import __version__
+from ._version import __version__
 version = __version__ # backward compat.
 
-import choosereactor # This MUST BE the FIRST file imported here! Do NOT touch.
-import wstest
-import echo
-import broadcast
-import testee
+from . import choosereactor # This MUST BE the FIRST file imported here! Do NOT touch.
+from . import wstest
+from . import echo
+from . import broadcast
+from . import testee
 #import wsperfcontrol
 #import wsperfmaster
-import case
-import caseset
-import report
-import spectemplate
-import fuzzing
+from . import case
+from . import caseset
+from . import report
+from . import spectemplate
+from . import fuzzing
 #import wampfuzzing
 #import wamptestserver
-import massconnect
+from . import massconnect

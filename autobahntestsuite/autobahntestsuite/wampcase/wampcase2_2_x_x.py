@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -306,7 +307,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
    def onAuthError(self, e):
       uri, desc, details = e.value.args
       self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "WAMP authentication error: %s" % details))
-      print "Authentication Error!", uri, desc, details
+      print("Authentication Error!", uri, desc, details)
 
 
    def main(self):
@@ -320,7 +321,7 @@ class WampCase2_2_x_x_Protocol(WampCraClientProtocol):
 
    def onEvent(self, topic, event):
       self.test.result.log.append((perf_counter(), self.factory.peerIndex, self.session_id, "Received event for topic <pre>%s</pre> and payload <pre>%s</pre>" % (topic, event)))
-      if not self.test.result.observed.has_key(self.session_id):
+      if self.session_id not in self.test.result.observed:
          self.test.result.observed[self.session_id] = []
       self.test.result.observed[self.session_id].append((topic, event))
 
@@ -402,9 +403,9 @@ class WampCase2_2_x_x_Base:
 
       self._uriSuffix = '#' + str(random.randint(0, 1000000))
 
-      if self.testee.options.has_key('rtt'):
+      if 'rtt' in self.testee.options:
          self._rtt = self.testee.options['rtt']
-      elif self.spec.has_key('options') and self.spec['options'].has_key('rtt'):
+      elif 'options' in self.spec and 'rtt' in self.spec['options']:
          self._rtt = self.spec['options']['rtt']
       else:
          self._rtt = 0.2
@@ -556,7 +557,7 @@ class WampCase2_2_x_x_Base:
 
       def error(err):
          ## FIXME
-         print "ERROR", err
+         print("ERROR", err)
          shutdown()
          self.finished.errback(err)
 
@@ -572,16 +573,16 @@ class WampCase2_2_x_x_Base:
 
          if len(clientErrors) > 0:
             passed = False
-            print "Client errors", clientErrors
+            print("Client errors", clientErrors)
          else:
             passed = json.dumps(self.result.observed) == json.dumps(self.result.expected)
             if False and not passed:
-               print
-               print "EXPECTED"
-               print self.result.expected
-               print "OBSERVED"
-               print self.result.observed
-               print
+               print()
+               print("EXPECTED")
+               print(self.result.expected)
+               print("OBSERVED")
+               print(self.result.observed)
+               print()
 
          self.result.passed = passed
          self.finished.callback(self.result)

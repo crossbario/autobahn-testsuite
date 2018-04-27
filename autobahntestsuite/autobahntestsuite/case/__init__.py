@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -89,173 +90,173 @@ CaseSubCategories = {"1.1": "Text Messages",
 ## Cases
 ##
 
-from case1_1_1 import *
-from case1_1_2 import *
-from case1_1_3 import *
-from case1_1_4 import *
-from case1_1_5 import *
-from case1_1_6 import *
-from case1_1_7 import *
-from case1_1_8 import *
+from .case1_1_1 import *
+from .case1_1_2 import *
+from .case1_1_3 import *
+from .case1_1_4 import *
+from .case1_1_5 import *
+from .case1_1_6 import *
+from .case1_1_7 import *
+from .case1_1_8 import *
 
-from case1_2_1 import *
-from case1_2_2 import *
-from case1_2_3 import *
-from case1_2_4 import *
-from case1_2_5 import *
-from case1_2_6 import *
-from case1_2_7 import *
-from case1_2_8 import *
+from .case1_2_1 import *
+from .case1_2_2 import *
+from .case1_2_3 import *
+from .case1_2_4 import *
+from .case1_2_5 import *
+from .case1_2_6 import *
+from .case1_2_7 import *
+from .case1_2_8 import *
 
-from case2_1 import *
-from case2_2 import *
-from case2_3 import *
-from case2_4 import *
-from case2_5 import *
-from case2_6 import *
-from case2_7 import *
-from case2_8 import *
-from case2_9 import *
-from case2_10 import *
-from case2_11 import *
+from .case2_1 import *
+from .case2_2 import *
+from .case2_3 import *
+from .case2_4 import *
+from .case2_5 import *
+from .case2_6 import *
+from .case2_7 import *
+from .case2_8 import *
+from .case2_9 import *
+from .case2_10 import *
+from .case2_11 import *
 
-from case3_1 import *
-from case3_2 import *
-from case3_3 import *
-from case3_4 import *
-from case3_5 import *
-from case3_6 import *
-from case3_7 import *
+from .case3_1 import *
+from .case3_2 import *
+from .case3_3 import *
+from .case3_4 import *
+from .case3_5 import *
+from .case3_6 import *
+from .case3_7 import *
 
-from case4_1_1 import *
-from case4_1_2 import *
-from case4_1_3 import *
-from case4_1_4 import *
-from case4_1_5 import *
+from .case4_1_1 import *
+from .case4_1_2 import *
+from .case4_1_3 import *
+from .case4_1_4 import *
+from .case4_1_5 import *
 
-from case4_2_1 import *
-from case4_2_2 import *
-from case4_2_3 import *
-from case4_2_4 import *
-from case4_2_5 import *
+from .case4_2_1 import *
+from .case4_2_2 import *
+from .case4_2_3 import *
+from .case4_2_4 import *
+from .case4_2_5 import *
 
-from case5_1 import *
-from case5_2 import *
-from case5_3 import *
-from case5_4 import *
-from case5_5 import *
-from case5_6 import *
-from case5_7 import *
-from case5_8 import *
-from case5_9 import *
-from case5_10 import *
-from case5_11 import *
-from case5_12 import *
-from case5_13 import *
-from case5_14 import *
-from case5_15 import *
-from case5_16 import *
-from case5_17 import *
-from case5_18 import *
-from case5_19 import *
-from case5_20 import *
+from .case5_1 import *
+from .case5_2 import *
+from .case5_3 import *
+from .case5_4 import *
+from .case5_5 import *
+from .case5_6 import *
+from .case5_7 import *
+from .case5_8 import *
+from .case5_9 import *
+from .case5_10 import *
+from .case5_11 import *
+from .case5_12 import *
+from .case5_13 import *
+from .case5_14 import *
+from .case5_15 import *
+from .case5_16 import *
+from .case5_17 import *
+from .case5_18 import *
+from .case5_19 import *
+from .case5_20 import *
 
-from case6_1_1 import *
-from case6_1_2 import *
-from case6_1_3 import *
+from .case6_1_1 import *
+from .case6_1_2 import *
+from .case6_1_3 import *
 
-from case6_2_1 import *
-from case6_2_2 import *
-from case6_2_3 import *
-from case6_2_4 import *
+from .case6_2_1 import *
+from .case6_2_2 import *
+from .case6_2_3 import *
+from .case6_2_4 import *
 
-from case6_3_1 import *
-from case6_3_2 import *
+from .case6_3_1 import *
+from .case6_3_2 import *
 
-from case6_4_1 import *
-from case6_4_2 import *
-from case6_4_3 import *
-from case6_4_4 import *
+from .case6_4_1 import *
+from .case6_4_2 import *
+from .case6_4_3 import *
+from .case6_4_4 import *
 
-from case6_x_x import *
+from .case6_x_x import *
 
-from case7_1_1 import *
-from case7_1_2 import *
-from case7_1_3 import *
-from case7_1_4 import *
-from case7_1_5 import *
-from case7_1_6 import *
+from .case7_1_1 import *
+from .case7_1_2 import *
+from .case7_1_3 import *
+from .case7_1_4 import *
+from .case7_1_5 import *
+from .case7_1_6 import *
 
-from case7_3_1 import *
-from case7_3_2 import *
-from case7_3_3 import *
-from case7_3_4 import *
-from case7_3_5 import *
-from case7_3_6 import *
+from .case7_3_1 import *
+from .case7_3_2 import *
+from .case7_3_3 import *
+from .case7_3_4 import *
+from .case7_3_5 import *
+from .case7_3_6 import *
 
-from case7_5_1 import *
+from .case7_5_1 import *
 
-from case7_7_X import *
-from case7_9_X import *
+from .case7_7_X import *
+from .case7_9_X import *
 
-from case7_13_1 import *
-from case7_13_2 import *
+from .case7_13_1 import *
+from .case7_13_2 import *
 
-from case9_1_1 import *
-from case9_1_2 import *
-from case9_1_3 import *
-from case9_1_4 import *
-from case9_1_5 import *
-from case9_1_6 import *
+from .case9_1_1 import *
+from .case9_1_2 import *
+from .case9_1_3 import *
+from .case9_1_4 import *
+from .case9_1_5 import *
+from .case9_1_6 import *
 
-from case9_2_1 import *
-from case9_2_2 import *
-from case9_2_3 import *
-from case9_2_4 import *
-from case9_2_5 import *
-from case9_2_6 import *
+from .case9_2_1 import *
+from .case9_2_2 import *
+from .case9_2_3 import *
+from .case9_2_4 import *
+from .case9_2_5 import *
+from .case9_2_6 import *
 
-from case9_3_1 import *
-from case9_3_2 import *
-from case9_3_3 import *
-from case9_3_4 import *
-from case9_3_5 import *
-from case9_3_6 import *
-from case9_3_7 import *
-from case9_3_8 import *
-from case9_3_9 import *
+from .case9_3_1 import *
+from .case9_3_2 import *
+from .case9_3_3 import *
+from .case9_3_4 import *
+from .case9_3_5 import *
+from .case9_3_6 import *
+from .case9_3_7 import *
+from .case9_3_8 import *
+from .case9_3_9 import *
 
-from case9_4_1 import *
-from case9_4_2 import *
-from case9_4_3 import *
-from case9_4_4 import *
-from case9_4_5 import *
-from case9_4_6 import *
-from case9_4_7 import *
-from case9_4_8 import *
-from case9_4_9 import *
+from .case9_4_1 import *
+from .case9_4_2 import *
+from .case9_4_3 import *
+from .case9_4_4 import *
+from .case9_4_5 import *
+from .case9_4_6 import *
+from .case9_4_7 import *
+from .case9_4_8 import *
+from .case9_4_9 import *
 
-from case9_5_1 import *
-from case9_5_2 import *
-from case9_5_3 import *
-from case9_5_4 import *
-from case9_5_5 import *
-from case9_5_6 import *
+from .case9_5_1 import *
+from .case9_5_2 import *
+from .case9_5_3 import *
+from .case9_5_4 import *
+from .case9_5_5 import *
+from .case9_5_6 import *
 
-from case9_6_1 import *
-from case9_6_2 import *
-from case9_6_3 import *
-from case9_6_4 import *
-from case9_6_5 import *
-from case9_6_6 import *
+from .case9_6_1 import *
+from .case9_6_2 import *
+from .case9_6_3 import *
+from .case9_6_4 import *
+from .case9_6_5 import *
+from .case9_6_6 import *
 
-from case9_7_X import *
+from .case9_7_X import *
 
-from case9_9_1 import *
+from .case9_9_1 import *
 
-from case10_1_1 import *
+from .case10_1_1 import *
 
-from case12_x_x import *
+from .case12_x_x import *
 
 
 ##

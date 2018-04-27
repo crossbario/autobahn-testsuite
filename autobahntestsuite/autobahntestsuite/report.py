@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -416,11 +418,11 @@ function toggleClose() {
 """
 
 
-REPORT_DIR_PERMISSIONS = 0770
+REPORT_DIR_PERMISSIONS = 0o770
 
 
 from zope.interface import implementer
-from interfaces import IReportGenerator
+from .interfaces import IReportGenerator
 
 
 @implementer(IReportGenerator)
@@ -459,8 +461,8 @@ class HtmlReportGenerator(object):
        """
        try:
           os.makedirs(self.report_dirname, REPORT_DIR_PERMISSIONS)
-       except OSError, exc:
-          print "Could not create directory: %s" % exc
+       except OSError as exc:
+          print("Could not create directory: %s" % exc)
           sys.exit(1)
 
 
@@ -474,14 +476,14 @@ class HtmlReportGenerator(object):
        report_path = os.path.join(self.report_dirname, report_filename)
        try:
           f = open(report_path, "w")
-       except IOError, ex:
-          print "Could not create file %s: %s." % (report_path, ex)
+       except IOError as ex:
+          print("Could not create file %s: %s." % (report_path, ex))
           return
        try:
            f.write(self.formatResultAsHtml(res, readable_test_name, agent,
                                            description))
-       except Exception, ex:
-           print "Could not write report: %s." % ex
+       except Exception as ex:
+           print("Could not write report: %s." % ex)
        f.close()
 
 
@@ -510,5 +512,5 @@ class HtmlReportGenerator(object):
                       "w") as f:
                 html = self.wamp_index_tpl.render(categories=reports)
                 f.write(html)
-        except Exception, ex:
-            print "Could not create index file: %s" % ex
+        except Exception as ex:
+            print("Could not create index file: %s" % ex)

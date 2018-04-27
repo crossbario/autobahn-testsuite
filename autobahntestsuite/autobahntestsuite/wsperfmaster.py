@@ -131,7 +131,7 @@ class WsPerfMasterProtocol(WebSocketServerProtocol):
                      self.slaveConnected = True
                      self.factory.addSlave(self, self.slaveId, self.peer.host, self.peer.port, o['version'], o['num_workers'], o['ident'])
 
-            except ValueError, e:
+            except ValueError as e:
                self.protocolError("could not decode text message as JSON (%s)" % str(e))
          else:
             self.protocolError("unexpected empty message")
@@ -152,11 +152,11 @@ class WsPerfMasterFactory(WebSocketServerFactory):
       self.workerRunsToRuns = {}
 
    def addSlave(self, proto, id, host, port, version, num_workers, ident):
-      if not self.protoToSlaves.has_key(proto):
+      if proto not in self.protoToSlaves:
          self.protoToSlaves[proto] = id
       else:
          raise Exception("logic error - duplicate proto in addSlave")
-      if not self.slavesToProtos.has_key(id):
+      if id not in self.slavesToProtos:
          self.slavesToProtos[id] = proto
       else:
          raise Exception("logic error - duplicate id in addSlave")
@@ -164,12 +164,12 @@ class WsPerfMasterFactory(WebSocketServerFactory):
       self.uiFactory.slaveConnected(id, host, port, version, num_workers, ident)
 
    def removeSlave(self, proto):
-      if self.protoToSlaves.has_key(proto):
+      if proto in self.protoToSlaves:
          id = self.protoToSlaves[proto]
          del self.protoToSlaves[proto]
-         if self.slavesToProtos.has_key(id):
+         if id in self.slavesToProtos:
             del self.slavesToProtos[id]
-         if self.slaves.has_key(id):
+         if id in self.slaves:
             del self.slaves[id]
          self.uiFactory.slaveDisconnected(id)
 

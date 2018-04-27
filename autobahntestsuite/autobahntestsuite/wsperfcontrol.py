@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -63,8 +64,8 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
             test = self.testsets[self.currentTestset][1][self.currentTest]
             cmd = self.WSPERF_CMDS[test['mode']] % test
             if self.factory.debugWsPerf:
-               print "Starting test for testee %s" % test['name']
-               print cmd
+               print("Starting test for testee %s" % test['name'])
+               print(cmd)
             sys.stdout.write('.')
             self.sendMessage(cmd)
             self.currentTest += 1
@@ -89,14 +90,14 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
                           'quantile_count': testset['options']['quantile_count'],
                           'rtts': 'true' if testset['options']['rtts'] else 'false',
 
-                          'count': case['count'] if case.has_key('count') else testset['options']['count'],
-                          'size': case['size'] if case.has_key('size') else testset['options']['size'],
+                          'count': case['count'] if 'count' in case else testset['options']['count'],
+                          'size': case['size'] if 'size' in case else testset['options']['size'],
 
-                          'timeout': case['timeout'] if case.has_key('timeout') else testset['options']['timeout'],
-                          'binary': 'true' if (case['binary'] if case.has_key('binary') else testset['options']['binary']) else 'false',
-                          'sync': 'true' if (case['sync'] if case.has_key('sync') else testset['options']['sync']) else 'false',
-                          'correctness': 'exact' if (case['verify'] if case.has_key('verify') else testset['options']['verify']) else 'length',
-                          'count': case['count'] if case.has_key('count') else testset['options']['count']
+                          'timeout': case['timeout'] if 'timeout' in case else testset['options']['timeout'],
+                          'binary': 'true' if (case['binary'] if 'binary' in case else testset['options']['binary']) else 'false',
+                          'sync': 'true' if (case['sync'] if 'sync' in case else testset['options']['sync']) else 'false',
+                          'correctness': 'exact' if (case['verify'] if 'verify' in case else testset['options']['verify']) else 'length',
+                          'count': case['count'] if 'count' in case else testset['options']['count']
                           }
 
                else:
@@ -117,27 +118,27 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
 
 
    def onTestsComplete(self):
-      print " All tests finished."
-      print
+      print(" All tests finished.")
+      print()
 
       if self.factory.debugWsPerf:
          self.pp.pprint(self.testresults)
 
       for testset in self.testsets:
 
-         if testset[0]['options'].has_key('outfile'):
+         if 'outfile' in testset[0]['options']:
             outfilename = testset[0]['options']['outfile']
             outfile = open(outfilename, 'w')
          else:
             outfilename = None
             outfile = sys.stdout
 
-         if testset[0]['options'].has_key('digits'):
+         if 'digits' in testset[0]['options']:
             digits = testset[0]['options']['digits']
          else:
             digits = 0
 
-         if testset[0]['options'].has_key('sep'):
+         if 'sep' in testset[0]['options']:
             sep = testset[0]['options']['sep']
          else:
             sep = "\t"
@@ -177,14 +178,14 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
                                                            ]]))
                   for i in xrange(quantile_count):
                      outfile.write(sep)
-                     if result['data'].has_key('quantiles'):
+                     if 'quantiles' in result['data']:
                         outfile.write(self.toMicroSec(result['data']['quantiles'][i][1]))
                   outfile.write('\n')
                else:
                   raise Exception("unknown case outcome '%s'" % outcome)
 
             if outfilename:
-               print "Test data written to %s." % outfilename
+               print("Test data written to %s." % outfilename)
 
          else:
             raise Exception("logic error")
@@ -213,7 +214,7 @@ class WsPerfControlProtocol(WebSocketClientProtocol):
                if self.factory.debugWsPerf:
                   self.pp.pprint(o)
                self.testresults[o['token']] = o
-         except ValueError, e:
+         except ValueError as e:
             pass
 
 

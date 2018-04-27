@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -62,8 +63,8 @@ CaseSubCategories = {
 }
 
 
-import wampcase2_2_x_x
-import wampcase3_1_x_x
+from . import wampcase2_2_x_x
+from . import wampcase3_1_x_x
 
 ## all WAMP test cases
 ##
@@ -71,7 +72,7 @@ Cases = []
 #Cases.extend(wampcase2_2_x_x.Cases)
 #Cases.extend(wampcase3_1_x_x.Cases)
 
-import wampcase2_5_x_x
+from . import wampcase2_5_x_x
 Cases.extend(wampcase2_5_x_x.Cases)
 
 

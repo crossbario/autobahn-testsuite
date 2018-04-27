@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -86,9 +87,9 @@ class BroadcastClientProtocol(WebSocketClientProtocol):
 
    def onMessage(self, payload, isBinary):
       if isBinary:
-         print "received: ", binascii.b2a_hex(payload)
+         print("received: ", binascii.b2a_hex(payload))
       else:
-         print "received: ", payload
+         print("received: ", payload)
 
 
 

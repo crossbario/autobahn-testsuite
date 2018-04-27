@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -17,7 +19,7 @@
 ###############################################################################
 
 ## don't touch: must be first import!
-import choosereactor
+from . import choosereactor
 
 import os, json, sys, pkg_resources
 
@@ -33,23 +35,23 @@ from autobahn.websocket.utf8validator import Utf8Validator
 from autobahn.websocket.xormasker import XorMaskerNull
 
 ## WebSocket testing modes
-import testee
-import fuzzing
+from . import testee
+from . import fuzzing
 
 ## WAMP testing modes
 #import wamptestee
 #import wampfuzzing
 
 ## Misc testing modes
-import echo
-import broadcast
-import massconnect
+from . import echo
+from . import broadcast
+from . import massconnect
 #import wsperfcontrol
 #import wsperfmaster
-import serializer
+from . import serializer
 
 
-from spectemplate import SPEC_FUZZINGSERVER, \
+from .spectemplate import SPEC_FUZZINGSERVER, \
                          SPEC_FUZZINGCLIENT, \
                          SPEC_FUZZINGWAMPSERVER, \
                          SPEC_FUZZINGWAMPCLIENT, \
@@ -138,20 +140,20 @@ class WsTestOptions(usage.Options):
       """
 
       if self['autobahnversion']:
-         print "Autobahn %s" % autobahn.version
-         print "AutobahnTestSuite %s" % autobahntestsuite.version
+         print("Autobahn %s" % autobahn.version)
+         print("AutobahnTestSuite %s" % autobahntestsuite.version)
          sys.exit(0)
 
       if not self['mode']:
-         raise usage.UsageError, "a mode must be specified to run!"
+         raise usage.UsageError("a mode must be specified to run!")
 
       if self['mode'] not in WsTestOptions.MODES:
-         raise usage.UsageError, (
+         raise usage.UsageError(
             "Mode '%s' is invalid.\nAvailable modes:\n\t- %s" % (
                self['mode'], "\n\t- ".join(sorted(WsTestOptions.MODES))))
 
       if (self['mode'] in WsTestOptions.MODES_NEEDING_WSURI and not self['wsuri']):
-         raise usage.UsageError, "mode needs a WebSocket URI!"
+         raise usage.UsageError("mode needs a WebSocket URI!")
 
       if self['webport'] is not None:
          try:
@@ -159,7 +161,7 @@ class WsTestOptions(usage.Options):
             if self['webport'] < 0 or self['webport'] > 65535:
                raise ValueError()
          except:
-            raise usage.UsageError, "invalid Web port %s" % self['webport']
+            raise usage.UsageError("invalid Web port %s" % self['webport'])
 
 
 
@@ -183,12 +185,12 @@ class WsTestRunner(object):
       """
       Start mode specific services.
       """
-      print
-      print "Using Twisted reactor class %s" % str(reactor.__class__)
-      print "Using UTF8 Validator class %s" % str(Utf8Validator)
-      print "Using XOR Masker classes %s" % str(XorMaskerNull)
+      print()
+      print("Using Twisted reactor class %s" % str(reactor.__class__))
+      print("Using UTF8 Validator class %s" % str(Utf8Validator))
+      print("Using XOR Masker classes %s" % str(XorMaskerNull))
       #print "Using JSON processor module '%s'" % str(autobahn.wamp.json_lib.__name__)
-      print
+      print()
 
       if self.mode == "import":
          return self.startImportSpec(self.options['spec'])
@@ -291,9 +293,9 @@ def run():
    cmdOpts = WsTestOptions()
    try:
       cmdOpts.parseOptions()
-   except usage.UsageError, errortext:
-      print '%s %s\n' % (sys.argv[0], errortext)
-      print 'Try %s --help for usage details\n' % sys.argv[0]
+   except usage.UsageError as errortext:
+      print('%s %s\n' % (sys.argv[0], errortext))
+      print('Try %s --help for usage details\n' % sys.argv[0])
       sys.exit(1)
    else:
       options = cmdOpts.opts
@@ -316,24 +318,24 @@ def run():
             ## .. if file does not exist, autocreate a spec file
             ##
             content = WsTestOptions.DEFAULT_SPECIFICATIONS[options['mode']]
-            print "Auto-generating spec file '%s'" % filename
+            print("Auto-generating spec file '%s'" % filename)
             f = open(filename, 'w')
             f.write(content)
             f.close()
          else:
             ## .. use existing one
             ##
-            print "Using implicit spec file '%s'" % filename
+            print("Using implicit spec file '%s'" % filename)
 
       else:
          ## use explicitly given specfile
          ##
-         print "Using explicit spec file '%s'" % options['spec']
+         print("Using explicit spec file '%s'" % options['spec'])
 
       ## now load the spec ..
       ##
       spec_filename = os.path.abspath(options['spec'])
-      print "Loading spec from %s" % spec_filename
+      print("Loading spec from %s" % spec_filename)
       spec = json.loads(open(spec_filename).read())
 
    else:

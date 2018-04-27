@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -16,7 +17,7 @@
 ##
 ###############################################################################
 
-from case9_5_1 import Case9_5_1
+from .case9_5_1 import Case9_5_1
 
 class Case9_5_4(Case9_5_1):
 

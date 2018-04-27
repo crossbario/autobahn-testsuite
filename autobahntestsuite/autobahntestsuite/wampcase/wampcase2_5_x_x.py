@@ -1,3 +1,5 @@
+from __future__ import print_function
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -29,7 +31,7 @@ from twisted.internet import reactor
 from twisted.internet.defer import Deferred, DeferredList
 
 from autobahntestsuite.util import AttributeBag
-from wampcase import WampCase, WampCaseFactory, WampCaseProtocol
+from .wampcase import WampCase, WampCaseFactory, WampCaseProtocol
 
 
 
@@ -76,7 +78,7 @@ class WampCase4_1_1_Protocol(WampCaseProtocol):
       expected = self.factory.result.expected
       rcnt = 0
       for e in expected:
-         if expected[e].has_key(topic):
+         if topic in expected[e]:
             expected[e][topic] += 1
             rcnt += 1
       self.factory.totalExpected += rcnt
@@ -84,12 +86,12 @@ class WampCase4_1_1_Protocol(WampCaseProtocol):
 
    def onEvent(self, topic, event):
       observed = self.factory.result.observed[self.session_id]
-      if not observed.has_key(topic):
+      if topic not in observed:
          observed[topic] = 0
       observed[topic] += 1
       self.factory.totalObserved += 1
 
-      print self.factory.totalObserved, self.factory.totalExpected
+      print(self.factory.totalObserved, self.factory.totalExpected)
 
 
 
@@ -123,7 +125,7 @@ class WampCase4_1_1(WampCase):
    def test(self, log, result, clients):
       msg = "NOP test running using %d sessions\n" % len(clients)
       log(msg)
-      print msg
+      print(msg)
 
       for i in xrange(self.params.pubsCount):
          j = random.randint(0, len(clients) - 1)
@@ -137,19 +139,19 @@ class WampCase4_1_1(WampCase):
          log("Continuing test ..")
 
          if False:
-            print
-            print "Expected:"
+            print()
+            print("Expected:")
             for r in result.expected:
-               print r
+               print(r)
                pprint(result.expected[r])
-               print
+               print()
 
-            print
-            print "Observed:"
+            print()
+            print("Observed:")
             for r in result.observed:
-               print r
+               print(r)
                pprint(result.observed[r])
-               print
+               print()
 
          result.passed = json.dumps(result.observed) == json.dumps(result.expected)
 

@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -58,7 +59,7 @@ class WampCase3_1_x_x_Protocol(WampCraClientProtocol):
 
    def onAuthError(self, e):
       uri, desc, details = e.value.args
-      print "Authentication Error!", uri, desc, details
+      print("Authentication Error!", uri, desc, details)
 
    def main(self):
       self.factory.onReady(self)
@@ -178,7 +179,7 @@ class WampCase3_1_x_x_Base:
 
       def error(err):
          ## FIXME
-         print "ERROR", err
+         print("ERROR", err)
          shutdown()
          self.finished.errback(err)
 
@@ -187,8 +188,8 @@ class WampCase3_1_x_x_Base:
          self.result.ended = perf_counter()
          passed = json.dumps(self.result.received) == json.dumps(self.result.expected)
          if not passed:
-            print "EXPECTED", self.result.expected
-            print "RECEIVED", self.result.received
+            print("EXPECTED", self.result.expected)
+            print("RECEIVED", self.result.received)
          self.result.passed = passed
          self.finished.callback(self.result)
 

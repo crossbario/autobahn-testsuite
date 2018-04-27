@@ -18,8 +18,9 @@
 ##
 ###############################################################################
 
-from case import Case
-from case6_3_1 import Case6_3_1
+from __future__ import absolute_import
+from .case import Case
+from .case6_3_1 import Case6_3_1
 import binascii
 
 class Case6_3_2(Case6_3_1):

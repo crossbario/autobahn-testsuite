@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -24,7 +25,7 @@ __all__ = ['Case12_X_X',
 
 import copy, os, pkg_resources, hashlib, binascii
 
-from case import Case
+from .case import Case
 from autobahn.websocket.compress import *
 
 

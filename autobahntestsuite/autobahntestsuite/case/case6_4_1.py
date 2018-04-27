@@ -18,8 +18,9 @@
 ##
 ###############################################################################
 
+from __future__ import absolute_import
 import binascii
-from case import Case
+from .case import Case
 from autobahn.websocket.protocol import WebSocketProtocol
 
 

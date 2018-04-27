@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -25,6 +26,7 @@ from autobahn.wamp1.protocol import exportRpc, \
                                     exportPub, \
                                     WampServerFactory, \
                                     WampServerProtocol
+from functools import reduce
 
 
 class Simple:
@@ -98,7 +100,7 @@ class KeyValue:
          if value is not None:
             self.store[k] = value
          else:
-            if self.store.has_key(k):
+            if k in self.store:
                del self.store[k]
       else:
          self.store.clear()
@@ -171,17 +173,17 @@ class MyTopicService:
       """
       Custom topic subscription handler.
       """
-      print "client wants to subscribe to %s%s" % (topicUriPrefix, topicUriSuffix)
+      print("client wants to subscribe to %s%s" % (topicUriPrefix, topicUriSuffix))
       try:
          i = int(topicUriSuffix)
          if i in self.allowedTopicIds:
-            print "Subscribing client to topic Foobar %d" % i
+            print("Subscribing client to topic Foobar %d" % i)
             return True
          else:
-            print "Client not allowed to subscribe to topic Foobar %d" % i
+            print("Client not allowed to subscribe to topic Foobar %d" % i)
             return False
       except:
-         print "illegal topic - skipped subscription"
+         print("illegal topic - skipped subscription")
          return False
 
 
@@ -190,23 +192,23 @@ class MyTopicService:
       """
       Custom topic publication handler.
       """
-      print "client wants to publish to %s%s" % (topicUriPrefix, topicUriSuffix)
+      print("client wants to publish to %s%s" % (topicUriPrefix, topicUriSuffix))
       try:
          i = int(topicUriSuffix)
-         if type(event) == dict and event.has_key("count"):
+         if type(event) == dict and "count" in event:
             if event["count"] > 0:
                self.serial += 1
                event["serial"] = self.serial
-               print "ok, published enriched event"
+               print("ok, published enriched event")
                return event
             else:
-               print "event count attribute is negative"
+               print("event count attribute is negative")
                return None
          else:
-            print "event is not dict or misses count attribute"
+            print("event is not dict or misses count attribute")
             return None
       except:
-         print "illegal topic - skipped publication of event"
+         print("illegal topic - skipped publication of event")
          return None
 
 

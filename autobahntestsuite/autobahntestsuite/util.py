@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -265,14 +266,14 @@ def _createWssContext(self, options, factory):
    # Check if an OpenSSL library can be imported; abort if it's missing.
    try:
       from twisted.internet import ssl
-   except ImportError, e:
+   except ImportError as e:
       print ("You need OpenSSL/pyOpenSSL installed for secure WebSocket"
              "(wss)!")
       sys.exit(1)
 
    # Make sure the necessary options ('key' and 'cert') are available
    if options['key'] is None or options['cert'] is None:
-      print OPENSSL_HELP
+      print(OPENSSL_HELP)
       sys.exit(1)
 
    # Create the context factory based on the given key and certificate

@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -23,9 +24,9 @@ import random
 from collections import deque
 
 from zope.interface import implementer
-from interfaces import ITestRun
+from .interfaces import ITestRun
 
-from util import AttributeBag
+from .util import AttributeBag
 
 
 class Testee(AttributeBag):

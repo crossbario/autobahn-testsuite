@@ -1,3 +1,4 @@
+from __future__ import absolute_import
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -16,7 +17,7 @@
 ##
 ###############################################################################
 
-from case import Case
+from .case import Case
 
 ## list of some invalid close codes
 tests = [0,999,1004,1005,1006,1014,1015,1016,1100,2000,2999]

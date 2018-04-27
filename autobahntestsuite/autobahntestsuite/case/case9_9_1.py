@@ -18,7 +18,8 @@
 ##
 ###############################################################################
 
-from case import Case
+from __future__ import absolute_import
+from .case import Case
 from autobahn.websocket.protocol import WebSocketProtocol
 import binascii
 from zope.interface import implements

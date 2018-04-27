@@ -1,3 +1,4 @@
+from __future__ import print_function
 ###############################################################################
 ##
 ##  Copyright (c) Crossbar.io Technologies GmbH
@@ -104,14 +105,14 @@ class TesteeClientProtocol(WebSocketClientProtocol):
 
    def onOpen(self):
       if self.factory.endCaseId is None:
-         print "Getting case count .."
+         print("Getting case count ..")
       elif self.factory.currentCaseId <= self.factory.endCaseId:
-         print "Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peer)
+         print("Running test case %d/%d as user agent %s on peer %s" % (self.factory.currentCaseId, self.factory.endCaseId, self.factory.agent, self.peer))
 
    def onMessage(self, msg, binary):
       if self.factory.endCaseId is None:
          self.factory.endCaseId = int(msg)
-         print "Ok, will run %d cases" % self.factory.endCaseId
+         print("Ok, will run %d cases" % self.factory.endCaseId)
       else:
          self.sendMessage(msg, binary)
 
@@ -167,7 +168,7 @@ class TesteeClientFactory(WebSocketClientFactory):
          reactor.stop()
 
    def clientConnectionFailed(self, connector, reason):
-      print "Connection to %s failed (%s)" % (self.url, reason.getErrorMessage())
+      print("Connection to %s failed (%s)" % (self.url, reason.getErrorMessage()))
       reactor.stop()
 
 
