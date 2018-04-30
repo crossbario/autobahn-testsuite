@@ -20,7 +20,7 @@
 
 from __future__ import print_function
 from __future__ import absolute_import
-from builtins import chr
+from future.builtins import bytes
 from builtins import range
 import binascii
 from .case import Case
@@ -36,12 +36,12 @@ def createUtf8TestSequences():
    UTF8_TEST_SEQUENCES = []
 
    # 1 Some correct UTF-8 text
-   vss = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
-   vs = ["Some valid UTF-8 sequences", []]
-   vs[1].append((True, 'hello\x24world')) # U+0024
-   vs[1].append((True, 'hello\xC2\xA2world')) # U+00A2
-   vs[1].append((True, 'hello\xE2\x82\xACworld')) # U+20AC
-   vs[1].append((True, 'hello\xF0\xA4\xAD\xA2world')) # U+24B62
+   vss = b'\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
+   vs = ["Some valid UTF-8 sequences".encode(), []]
+   vs[1].append((True, b'hello\x24world')) # U+0024
+   vs[1].append((True, b'hello\xC2\xA2world')) # U+00A2
+   vs[1].append((True, b'hello\xE2\x82\xACworld')) # U+20AC
+   vs[1].append((True, b'hello\xF0\xA4\xAD\xA2world')) # U+24B62
    vs[1].append((True, vss))
    UTF8_TEST_SEQUENCES.append(vs)
 
@@ -56,167 +56,167 @@ def createUtf8TestSequences():
 
    # 2.1 First possible sequence of a certain length
    vs = ["First possible sequence of a certain length", []]
-   vs[1].append((True, '\x00'))
-   vs[1].append((True, '\xc2\x80'))
-   vs[1].append((True, '\xe0\xa0\x80'))
-   vs[1].append((True, '\xf0\x90\x80\x80'))
+   vs[1].append((True, b'\x00'))
+   vs[1].append((True, b'\xc2\x80'))
+   vs[1].append((True, b'\xe0\xa0\x80'))
+   vs[1].append((True, b'\xf0\x90\x80\x80'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # the following conform to the UTF-8 integer encoding scheme, but
    # valid UTF-8 only allows for Unicode code points up to U+10FFFF
    vs = ["First possible sequence length 5/6 (invalid codepoints)", []]
-   vs[1].append((False, '\xf8\x88\x80\x80\x80'))
-   vs[1].append((False, '\xfc\x84\x80\x80\x80\x80'))
+   vs[1].append((False, b'\xf8\x88\x80\x80\x80'))
+   vs[1].append((False, b'\xfc\x84\x80\x80\x80\x80'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 2.2 Last possible sequence of a certain length
    vs = ["Last possible sequence of a certain length", []]
-   vs[1].append((True, '\x7f'))
-   vs[1].append((True, '\xdf\xbf'))
-   vs[1].append((True, '\xef\xbf\xbf'))
-   vs[1].append((True, '\xf4\x8f\xbf\xbf'))
+   vs[1].append((True, b'\x7f'))
+   vs[1].append((True, b'\xdf\xbf'))
+   vs[1].append((True, b'\xef\xbf\xbf'))
+   vs[1].append((True, b'\xf4\x8f\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # the following conform to the UTF-8 integer encoding scheme, but
    # valid UTF-8 only allows for Unicode code points up to U+10FFFF
    vs = ["Last possible sequence length 4/5/6 (invalid codepoints)", []]
-   vs[1].append((False, '\xf7\xbf\xbf\xbf'))
-   vs[1].append((False, '\xfb\xbf\xbf\xbf\xbf'))
-   vs[1].append((False, '\xfd\xbf\xbf\xbf\xbf\xbf'))
+   vs[1].append((False, b'\xf7\xbf\xbf\xbf'))
+   vs[1].append((False, b'\xfb\xbf\xbf\xbf\xbf'))
+   vs[1].append((False, b'\xfd\xbf\xbf\xbf\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 2.3 Other boundary conditions
-   vs = ["Other boundary conditions", []]
-   vs[1].append((True, '\xed\x9f\xbf'))
-   vs[1].append((True, '\xee\x80\x80'))
-   vs[1].append((True, '\xef\xbf\xbd'))
-   vs[1].append((True, '\xf4\x8f\xbf\xbf'))
-   vs[1].append((False, '\xf4\x90\x80\x80'))
+   vs = ["Other boundary conditions".encode(), []]
+   vs[1].append((True, b'\xed\x9f\xbf'))
+   vs[1].append((True, b'\xee\x80\x80'))
+   vs[1].append((True, b'\xef\xbf\xbd'))
+   vs[1].append((True, b'\xf4\x8f\xbf\xbf'))
+   vs[1].append((False, b'\xf4\x90\x80\x80'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 3.1  Unexpected continuation bytes
-   vs = ["Unexpected continuation bytes", []]
-   vs[1].append((False, '\x80'))
-   vs[1].append((False, '\xbf'))
-   vs[1].append((False, '\x80\xbf'))
-   vs[1].append((False, '\x80\xbf\x80'))
-   vs[1].append((False, '\x80\xbf\x80\xbf'))
-   vs[1].append((False, '\x80\xbf\x80\xbf\x80'))
-   vs[1].append((False, '\x80\xbf\x80\xbf\x80\xbf'))
-   s = ""
+   vs = ["Unexpected continuation bytes".encode(), []]
+   vs[1].append((False, b'\x80'))
+   vs[1].append((False, b'\xbf'))
+   vs[1].append((False, b'\x80\xbf'))
+   vs[1].append((False, b'\x80\xbf\x80'))
+   vs[1].append((False, b'\x80\xbf\x80\xbf'))
+   vs[1].append((False, b'\x80\xbf\x80\xbf\x80'))
+   vs[1].append((False, b'\x80\xbf\x80\xbf\x80\xbf'))
+   s = b""
    for i in range(0x80, 0xbf):
-      s += chr(i)
+      s += bytes([i])
    vs[1].append((False, s))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 3.2  Lonely start characters
-   vs = ["Lonely start characters", []]
+   vs = ["Lonely start characters".encode(), []]
    m = [(0xc0, 0xdf), (0xe0, 0xef), (0xf0, 0xf7), (0xf8, 0xfb), (0xfc, 0xfd)]
    for mm in m:
-      s = ''
+      s = b''
       for i in range(mm[0], mm[1]):
-         s += chr(i)
-         s += chr(0x20)
+         s += bytes([i])
+         s += bytes([0x20])
       vs[1].append((False, s))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 3.3  Sequences with last continuation byte missing
-   vs = ["Sequences with last continuation byte missing", []]
-   k = ['\xc0', '\xe0\x80', '\xf0\x80\x80', '\xf8\x80\x80\x80', '\xfc\x80\x80\x80\x80',
-        '\xdf', '\xef\xbf', '\xf7\xbf\xbf', '\xfb\xbf\xbf\xbf', '\xfd\xbf\xbf\xbf\xbf']
+   vs = ["Sequences with last continuation byte missing".encode(), []]
+   k = [b'\xc0', b'\xe0\x80', b'\xf0\x80\x80', b'\xf8\x80\x80\x80', b'\xfc\x80\x80\x80\x80',
+        b'\xdf', b'\xef\xbf', b'\xf7\xbf\xbf', b'\xfb\xbf\xbf\xbf', b'\xfd\xbf\xbf\xbf\xbf']
    for kk in k:
       vs[1].append((False, kk))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 3.4  Concatenation of incomplete sequences
-   vs = ["Concatenation of incomplete sequences", []]
-   vs[1].append((False, ''.join(k)))
+   vs = ["Concatenation of incomplete sequences".encode(), []]
+   vs[1].append((False, b''.join(k)))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 3.5  Impossible bytes
-   vs = ["Impossible bytes", []]
-   vs[1].append((False, '\xfe'))
-   vs[1].append((False, '\xff'))
-   vs[1].append((False, '\xfe\xfe\xff\xff'))
+   vs = ["Impossible bytes".encode(), []]
+   vs[1].append((False, b'\xfe'))
+   vs[1].append((False, b'\xff'))
+   vs[1].append((False, b'\xfe\xfe\xff\xff'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 4.1  Examples of an overlong ASCII character
-   vs = ["Examples of an overlong ASCII character", []]
-   vs[1].append((False, '\xc0\xaf'))
-   vs[1].append((False, '\xe0\x80\xaf'))
-   vs[1].append((False, '\xf0\x80\x80\xaf'))
-   vs[1].append((False, '\xf8\x80\x80\x80\xaf'))
-   vs[1].append((False, '\xfc\x80\x80\x80\x80\xaf'))
+   vs = ["Examples of an overlong ASCII character".encode(), []]
+   vs[1].append((False, b'\xc0\xaf'))
+   vs[1].append((False, b'\xe0\x80\xaf'))
+   vs[1].append((False, b'\xf0\x80\x80\xaf'))
+   vs[1].append((False, b'\xf8\x80\x80\x80\xaf'))
+   vs[1].append((False, b'\xfc\x80\x80\x80\x80\xaf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 4.2  Maximum overlong sequences
-   vs = ["Maximum overlong sequences", []]
-   vs[1].append((False, '\xc1\xbf'))
-   vs[1].append((False, '\xe0\x9f\xbf'))
-   vs[1].append((False, '\xf0\x8f\xbf\xbf'))
-   vs[1].append((False, '\xf8\x87\xbf\xbf\xbf'))
-   vs[1].append((False, '\xfc\x83\xbf\xbf\xbf\xbf'))
+   vs = ["Maximum overlong sequences".encode(), []]
+   vs[1].append((False, b'\xc1\xbf'))
+   vs[1].append((False, b'\xe0\x9f\xbf'))
+   vs[1].append((False, b'\xf0\x8f\xbf\xbf'))
+   vs[1].append((False, b'\xf8\x87\xbf\xbf\xbf'))
+   vs[1].append((False, b'\xfc\x83\xbf\xbf\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 4.3  Overlong representation of the NUL character
-   vs = ["Overlong representation of the NUL character", []]
-   vs[1].append((False, '\xc0\x80'))
-   vs[1].append((False, '\xe0\x80\x80'))
-   vs[1].append((False, '\xf0\x80\x80\x80'))
-   vs[1].append((False, '\xf8\x80\x80\x80\x80'))
-   vs[1].append((False, '\xfc\x80\x80\x80\x80\x80'))
+   vs = ["Overlong representation of the NUL character".encode(), []]
+   vs[1].append((False, b'\xc0\x80'))
+   vs[1].append((False, b'\xe0\x80\x80'))
+   vs[1].append((False, b'\xf0\x80\x80\x80'))
+   vs[1].append((False, b'\xf8\x80\x80\x80\x80'))
+   vs[1].append((False, b'\xfc\x80\x80\x80\x80\x80'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 5.1 Single UTF-16 surrogates
-   vs = ["Single UTF-16 surrogates", []]
-   vs[1].append((False, '\xed\xa0\x80'))
-   vs[1].append((False, '\xed\xad\xbf'))
-   vs[1].append((False, '\xed\xae\x80'))
-   vs[1].append((False, '\xed\xaf\xbf'))
-   vs[1].append((False, '\xed\xb0\x80'))
-   vs[1].append((False, '\xed\xbe\x80'))
-   vs[1].append((False, '\xed\xbf\xbf'))
+   vs = ["Single UTF-16 surrogates".encode(), []]
+   vs[1].append((False, b'\xed\xa0\x80'))
+   vs[1].append((False, b'\xed\xad\xbf'))
+   vs[1].append((False, b'\xed\xae\x80'))
+   vs[1].append((False, b'\xed\xaf\xbf'))
+   vs[1].append((False, b'\xed\xb0\x80'))
+   vs[1].append((False, b'\xed\xbe\x80'))
+   vs[1].append((False, b'\xed\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 5.2 Paired UTF-16 surrogates
-   vs = ["Paired UTF-16 surrogates", []]
-   vs[1].append((False, '\xed\xa0\x80\xed\xb0\x80'))
-   vs[1].append((False, '\xed\xa0\x80\xed\xbf\xbf'))
-   vs[1].append((False, '\xed\xad\xbf\xed\xb0\x80'))
-   vs[1].append((False, '\xed\xad\xbf\xed\xbf\xbf'))
-   vs[1].append((False, '\xed\xae\x80\xed\xb0\x80'))
-   vs[1].append((False, '\xed\xae\x80\xed\xbf\xbf'))
-   vs[1].append((False, '\xed\xaf\xbf\xed\xb0\x80'))
-   vs[1].append((False, '\xed\xaf\xbf\xed\xbf\xbf'))
+   vs = ["Paired UTF-16 surrogates".encode(), []]
+   vs[1].append((False, b'\xed\xa0\x80\xed\xb0\x80'))
+   vs[1].append((False, b'\xed\xa0\x80\xed\xbf\xbf'))
+   vs[1].append((False, b'\xed\xad\xbf\xed\xb0\x80'))
+   vs[1].append((False, b'\xed\xad\xbf\xed\xbf\xbf'))
+   vs[1].append((False, b'\xed\xae\x80\xed\xb0\x80'))
+   vs[1].append((False, b'\xed\xae\x80\xed\xbf\xbf'))
+   vs[1].append((False, b'\xed\xaf\xbf\xed\xb0\x80'))
+   vs[1].append((False, b'\xed\xaf\xbf\xed\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # 5.3 Other illegal code positions
    # Those are non-character code points and valid UTF-8 by RFC 3629
-   vs = ["Non-character code points (valid UTF-8)", []]
+   vs = ["Non-character code points (valid UTF-8)".encode(), []]
    # https://bug686312.bugzilla.mozilla.org/attachment.cgi?id=561257
    # non-characters: EF BF [BE-BF]
-   vs[1].append((True, '\xef\xbf\xbe'))
-   vs[1].append((True, '\xef\xbf\xbf'))
+   vs[1].append((True, b'\xef\xbf\xbe'))
+   vs[1].append((True, b'\xef\xbf\xbf'))
    # non-characters: F[0-7] [89AB]F BF [BE-BF]
-   for z1 in ['\xf0', '\xf1', '\xf2', '\xf3', '\xf4']:
-      for z2 in ['\x8f', '\x9f', '\xaf', '\xbf']:
-         if not (z1 == '\xf4' and z2 != '\x8f'): # those encode codepoints >U+10FFFF
-            for z3 in ['\xbe', '\xbf']:
-               zz = z1 + z2 + '\xbf' + z3
-               if zz not in ['\xf0\x8f\xbf\xbe', '\xf0\x8f\xbf\xbf']: # filter overlong sequences
+   for z1 in [b'\xf0', b'\xf1', b'\xf2', b'\xf3', b'\xf4']:
+      for z2 in [b'\x8f', b'\x9f', b'\xaf', b'\xbf']:
+         if not (z1 == b'\xf4' and z2 != b'\x8f'): # those encode codepoints >U+10FFFF
+            for z3 in [b'\xbe', b'\xbf']:
+               zz = z1 + z2 + b'\xbf' + z3
+               if zz not in [b'\xf0\x8f\xbf\xbe', b'\xf0\x8f\xbf\xbf']: # filter overlong sequences
                   vs[1].append((True, zz))
    UTF8_TEST_SEQUENCES.append(vs)
 
    # Unicode "specials", such as replacement char etc
    # http://en.wikipedia.org/wiki/Specials_%28Unicode_block%29
-   vs = ["Unicode specials (i.e. replacement char)", []]
-   vs[1].append((True, '\xef\xbf\xb9'))
-   vs[1].append((True, '\xef\xbf\xba'))
-   vs[1].append((True, '\xef\xbf\xbb'))
-   vs[1].append((True, '\xef\xbf\xbc'))
-   vs[1].append((True, '\xef\xbf\xbd')) # replacement char
-   vs[1].append((True, '\xef\xbf\xbe'))
-   vs[1].append((True, '\xef\xbf\xbf'))
+   vs = ["Unicode specials (i.e. replacement char)".encode(), []]
+   vs[1].append((True, b'\xef\xbf\xb9'))
+   vs[1].append((True, b'\xef\xbf\xba'))
+   vs[1].append((True, b'\xef\xbf\xbb'))
+   vs[1].append((True, b'\xef\xbf\xbc'))
+   vs[1].append((True, b'\xef\xbf\xbd')) # replacement char
+   vs[1].append((True, b'\xef\xbf\xbe'))
+   vs[1].append((True, b'\xef\xbf\xbf'))
    UTF8_TEST_SEQUENCES.append(vs)
 
    return UTF8_TEST_SEQUENCES
@@ -348,7 +348,7 @@ for t in createUtf8TestSequences():
          desc = "Send a text message with payload which is not valid UTF-8 in one fragment."
          exp = "The connection is failed immediately, since the payload is not valid UTF-8."
       C = type("Case6_%d_%d" % (i, j),
-                (object, Case, ),
+                (Case,),
                 {"PAYLOAD": p[1],
                  "isValid": p[0],
                  "DESCRIPTION": """%s<br><br>Payload: 0x%s""" % (desc, binascii.b2a_hex(p[1])),

@@ -26,9 +26,9 @@ class Case5_8(Case):
    EXPECTATION = """A pong is received, then the message is echo'ed back to us."""
 
    def onOpen(self):
-      ping_payload = "ping payload"
-      fragments = ["fragment1", "fragment2"]
-      self.expected[Case.OK] = [("pong", ping_payload), ("message", ''.join(fragments), False)]
+      ping_payload = b"ping payload"
+      fragments = [b"fragment1", b"fragment2"]
+      self.expected[Case.OK] = [("pong", ping_payload), ("message", b''.join(fragments), False)]
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendFrame(opcode = 1, fin = False, payload = fragments[0], chopsize = 1)
       self.p.sendFrame(opcode = 9, fin = True, payload = ping_payload, chopsize = 1)

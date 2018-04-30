@@ -37,10 +37,10 @@ class Case5_19(Case):
 
    def onOpen(self):
 
-      self.fragments = ["fragment1", "fragment2", "fragment3", "fragment4", "fragment5"]
-      self.pings = ["pongme 1!", "pongme 2!"]
+      self.fragments = [b"fragment1", b"fragment2", b"fragment3", b"fragment4", b"fragment5"]
+      self.pings = [b"pongme 1!", b"pongme 2!"]
 
-      self.expected[Case.OK] = [("pong", self.pings[0]), ("pong", self.pings[1]), ("message", ''.join(self.fragments), False)]
+      self.expected[Case.OK] = [("pong", self.pings[0]), ("pong", self.pings[1]), ("message", b''.join(self.fragments), False)]
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
 
       self.p.sendFrame(opcode = 1, fin = False, payload = self.fragments[0], sync = self.sync)

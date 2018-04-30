@@ -27,6 +27,6 @@ class Case9_2_5(Case9_2_1):
 
    def init(self):
       self.DATALEN = 8 * 2**20
-      self.PAYLOAD = "\x00\xfe\x23\xfa\xf0"
+      self.PAYLOAD = b"\x00\xfe\x23\xfa\xf0"
       self.WAITSECS = 100
       self.reportTime = True

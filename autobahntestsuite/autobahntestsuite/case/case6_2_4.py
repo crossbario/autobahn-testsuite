@@ -24,7 +24,7 @@ import binascii
 
 class Case6_2_4(Case):
 
-   PAYLOAD = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
+   PAYLOAD = b'\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
 
    DESCRIPTION = """Send a valid UTF-8 text message in fragments of 1 octet, resulting in frames ending on positions which are not code point ends.<br><br>MESSAGE:<br>%s<br>%s""" % (PAYLOAD, binascii.b2a_hex(PAYLOAD))
 

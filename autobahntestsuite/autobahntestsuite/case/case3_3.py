@@ -26,7 +26,7 @@ class Case3_3(Case):
    EXPECTATION = """Echo for first message is received, but then connection is failed immediately, since RSV must be 0, when no extension defining RSV meaning has been negotiated. The Pong is not received."""
 
    def onOpen(self):
-      payload = "Hello, world!"
+      payload = b"Hello, world!"
       self.expected[Case.OK] = [("message", payload, False)]
       self.expected[Case.NON_STRICT] = []
       self.expectedClose = {"closedByMe":False,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],"requireClean":False}

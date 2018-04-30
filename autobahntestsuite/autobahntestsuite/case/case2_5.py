@@ -26,7 +26,7 @@ class Case2_5(Case):
    EXPECTATION = """Connection is failed immediately (1002/Protocol Error), since control frames are only allowed to have payload up to and including 125 octets.."""
 
    def onOpen(self):
-      payload = "\xfe" * 126
+      payload = b"\xfe" * 126
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":False,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],"requireClean":False}
       self.p.sendFrame(opcode = 9, payload = payload)

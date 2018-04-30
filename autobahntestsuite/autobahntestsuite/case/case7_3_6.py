@@ -37,7 +37,7 @@ class Case7_3_6(Case):
          self.result = self.resultClose
 
    def onOpen(self):
-      self.payload = "*" * 124
+      self.payload = b"*" * 124
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],"requireClean":False}
       self.p.sendCloseFrame(self.p.CLOSE_STATUS_CODE_NORMAL, reasonUtf8 = self.payload)

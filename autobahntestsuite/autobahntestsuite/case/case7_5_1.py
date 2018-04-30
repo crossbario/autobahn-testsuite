@@ -45,7 +45,7 @@ class Case7_5_1(Case):
          self.p.localCloseReason = "?"
 
    def onOpen(self):
-      self.payload = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5\xed\xa0\x80\x65\x64\x69\x74\x65\x64'
+      self.payload = b'\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5\xed\xa0\x80\x65\x64\x69\x74\x65\x64'
       self.expected[Case.OK] = []      
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR,self.p.CLOSE_STATUS_CODE_INVALID_PAYLOAD],"requireClean":False}
       #self.p.sendFrame(opcode = 8,payload = self.payload)

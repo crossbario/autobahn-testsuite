@@ -26,12 +26,12 @@ class Case6_1_3(Case):
    EXPECTATION = """A message is echo'ed back to us (with payload = payload of middle fragment)."""
 
    def onOpen(self):
-      payload = "middle frame payload"
+      payload = b"middle frame payload"
       self.expected[Case.OK] = [("message", payload, False)]
       self.expectedClose = {"closedByMe": True,
                             "closeCode": [self.p.CLOSE_STATUS_CODE_NORMAL],
                             "requireClean": True}
-      self.p.sendFrame(opcode = 1, fin = False, payload = "")
+      self.p.sendFrame(opcode = 1, fin = False, payload = b"")
       self.p.sendFrame(opcode = 0, fin = False, payload = payload)
-      self.p.sendFrame(opcode = 0, fin = True, payload = "")
+      self.p.sendFrame(opcode = 0, fin = True, payload = b"")
       self.p.closeAfter(1)

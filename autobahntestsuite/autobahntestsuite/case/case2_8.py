@@ -28,7 +28,7 @@ class Case2_8(Case):
    def onOpen(self):
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
-      self.p.sendFrame(opcode = 10, payload = "unsolicited pong payload")
+      self.p.sendFrame(opcode = 10, payload = b"unsolicited pong payload")
       self.p.sendClose(self.p.CLOSE_STATUS_CODE_NORMAL)
       self.p.closeAfter(1)
       

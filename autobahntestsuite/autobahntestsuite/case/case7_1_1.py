@@ -34,7 +34,7 @@ class Case7_1_1(Case):
          self.result = self.resultClose
 
    def onOpen(self):
-      payload = "Hello World!"
+      payload = b"Hello World!"
       self.expected[Case.OK] = [("message", payload, False)]      
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendFrame(opcode = 1, payload = payload)

@@ -30,5 +30,5 @@ class Case3_1(Case):
       self.expectedClose = {"closedByMe": False,
                             "closeCode": [self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],
                             "requireClean": False}
-      self.p.sendFrame(opcode = 1, payload = "Hello, world!", rsv = 1)
+      self.p.sendFrame(opcode = 1, payload = b"Hello, world!", rsv = 1)
       self.p.killAfter(1)

@@ -33,7 +33,7 @@ class Case2_10(Case):
       self.expected[Case.OK] = []
       for i in range(0, 10):
          payload = "payload-%d" % i
-         self.expected[Case.OK].append(("pong", payload))
-         self.p.sendFrame(opcode = 9, payload = payload, chopsize = self.chopsize)
+         self.expected[Case.OK].append(("pong", payload.encode()))
+         self.p.sendFrame(opcode = 9, payload = payload.encode(), chopsize = self.chopsize)
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.closeAfter(3)

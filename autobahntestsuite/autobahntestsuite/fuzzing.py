@@ -59,17 +59,17 @@ from .report import CSS_COMMON, \
 
 
 def binLogData(data, maxlen = 64):
-   ellipses = " ..."
+   ellipses = b" ..."
    if len(data) > maxlen - len(ellipses):
       dd = binascii.b2a_hex(data[:maxlen]) + ellipses
    else:
       dd = binascii.b2a_hex(data)
-   return dd
+   return dd.decode('utf-8')
 
 
 
 def asciiLogData(data, maxlen = 64, replace = False):
-   ellipses = " ..."
+   ellipses = b" ..."
    try:
       if len(data) > maxlen - len(ellipses):
          dd = data[:maxlen] + ellipses
@@ -217,7 +217,7 @@ class FuzzingProtocol(object):
       if self.createStats:
          self.rxFrameStats[frameHeader.opcode] = self.rxFrameStats.get(frameHeader.opcode, 0) + 1
       if self.createWirelog:
-         p = ''.join(payload)
+         p = b''.join(payload)
          self.wirelog.append(("RF",
                               (len(p), asciiLogData(p)),
                               frameHeader.opcode,
@@ -307,7 +307,7 @@ class FuzzingProtocol(object):
             print("Report generation complete.")
 
       elif self.path == "/getCaseCount":
-         self.sendMessage(json.dumps(len(self.factory.specCases)))
+         self.sendMessage(json.dumps(len(self.factory.specCases)).encode('utf-8'))
          self.sendClose()
 
       elif self.path == "/getCaseStatus":
@@ -363,7 +363,7 @@ class FuzzingProtocol(object):
          else:
 
             try:
-               obj = json.loads(msg)
+               obj = json.loads(msg.decode('utf-8'))
             except:
                raise Exception("could not parse command")
 
@@ -896,7 +896,7 @@ class FuzzingFactory(object):
       f.write('      <table>\n')
       f.write('         <tr class="stats_header"><td>Key</td><td class="left">Value</td><td class="left">Description</td></tr>\n')
       for c in cbv:
-         f.write(('         <tr class="stats_row"><td>%s</td><td class="left">%s</td><td class="left">%s</td></tr>\n' % (c[0], case[c[0]], c[1])).encode("utf-8"))
+         f.write(('         <tr class="stats_row"><td>%s</td><td class="left">%s</td><td class="left">%s</td></tr>\n' % (c[0], case[c[0]], c[1])))
       f.write('      </table>')
       f.write("      <br/><hr/>\n")
 

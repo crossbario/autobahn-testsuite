@@ -26,7 +26,7 @@ class Case1_2_6(Case):
    EXPECTATION = """Receive echo'ed binary message (with payload as sent). Clean close with normal code."""
 
    def onOpen(self):
-      payload = "\xfe" * 65535
+      payload = b"\xfe" * 65535
       self.expected[Case.OK] = [("message", payload, True)]
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendFrame(opcode = 2, payload = payload)

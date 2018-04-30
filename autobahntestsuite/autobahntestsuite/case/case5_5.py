@@ -26,8 +26,8 @@ class Case5_5(Case):
    EXPECTATION = """Message is processed and echo'ed back to us."""
 
    def onOpen(self):
-      fragments = ["fragment1", "fragment2"]
-      self.expected[Case.OK] = [("message", ''.join(fragments), False)]
+      fragments = [b"fragment1", b"fragment2"]
+      self.expected[Case.OK] = [("message", b''.join(fragments), False)]
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendFrame(opcode = 1, fin = False, payload = fragments[0], chopsize = 1)
       self.p.sendFrame(opcode = 0, fin = True, payload = fragments[1], chopsize = 1)

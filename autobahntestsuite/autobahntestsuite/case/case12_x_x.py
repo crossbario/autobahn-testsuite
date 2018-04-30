@@ -151,7 +151,7 @@ def sendOne(self):
          msg = self.testData[idxFrom:] + self.testData[:idxTo]
       self.payloadRXPtr = idxTo
    else:
-      msg = ''
+      msg = b''
 
    m = hashlib.sha1()
    m.update(msg)
@@ -223,7 +223,7 @@ for td in WS_COMPRESSION_TESTDATA:
       DESCRIPTION = """Send %d compressed messages each of payload size %d, auto-fragment to %s octets. Use default permessage-deflate offer.""" % (s[1], s[0], s[3])
       EXPECTATION = """Receive echo'ed messages (with payload as sent). Timeout case after %d secs.""" % (s[2])
       C = type(cc,
-                (object, Case, ),
+                (Case,),
                 {"LEN": s[0],
                  "COUNT": s[1],
                  "WAITSECS": s[2],
@@ -356,7 +356,7 @@ for dp in DEFLATE_PARAMS:
       DESCRIPTION = """Send %d compressed messages each of payload size %d, auto-fragment to %s octets. Use permessage-deflate %s""" % (s[1], s[0], s[3], co_desc)
       EXPECTATION = """Receive echo'ed messages (with payload as sent). Timeout case after %d secs.""" % (s[2])
       C = type(cc,
-                (object, Case, ),
+                (Case,),
                 {"LEN": s[0],
                  "COUNT": s[1],
                  "WAITSECS": s[2],

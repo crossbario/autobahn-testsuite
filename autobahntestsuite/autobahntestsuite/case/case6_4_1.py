@@ -26,10 +26,10 @@ from autobahn.websocket.protocol import WebSocketProtocol
 
 class Case6_4_1(Case):
 
-   PAYLOAD1 = '\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
-   #PAYLOAD2 = '\xed\xa0\x80' # invalid exactly on byte 12 (\xa0)
-   PAYLOAD2 = '\xf4\x90\x80\x80' #invalid exactly on byte 12 (\x90)
-   PAYLOAD3 = '\x65\x64\x69\x74\x65\x64'
+   PAYLOAD1 = b'\xce\xba\xe1\xbd\xb9\xcf\x83\xce\xbc\xce\xb5'
+   #PAYLOAD2 = b'\xed\xa0\x80' # invalid exactly on byte 12 (\xa0)
+   PAYLOAD2 = b'\xf4\x90\x80\x80' #invalid exactly on byte 12 (\x90)
+   PAYLOAD3 = b'\x65\x64\x69\x74\x65\x64'
    PAYLOAD = PAYLOAD1 + PAYLOAD2 + PAYLOAD3
 
    DESCRIPTION = """Send invalid UTF-8 text message in 3 fragments (frames).

@@ -24,10 +24,10 @@ import binascii
 
 class Case6_2_2(Case):
 
-   PAYLOAD1 = "Hello-µ@ßöä"
-   PAYLOAD2 = "üàá-UTF-8!!"
+   PAYLOAD1 = "Hello-µ@ßöä".encode('utf-8')
+   PAYLOAD2 = "üàá-UTF-8!!".encode('utf-8')
 
-   DESCRIPTION = """Send a valid UTF-8 text message in two fragments, fragmented on UTF-8 code point boundary.<br><br>MESSAGE FRAGMENT 1:<br>%s<br>%s<br><br>MESSAGE FRAGMENT 2:<br>%s<br>%s""" % (PAYLOAD1, binascii.b2a_hex(PAYLOAD1), PAYLOAD2, binascii.b2a_hex(PAYLOAD2))
+   DESCRIPTION = """Send a valid UTF-8 text message in two fragments, fragmented on UTF-8 code point boundary.<br><br>MESSAGE FRAGMENT 1:<br>%s<br>%s<br><br>MESSAGE FRAGMENT 2:<br>%s<br>%s""" % (PAYLOAD1.decode('utf-8'), binascii.b2a_hex(PAYLOAD1), PAYLOAD2.decode('utf-8'), binascii.b2a_hex(PAYLOAD2))
 
    EXPECTATION = """The message is echo'ed back to us."""
 

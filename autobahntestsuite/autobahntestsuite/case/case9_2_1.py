@@ -27,7 +27,7 @@ class Case9_2_1(Case):
 
    def init(self):
       self.DATALEN = 64 * 2**10
-      self.PAYLOAD = "\x00\xfe\x23\xfa\xf0"
+      self.PAYLOAD = b"\x00\xfe\x23\xfa\xf0"
       self.WAITSECS = 10
       self.reportTime = True
 

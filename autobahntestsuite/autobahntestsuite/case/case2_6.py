@@ -26,7 +26,7 @@ class Case2_6(Case):
    EXPECTATION = """Pong with payload echo'ed is sent in reply to Ping. Implementations must be TCP clean. Clean close with normal code."""
 
    def onOpen(self):
-      payload = "\xfe" * 125
+      payload = b"\xfe" * 125
       self.expected[Case.OK] = [("pong", payload)]
       self.expectedClose = {"closedByMe":True,"closeCode":[self.p.CLOSE_STATUS_CODE_NORMAL],"requireClean":True}
       self.p.sendFrame(opcode = 9, payload = payload, chopsize = 1)

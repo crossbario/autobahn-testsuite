@@ -28,6 +28,6 @@ class Case5_2(Case):
    def onOpen(self):
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":False,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],"requireClean":False}
-      self.p.sendFrame(opcode = 10, fin = False, payload = "fragment1")
-      self.p.sendFrame(opcode = 0, fin = True, payload = "fragment2")
+      self.p.sendFrame(opcode = 10, fin = False, payload = b"fragment1")
+      self.p.sendFrame(opcode = 0, fin = True, payload = b"fragment2")
       self.p.killAfter(1)

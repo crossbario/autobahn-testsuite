@@ -26,7 +26,7 @@ class Case3_5(Case):
    EXPECTATION = """The connection is failed immediately, since RSV must be 0."""
 
    def onOpen(self):
-      payload = "\x00\xff\xfe\xfd\xfc\xfb\x00\xff"
+      payload = b"\x00\xff\xfe\xfd\xfc\xfb\x00\xff"
       self.expected[Case.OK] = []
       self.expectedClose = {"closedByMe":False,"closeCode":[self.p.CLOSE_STATUS_CODE_PROTOCOL_ERROR],"requireClean":False}
       self.p.sendFrame(opcode = 2, payload = payload, rsv = 5)

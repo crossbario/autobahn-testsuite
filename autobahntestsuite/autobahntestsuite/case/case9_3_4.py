@@ -28,6 +28,6 @@ class Case9_3_4(Case9_3_1):
    def init(self):
       self.DATALEN = 4 * 2**20
       self.FRAGSIZE = 4 * 2**10
-      self.PAYLOAD = "*" * self.DATALEN
+      self.PAYLOAD = b"*" * self.DATALEN
       self.WAITSECS = 100
       self.reportTime = True

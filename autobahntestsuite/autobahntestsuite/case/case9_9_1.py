@@ -23,13 +23,11 @@ from builtins import object
 from .case import Case
 from autobahn.websocket.protocol import WebSocketProtocol
 import binascii
-from zope.interface import implements
+from zope.interface import implementer
 from twisted.internet import reactor, interfaces
 
-
+@implementer(interfaces.IPushProducer)
 class FrameProducer(object):
-
-   implements(interfaces.IPushProducer)
 
    def __init__(self, proto, payload):
       self.proto = proto
@@ -53,7 +51,7 @@ class FrameProducer(object):
 
 class Case9_9_1(Case):
 
-   PAYLOAD = "*" * 2**10 * 4
+   PAYLOAD = b"*" * 2**10 * 4
 
    DESCRIPTION = """Send a text message consisting of an infinite sequence of frames with payload 4k. Do this for X seconds."""
 

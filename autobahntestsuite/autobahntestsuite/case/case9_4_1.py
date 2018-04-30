@@ -28,7 +28,7 @@ class Case9_4_1(Case):
    def init(self):
       self.DATALEN = 4 * 2**20
       self.FRAGSIZE = 64
-      self.PAYLOAD = "\xfe" * self.DATALEN
+      self.PAYLOAD = b"\xfe" * self.DATALEN
       self.WAITSECS = 100
       self.reportTime = True
 

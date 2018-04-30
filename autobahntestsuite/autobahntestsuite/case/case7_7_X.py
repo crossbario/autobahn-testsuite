@@ -46,7 +46,7 @@ for s in tests:
    DESCRIPTION = """Send close with valid close code %d""" % s
    EXPECTATION = """Clean close with normal or echoed code"""
    C = type("Case7_7_%d" % i,
-         (object, Case, ),
+         (Case,),
          {"CLOSE_CODE": s,
           "DESCRIPTION": """%s""" % DESCRIPTION,
           "EXPECTATION": """%s""" % EXPECTATION,

@@ -24,9 +24,9 @@ import binascii
 
 class Case6_2_3(Case):
 
-   PAYLOAD = "Hello-µ@ßöäüàá-UTF-8!!"
+   PAYLOAD = "Hello-µ@ßöäüàá-UTF-8!!".encode('utf-8')
 
-   DESCRIPTION = """Send a valid UTF-8 text message in fragments of 1 octet, resulting in frames ending on positions which are not code point ends.<br><br>MESSAGE:<br>%s<br>%s""" % (PAYLOAD, binascii.b2a_hex(PAYLOAD))
+   DESCRIPTION = """Send a valid UTF-8 text message in fragments of 1 octet, resulting in frames ending on positions which are not code point ends.<br><br>MESSAGE:<br>%s<br>%s""" % (PAYLOAD.decode('utf-8'), binascii.b2a_hex(PAYLOAD))
 
    EXPECTATION = """The message is echo'ed back to us."""
 
