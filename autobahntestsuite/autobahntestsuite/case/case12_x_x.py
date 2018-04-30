@@ -255,7 +255,7 @@ Case13_X_X_CaseSubCategories = {}
 
 def accept1(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(False, 0)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(False, 0)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
@@ -263,52 +263,52 @@ def accept1(self, offers):
 
 def accept2(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 0)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(True, 0)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
-         if offer.acceptNoContextTakeover:
-            return PerMessageDeflateOfferAccept(offer, requestNoContextTakeover = True)
+         if offer.accept_no_context_takeover:
+            return PerMessageDeflateOfferAccept(offer, request_no_context_takeover = True)
 
 def accept3(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(False, 8)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(False, 8)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
-         if offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 8)
+         if offer.accept_max_window_bits:
+            return PerMessageDeflateOfferAccept(offer, request_max_window_bits = 8)
 
 def accept4(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(False, 15)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(False, 15)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
-         if offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 15)
+         if offer.accept_max_window_bits:
+            return PerMessageDeflateOfferAccept(offer, request_max_window_bits = 15)
 
 def accept5(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 8)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(True, 8)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
-         if offer.acceptNoContextTakeover and offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 8, requestNoContextTakeover = True)
+         if offer.accept_no_context_takeover and offer.accept_max_window_bits:
+            return PerMessageDeflateOfferAccept(offer, request_max_window_bits = 8, request_no_context_takeover = True)
 
 def accept6(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 15)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(True, 15)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
-         if offer.acceptNoContextTakeover and offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 15, requestNoContextTakeover = True)
+         if offer.accept_no_context_takeover and offer.accept_max_window_bits:
+            return PerMessageDeflateOfferAccept(offer, request_max_window_bits = 15, request_no_context_takeover = True)
 
 def accept7(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 8), (True, 0), (False, 0)]
+   server accept (request_no_context_takeover, request_max_window_bits): [(True, 8), (True, 0), (False, 0)]
    """
    a = accept5(self, offers)
    if a:
@@ -323,12 +323,12 @@ def accept7(self, offers):
 
 DEFLATE_PARAMS = [
    (accept1, [PerMessageDeflateOffer()]),
-   (accept2, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 0)]),
-   (accept3, [PerMessageDeflateOffer(requestNoContextTakeover = False, requestMaxWindowBits = 8)]),
-   (accept4, [PerMessageDeflateOffer(requestNoContextTakeover = False, requestMaxWindowBits = 15)]),
-   (accept5, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 8)]),
-   (accept6, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 15)]),
-   (accept7, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 8), PerMessageDeflateOffer(requestNoContextTakeover = True), PerMessageDeflateOffer()])
+   (accept2, [PerMessageDeflateOffer(request_no_context_takeover = True, request_max_window_bits = 0)]),
+   (accept3, [PerMessageDeflateOffer(request_no_context_takeover = False, request_max_window_bits = 8)]),
+   (accept4, [PerMessageDeflateOffer(request_no_context_takeover = False, request_max_window_bits = 15)]),
+   (accept5, [PerMessageDeflateOffer(request_no_context_takeover = True, request_max_window_bits = 8)]),
+   (accept6, [PerMessageDeflateOffer(request_no_context_takeover = True, request_max_window_bits = 15)]),
+   (accept7, [PerMessageDeflateOffer(request_no_context_takeover = True, request_max_window_bits = 8), PerMessageDeflateOffer(request_no_context_takeover = True), PerMessageDeflateOffer()])
 ]
 
 
@@ -345,7 +345,7 @@ for dp in DEFLATE_PARAMS:
    fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % TEST_DATA['file'])
    fileSize = os.path.getsize(fn)
 
-   co_desc = "client offers (requestNoContextTakeover, requestMaxWindowBits): {0}".format([(x.requestNoContextTakeover, x.requestMaxWindowBits) for x in co])
+   co_desc = "client offers (requestNoContextTakeover, requestMaxWindowBits): {0}".format([(x.request_no_context_takeover, x.request_max_window_bits) for x in co])
    sa_desc = sa.__doc__.strip()
 
    Case13_X_X_CaseSubCategories['13.%d' % j] = TEST_DATA["desc"] + (" (%s, %s bytes)" % ("binary" if isBinary else "utf8", fileSize)) + " - " + co_desc + " / " + sa_desc

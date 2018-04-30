@@ -39,12 +39,18 @@ from autobahn.websocket.compress import *
 
 
 class TesteeServerProtocol(WebSocketServerProtocol):
+   def __init__(self, debug=False):
+      WebSocketServerProtocol.__init__(self)
+      self.debug = debug
 
    def onMessage(self, payload, isBinary):
       self.sendMessage(payload, isBinary)
 
 
 class StreamingTesteeServerProtocol(WebSocketServerProtocol):
+   def __init__(self, debug=False):
+      WebSocketServerProtocol.__init__(self)
+      self.debug = debug
 
    def onMessageBegin(self, isBinary):
       #print "onMessageBegin"
@@ -79,7 +85,7 @@ class TesteeServerFactory(WebSocketServerFactory):
          server = ident
       else:
          server = "AutobahnPython/%s" % autobahn.version
-      WebSocketServerFactory.__init__(self, url, debug = debug, debugCodePaths = debug, server = server)
+      WebSocketServerFactory.__init__(self, url, server = server)
       self.setProtocolOptions(failByDrop = False) # spec conformance
       #self.setProtocolOptions(failByDrop = True) # needed for streaming mode
       #self.setProtocolOptions(utf8validateIncoming = False)
@@ -97,6 +103,7 @@ class TesteeServerFactory(WebSocketServerFactory):
             elif isinstance(offer, PerMessageSnappyOffer):
                return PerMessageSnappyOfferAccept(offer)
 
+      self.debug = debug
       self.setProtocolOptions(perMessageCompressionAccept = accept)
 
 
@@ -123,7 +130,7 @@ class TesteeClientFactory(WebSocketClientFactory):
    protocol = TesteeClientProtocol
 
    def __init__(self, url, debug = False, ident = None):
-      WebSocketClientFactory.__init__(self, url, useragent = ident, debug = debug, debugCodePaths = debug)
+      WebSocketClientFactory.__init__(self, url, useragent = ident)
       self.setProtocolOptions(failByDrop = False) # spec conformance
 
       ## enable permessage-XXX compression extensions
@@ -144,7 +151,7 @@ class TesteeClientFactory(WebSocketClientFactory):
 
       self.setProtocolOptions(perMessageCompressionAccept = accept)
 
-
+      self.debug = debug
       self.endCaseId = None
       self.currentCaseId = 0
 

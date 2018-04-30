@@ -88,6 +88,9 @@ class FuzzingProtocol(object):
 
    MAX_WIRE_LOG_DATA = 256
 
+   def __init__(self, debug=True):
+      self.debug = True
+
    def connectionMade(self):
 
       attrs = ['case', 'runCase', 'caseAgent', 'caseStarted', 'connectionWasOpen', 'shutdownOnComplete']
@@ -162,8 +165,8 @@ class FuzzingProtocol(object):
                        "rxFrameStats": self.rxFrameStats,
                        "txOctetStats": self.txOctetStats,
                        "txFrameStats": self.txFrameStats,
-                       "httpRequest": self.http_request_data if hasattr(self, 'http_request_data') else '?',
-                       "httpResponse": self.http_response_data if hasattr(self, 'http_response_data') else '?',
+                       "httpRequest": self.http_request_data.decode('utf-8') if hasattr(self, 'http_request_data') else '?',
+                       "httpResponse": self.http_response_data.decode('utf-8') if hasattr(self, 'http_response_data') else '?',
                        "trafficStats": self.runCase.trafficStats.__json__() if self.runCase.trafficStats else None}
 
          def cleanBin(e_old):
@@ -224,7 +227,7 @@ class FuzzingProtocol(object):
                               frameHeader.fin,
                               frameHeader.rsv,
                               frameHeader.mask is not None,
-                              binascii.b2a_hex(frameHeader.mask) if frameHeader.mask else None))
+                              binascii.b2a_hex(frameHeader.mask).decode('utf-8') if frameHeader.mask else None))
 
 
    def logTxFrame(self, frameHeader, payload, repeatLength, chopsize, sync):
@@ -236,7 +239,7 @@ class FuzzingProtocol(object):
                               frameHeader.opcode,
                               frameHeader.fin,
                               frameHeader.rsv,
-                              binascii.b2a_hex(frameHeader.mask) if frameHeader.mask else None,
+                              binascii.b2a_hex(frameHeader.mask).decode('utf-8') if frameHeader.mask else None,
                               repeatLength,
                               chopsize,
                               sync))
@@ -419,9 +422,10 @@ class FuzzingFactory(object):
 
    MAX_CASE_PICKLE_LEN = 1000
 
-   def __init__(self, outdir):
+   def __init__(self, outdir, debug=False):
       self.repeatAgentRowPerSubcategory = True
       self.outdir = outdir
+      self.debug = debug
       self.agents = {}
       self.cases = {}
       self.resultListeners = {}
@@ -1052,6 +1056,11 @@ class FuzzingFactory(object):
 
 class FuzzingServerProtocol(FuzzingProtocol, WebSocketServerProtocol):
 
+   def __init__(self, debug=False):
+      WebSocketServerProtocol.__init__(self)
+      FuzzingProtocol.__init__(self, debug=debug)
+
+
    def connectionMade(self):
       WebSocketServerProtocol.connectionMade(self)
       FuzzingProtocol.connectionMade(self)
@@ -1153,8 +1162,8 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
 
    def __init__(self, spec, debug = False):
 
-      WebSocketServerFactory.__init__(self, debug = debug, debugCodePaths = debug)
-      FuzzingFactory.__init__(self, spec.get("outdir", "./reports/clients/"))
+      WebSocketServerFactory.__init__(self)
+      FuzzingFactory.__init__(self, spec.get("outdir", "./reports/clients/"), debug=debug)
 
       # needed for wire log / stats
       self.logOctets = True
@@ -1181,9 +1190,17 @@ class FuzzingServerFactory(FuzzingFactory, WebSocketServerFactory):
       print("Ok, will run %d test cases for any clients connecting" % len(self.specCases))
       print("Cases = %s" % str(self.specCases))
 
+   def buildProtocol(self, addr):
+      proto = self.protocol(self.debug)
+      proto.factory = self
 
+      return proto
 
 class FuzzingClientProtocol(FuzzingProtocol, WebSocketClientProtocol):
+
+   def __init__(self, debug=False):
+      WebSocketClientProtocol.__init__(self)
+      FuzzingProtocol.__init__(self, debug=debug)
 
    def connectionMade(self):
       FuzzingProtocol.connectionMade(self)
@@ -1209,8 +1226,8 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
    def __init__(self, spec, debug = False):
 
-      WebSocketClientFactory.__init__(self, debug = debug, debugCodePaths = debug)
-      FuzzingFactory.__init__(self, spec.get("outdir", "./reports/servers/"))
+      WebSocketClientFactory.__init__(self)
+      FuzzingFactory.__init__(self, spec.get("outdir", "./reports/servers/"), debug=debug)
 
       # needed for wire log / stats
       self.logOctets = True
@@ -1234,7 +1251,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
 
 
    def buildProtocol(self, addr):
-      proto = FuzzingClientProtocol()
+      proto = FuzzingClientProtocol(self.debug)
       proto.factory = self
 
       proto.caseAgent = self.agent
