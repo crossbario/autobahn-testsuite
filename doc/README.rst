@@ -62,6 +62,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
          <li><a href="http://gitorious.org/qtwebsocket" target="_blank">QtWebSocket</a></li>
          <li><a href="https://github.com/eventlet/eventlet" target="_blank">eventlet</a></li>
          <li><a href="http://code.google.com/p/zaproxy/" target="_blank">zaproxy</a></li>
+         <li><a href="https://github.com/boostorg/beast" target="_blank">Boost/Beast</a></li>
          <li>... and more (can't keep up)</li>
       </ul>
    </div>
