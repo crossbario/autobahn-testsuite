@@ -87,6 +87,8 @@ WS_COMPRESSION_TESTDATA = {
        }
 }
 
+# explicit iteration order to fix order as it was historically on python 2 (dict order)
+WS_COMPRESSION_TESTDATA_KEYS = ['json_data1', 'lena512', 'gutenberg_faust', 'html_data1', 'ooms']
 
 
 def __init__(self, protocol):
@@ -217,7 +219,7 @@ def accept_deflate(self, offers):
          return PerMessageDeflateOfferAccept(offer)
 
 j = 1
-for td in WS_COMPRESSION_TESTDATA:
+for td in WS_COMPRESSION_TESTDATA_KEYS:
 
    isBinary = WS_COMPRESSION_TESTDATA[td]["binary"]
    fn = pkg_resources.resource_filename("autobahntestsuite", "testdata/%s" % WS_COMPRESSION_TESTDATA[td]['file'])
