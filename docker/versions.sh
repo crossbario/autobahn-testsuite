@@ -3,7 +3,7 @@
 #
 # CHANGE FOR NEW RELEASES (these need to be proper Git tags in the respective repo):
 #
-export AUTOBAHN_TESTSUITE_VERSION='0.7.6'
+export AUTOBAHN_TESTSUITE_VERSION='0.8.0'
 #
 # END OF CONFIG
 #

@@ -1,12 +1,6 @@
-# When on Windows and starting GNU make from Git bash, we need to set this:
-#ifdef COMSPEC
-#   SHELL=C:/Windows/System32/cmd.exe
-#endif
+.PHONY: clean build
 
-all: clean build upload
-
-install:
-	python setup.py install
+all: clean install build publish
 
 clean:
 	rm -rf ./autobahntestsuite.egg-info
@@ -17,28 +11,42 @@ clean:
 	rm -rf ./reports
 	rm -f ./.wstest.db
 
-build:
-	python setup.py bdist_egg
+install:
+	python setup.py install
 
-upload:
-	scp dist/*.egg www.tavendo.de:/usr/local/www/pypi
+build:
+	# use py 2 to build
+	python setup.py sdist bdist_wheel --universal
 
 publish:
-	python setup.py register
-	python setup.py sdist upload
+	# use py 3 to upload
+	~/cpy365_11/bin/twine upload dist/*
 
-test_sql:
-	echo "select count(*) from testresult;" | sqlite3 .wstest.db
 
-test_import:
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local.json
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual.json
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_dual_webmq.json
-	python autobahntestsuite/wstest.py -m import -s ../examples/fuzzingwampclient/local_webmq_sse.json
-
-test_run:
-	python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP WebMQ SSE'
-	#python autobahntestsuite/wstest.py -m fuzzingwampclient -t 'Local WAMP WebMQ'
+# Usage: wstest [options]
+# Options:
+#   -a, --autobahnversion  Print version information for Autobahn and
+#                          AutobahnTestSuite.
+#   -c, --cert=            Server certificate file for secure WebSocket (WSS)
+#                          [required in server modes for WSS].
+#   -d, --debug            Debug output [default: off].
+#       --help             Display this help and exit.
+#   -i, --ident=           Testee client identifier [optional for client testees].
+#   -k, --key=             Server private key file for secure WebSocket (WSS)
+#                          [required in server modes for WSS].
+#   -m, --mode=            Test mode, one of: echoserver, echoclient,
+#                          broadcastclient, broadcastserver, fuzzingserver,
+#                          fuzzingclient, testeeserver, testeeclient, massconnect,
+#                          serializer [required]
+#   -o, --outfile=         Output filename for modes that generate testdata.
+#   -s, --spec=            Test specification file [required in some modes].
+#   -t, --testset=         Run a test set from an import test spec.
+#   -u, --webport=         Web port for running an embedded HTTP Web server;
+#                          defaults to 8080; set to 0 to disable. [optionally used
+#                          in some modes: fuzzingserver, echoserver,
+#                          broadcastserver, wsperfmaster]. [default: 8080]
+#       --version          Display Twisted version and exit.
+#   -w, --wsuri=           WebSocket URI [required in some modes].
 
 test_testee_server:
 	python -m autobahntestsuite.wstest -m testeeserver -w ws://127.0.0.1:9001
@@ -46,25 +54,30 @@ test_testee_server:
 test_testee_client:
 	python -m autobahntestsuite.wstest -m testeeclient -w ws://127.0.0.1:9001
 
-test_broadcast_server:
-	python -m autobahntestsuite.wstest -m broadcastserver -w ws://127.0.0.1:9001
-
-test_echo_server:
-	python -m autobahntestsuite.wstest -m echoserver -w ws://127.0.0.1:9001
-
 test_fuzzing_server:
 	python -m autobahntestsuite.wstest -m fuzzingserver
 
 test_fuzzing_client:
 	python -m autobahntestsuite.wstest -m fuzzingclient -w ws://127.0.0.1:9001
 
+
+test_echo_server:
+	python -m autobahntestsuite.wstest -m echoserver -w ws://127.0.0.1:9001
+
+test_echo_client:
+	python -m autobahntestsuite.wstest -m echoclient -w ws://127.0.0.1:9001
+
+
+test_broadcast_server:
+	python -m autobahntestsuite.wstest -m broadcastserver -w ws://127.0.0.1:9001
+
+test_broadcast_client:
+	python -m autobahntestsuite.wstest -m broadcastclient -w ws://127.0.0.1:9001
+
+
 test_web:
 	python -m autobahntestsuite.wstest -m web
 
+
 test_help:
 	python -m autobahntestsuite.wstest --help
-
-test_serializer:
-	python -m autobahntestsuite.wstest -m serializer --outfile "testdata.json"
-
-test: test_import test_run test_web
