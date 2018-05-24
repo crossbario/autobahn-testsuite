@@ -5,6 +5,29 @@ The **Autobahn**|Testsuite provides a fully automated test suite to verify clien
 **Autobahn**|Testsuite also provides a couple of other tools useful for WebSocket
 (and [WAMP](http://wamp.ws)) implementors and developers.
 
+**What users are saying:**
+
+"Autobahn was a huge help during the standardization and early development of WebSocket in `Firefox <http://autobahn.ws/testsuite/www.mozilla.org/firefox>`__. It helped find many nasty corner conditions in a clean and repeatable way.
+
+Interoperation testing like this really moves the Open Web forward."
+
+Patrick McManus, `Mozilla <http://www.mozilla.org/>`_ `Firefox <http://www.mozilla.org/firefox>`_
+
+=================
+
+"The `Jetty project <http://eclipse.org/jetty>`_ has been active in the development of the websocket protocol and lack of a comprehensive test suite was an impediment to the standardisation of the protocol. The Autobahn test suit has filled that void and been warmly embraced by our websocket engineers at `Intalio <http://www.intalio.com/products/jetty/overview/>`__ as it has been invaluable for evaluating the protocol development, improving inter operability and monitoring adoption of new/optional features.
+
+*Our own implementation and the wider websocket 'ecosystem' are significantly better due to the availability of Autobahn*."
+
+Greg Wilkins, `Jetty <http://eclipse.org/jetty>`_ author, Chief Architect at `Intalio <http://www.intalio.com/>`_
+
+==================
+
+"During the time of implementing the latest WebSocket version in `Netty <http://netty.io/>`_ and `Undertow <https://github.com/undertow-io/undertow>`_ we were searching for a way to test our implementations and make sure they are 100% RFC compliant. While we already had unit tests in place there was a lack of good tests for the whole implementation. Using the AutobahnTestsuite for this purpose allowed us to concentrate on the implementation and made it easy to catch regressions as soon as possible."
+
+Norman Maurer, Principal Software Engineer at `Red Hat <http://www.redhat.com/>`_
+
+
 ## Reports
 
 For some current reports on the test coverage of [Autobahn|Python](http://github.com/crossbario/autobahn-python) see
@@ -46,7 +69,119 @@ also includes a number of other handy modes:
 * WebSocket Mass-Connect
 
 
-## How to install
+## Users
+
+Autobahn|Testsuite is used by numerous projects and companies across the industry:
+
+.. raw:: html
+
+   <div class="testsuite_users_table">
+      <ul style="float: left; width: 190px">
+         <li><a href="http://autobahn.ws">Autobahn</a></li>
+         <li><a href="http://www.mozilla.org/" target="_blank">Mozilla Firefox</a></li>
+         <li><a href="http://www.chromium.org/Home" target="_blank">Google Chrome / WebKit</a></li>
+         <li><a href="http://windows.microsoft.com/en-us/internet-explorer/products/ie/home" target="_blank">Microsoft Internet Explorer</a></li>
+         <li><a href="http://www.rim.com/" target="_blank">RIM / Browser</a></li>
+         <li><a href="http://www.zaphoyd.com/websocketpp" target="_blank">WebSocket++</a></li>
+         <li><a href="http://www.serverframework.com" target="_blank">The Server Framework</a></li>
+         <li><a href="http://eclipse.org/jetty/" target="_blank">Jetty</a></li>
+         <li><a href="http://netty.io/" target="_blank">Netty</a></li>
+         <li><a href="http://grizzly.java.net/" target="_blank">Grizzly</a></li>
+         <li><a href="https://github.com/kerryjiang/WebSocket4Net" target="_blank">WebSocket4Net</a></li>
+         <li><a href="https://github.com/kerryjiang/SuperWebSocket" target="_blank">SuperWebSocket</a></li>
+         <li><a href="https://github.com/webbit/webbit" target="_blank">Webbit</a></li>
+         <li><a href="https://github.com/lipp/lua-websockets" target="_blank">lua-websockets</a></li>
+      </ul>
+      <ul style="float: left; margin-left: 30px; width: 190px">
+         <li><a href="http://crossbar.io" target="_blank">Crossbar.io</a></li>
+         <li><a href="http://tomcat.apache.org/" target="_blank">Apache Tomcat</a></li>
+         <li><a href="https://github.com/Worlize/WebSocket-Node" target="_blank">WebSocket-Node</a></li>
+         <li><a href="https://github.com/einaros/ws" target="_blank">WS for node.js</a></li>
+         <li><a href="https://github.com/LearnBoost/websocket.io" target="_blank">websocket.io</a></li>
+         <li><a href="https://github.com/Lawouach/WebSocket-for-Python" target="_blank">ws4py</a></li>
+         <li><a href="https://github.com/facebook/tornado" target="_blank">Facebook Tornado</a></li>
+         <li><a href="http://code.google.com/p/pywebsocket/" target="_blank">pywebsocket</a></li>
+         <li><a href="http://www.noemax.com/" target="_blank">Noemax PowerWebSockets</a></li>
+         <li><a href="http://www.noemax.com/" target="_blank">Noemax WCF-Xtensions</a></li>
+         <li><a href="https://github.com/TooTallNate/Java-WebSocket" target="_blank">Java-WebSocket</a></li>
+         <li><a href="http://jwebsocket.org/" target="_blank">jWebSocket</a></li>
+         <li><a href="https://github.com/aaugustin/websockets" target="_blank">websockets</a></li>
+         <li><a href="https://github.com/DamnedFacts/RSWebSocket" target="_blank">RSWebSocket</a></li>
+      </ul>
+      <ul style="float: left; margin-left: 30px; width: 190px">
+         <li><a href="http://cloudsecurity.intel.com/api-management" target="_blank">Intel API Management</a></li>
+         <li><a href="http://pusher.com/" target="_blank">Pusher / EM-WebSocket</a></li>
+         <li><a href="https://github.com/square/SocketRocket" target="_blank">SocketRocket</a></li>
+         <li><a href="https://github.com/DamnedFacts/RSWebSocket" target="_blank">RSWebSocket</a></li>
+         <li><a href="http://faye.jcoglan.com/" target="_blank">Faye</a></li>
+         <li><a href="https://bitbucket.org/Jeffrey/gevent-websocket/overview" target="_blank">gevent-websocket</a></li>
+         <li><a href="https://github.com/extend/cowboy" target="_blank">Cowboy</a></li>
+         <li><a href="http://caucho.com/resin-4.0/index.xtp" target="_blank">Resin</a></li>
+         <li><a href="http://yaws.hyber.org/" target="_blank">Erlang Yaws</a></li>
+         <li><a href="http://wasd.vsm.com.au/wasd/" target="_blank">WASD OpenVMS</a></li>
+         <li><a href="http://gitorious.org/qtwebsocket" target="_blank">QtWebSocket</a></li>
+         <li><a href="https://github.com/eventlet/eventlet" target="_blank">eventlet</a></li>
+         <li><a href="http://code.google.com/p/zaproxy/" target="_blank">zaproxy</a></li>
+         <li><a href="https://github.com/boostorg/beast" target="_blank">Boost/Beast</a></li>
+         <li>... and more (can't keep up)</li>
+      </ul>
+   </div>
+   <div style="clear: both;"></div>
+
+
+## Installation
+
+### Using the testsuite Docker image
+
+The testsuite is available as a [Docker image](https://hub.docker.com/r/crossbario/autobahn-testsuite/tags/) which allows
+easy and repeatable use both for testing WebSocket clients and WebSocket servers.
+
+By default, the image will run the testsuite in so-called "fuzzingserver" mode. This is the mode used to test your WebSocket _client_ implementations.
+
+To start the testsuite container:
+
+```console
+docker run -it --rm \
+    -v ${PWD}/config:/config \
+    -v ${PWD}/reports:/reports \
+    -p 9001:9001 \
+    --name fuzzingserver \
+    crossbario/autobahn-testsuite
+```
+
+Above will mount an (included) test configuration from the [config](config) folder, which must include a server test configuration file [docker/config/fuzzingserver.json](docker/config/fuzzingserver.json) like this:
+
+```json
+{
+    "url": "ws://127.0.0.1:9001",
+    "outdir": "./reports/clients",
+    "cases": ["*"],
+    "exclude-cases": [
+        "9.*",
+        "12.*",
+        "13.*"
+    ],
+    "exclude-agent-cases": {}
+}
+```
+
+> This specific config will run all test cases, but exclude the longer running mass/performance test cases 9.*, and exclude the WebSocket compression test cases 12.*/13.* (which only make sense if your client library implements [RFC7692 ("permessage-deflate")](https://tools.ietf.org/html/rfc7692)).
+
+Above command will also mount a host directory/volume [reports](reports) where the generated reports will be placed by the testsuite.
+
+Finally, the config will make the fuzzing server run on port 9001 - and expose that on the host.
+
+> To test multiple clients and generate one big report containing all clients, do NOT stop the testsuite container, but run all your clients, and then stop the container. The generated reports will include all clients.
+
+Here is how to test the Python 3 / asyncio flavor of [AutobahnPython](https://github.com/crossbario/autobahn-python):
+
+```console
+pip install autobahn
+wget https://raw.githubusercontent.com/crossbario/autobahn-python/master/wstest/testee_client_aio.py
+python testee_client_aio.py
+```
+
+####
 
 **The following recipe still works, but the new, recommended way is using a Docker toolchain image we provide. Please checkout [this](https://github.com/crossbario/crossbar-docker/tree/master/autobahn-testsuite#usage) - much easier and repeatable.**
 
@@ -185,8 +320,6 @@ You can tweak that file to run only some tests, e.g. `"cases: ["1.*", "2.1.*"]"`
 
 For more information take a look at the following information
 
-* [users and coverage](/doc/README.rst)
-* [installation instructions](/doc/installation.rst)
 * [usage instructions](/doc/usage.rst)
 
 
