@@ -141,16 +141,23 @@ def onOpen(self):
 
 
 def sendOne(self):
+   payload = self.testData
+   if not self.TESTDATA['binary']:
+      # If we're not working with a "binary" payload, treat it as a unicode string
+      payload = payload.decode('utf-8')
    if self.LEN > 0:
       idxFrom = self.payloadRXPtr
-      idxTo = (self.payloadRXPtr + self.LEN) % self.testDataLen
+      idxTo = (self.payloadRXPtr + self.LEN) % len(payload)
       if idxTo > idxFrom:
-         msg = self.testData[idxFrom:idxTo]
+         msg = payload[idxFrom:idxTo]
       else:
-         msg = self.testData[idxFrom:] + self.testData[:idxTo]
+         msg = payload[idxFrom:] + payload[:idxTo]
       self.payloadRXPtr = idxTo
    else:
       msg = ''
+
+   if not self.TESTDATA['binary']:
+      msg = msg.encode('utf-8')
 
    m = hashlib.sha1()
    m.update(msg)
@@ -164,6 +171,8 @@ def onMessage(self, msg, binary):
    m = hashlib.sha1()
    m.update(msg)
    received_hash = m.digest()
+   if not self.TESTDATA['binary']:
+      msg = msg.decode('utf-8')
 
    if binary != self.TESTDATA['binary'] or len(msg) != self.LEN or received_hash != self._expected_hash:
 
