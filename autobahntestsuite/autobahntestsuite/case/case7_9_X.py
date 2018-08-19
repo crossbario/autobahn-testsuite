@@ -19,7 +19,7 @@
 from case import Case
 
 ## list of some invalid close codes
-tests = [0,999,1004,1005,1006,1014,1015,1016,1100,2000,2999]
+tests = [0,999,1004,1005,1006,1016,1100,2000,2999]
 
 Case7_9_X = []
 
