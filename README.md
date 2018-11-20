@@ -89,7 +89,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
       <li><a href="https://github.com/LearnBoost/websocket.io" target="_blank">websocket.io</a></li>
       <li><a href="https://github.com/Lawouach/WebSocket-for-Python" target="_blank">ws4py</a></li>
       <li><a href="https://github.com/facebook/tornado" target="_blank">Facebook Tornado</a></li>
-      <li><a href="http://code.google.com/p/pywebsocket/" target="_blank">pywebsocket</a></li>
+      <li><a href="https://github.com/google/pywebsocket" target="_blank">pywebsocket</a></li>
       <li><a href="http://www.noemax.com/" target="_blank">Noemax PowerWebSockets</a></li>
       <li><a href="http://www.noemax.com/" target="_blank">Noemax WCF-Xtensions</a></li>
       <li><a href="https://github.com/TooTallNate/Java-WebSocket" target="_blank">Java-WebSocket</a></li>
