@@ -15,12 +15,10 @@ install:
 	python setup.py install
 
 build:
-	# use py 2 to build
 	python setup.py sdist bdist_wheel --universal
 
 publish:
-	# use py 3 to upload
-	~/cpy365_11/bin/twine upload dist/*
+	twine upload dist/*
 
 
 # Usage: wstest [options]
