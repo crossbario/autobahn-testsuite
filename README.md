@@ -140,7 +140,7 @@ docker run -it --rm \
     crossbario/autobahn-testsuite
 ```
 
-Above will mount an (included) test configuration from the [config](config) folder, which must include a server test configuration file [docker/config/fuzzingserver.json](docker/config/fuzzingserver.json) like this:
+Above will mount an (included) test configuration from the [docker/config](config) folder, which must include a server test configuration file [docker/config/fuzzingserver.json](docker/config/fuzzingserver.json) like this:
 
 ```json
 {
