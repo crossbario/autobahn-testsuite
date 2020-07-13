@@ -21,7 +21,7 @@ from case import Case
 
 class Case7_13_2(Case):
 
-   DESCRIPTION = """Send close with close code 65536"""
+   DESCRIPTION = """Send close with close code 65535"""
 
    EXPECTATION = """Actual events are undefined by the spec."""
    
