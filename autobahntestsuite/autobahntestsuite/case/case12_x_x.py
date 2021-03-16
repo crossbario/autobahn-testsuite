@@ -282,12 +282,12 @@ def accept2(self, offers):
 
 def accept3(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(False, 8)]
+   server accept (requestNoContextTakeover, requestMaxWindowBits): [(False, 9)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
          if offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 8)
+            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 9)
 
 def accept4(self, offers):
    """
@@ -300,12 +300,12 @@ def accept4(self, offers):
 
 def accept5(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 8)]
+   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 9)]
    """
    for offer in offers:
       if isinstance(offer, PerMessageDeflateOffer):
          if offer.acceptNoContextTakeover and offer.acceptMaxWindowBits:
-            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 8, requestNoContextTakeover = True)
+            return PerMessageDeflateOfferAccept(offer, requestMaxWindowBits = 9, requestNoContextTakeover = True)
 
 def accept6(self, offers):
    """
@@ -318,7 +318,7 @@ def accept6(self, offers):
 
 def accept7(self, offers):
    """
-   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 8), (True, 0), (False, 0)]
+   server accept (requestNoContextTakeover, requestMaxWindowBits): [(True, 9), (True, 0), (False, 0)]
    """
    a = accept5(self, offers)
    if a:
@@ -334,11 +334,11 @@ def accept7(self, offers):
 DEFLATE_PARAMS = [
    (accept1, [PerMessageDeflateOffer()]),
    (accept2, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 0)]),
-   (accept3, [PerMessageDeflateOffer(requestNoContextTakeover = False, requestMaxWindowBits = 8)]),
+   (accept3, [PerMessageDeflateOffer(requestNoContextTakeover = False, requestMaxWindowBits = 9)]),
    (accept4, [PerMessageDeflateOffer(requestNoContextTakeover = False, requestMaxWindowBits = 15)]),
-   (accept5, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 8)]),
+   (accept5, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 9)]),
    (accept6, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 15)]),
-   (accept7, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 8), PerMessageDeflateOffer(requestNoContextTakeover = True), PerMessageDeflateOffer()])
+   (accept7, [PerMessageDeflateOffer(requestNoContextTakeover = True, requestMaxWindowBits = 9), PerMessageDeflateOffer(requestNoContextTakeover = True), PerMessageDeflateOffer()])
 ]
 
 
