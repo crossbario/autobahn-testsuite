@@ -38,4 +38,4 @@ WORKDIR /
 EXPOSE 9001 9001
 
 # run wstest by default in fuzzingserver mode
-CMD ["/usr/local/bin/wstest", "--mode", "fuzzingserver", "--spec", "/config/fuzzingserver.json"]
+CMD ["wstest", "--mode", "fuzzingserver", "--spec", "/config/fuzzingserver.json"]
