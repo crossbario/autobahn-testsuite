@@ -1226,7 +1226,7 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
       self.currServer = -1
       if self.nextServer():
          if self.nextCase():
-            connectWS(self)
+            connectWS(self, contextFactory=self.contextFactory)
 
 
    def buildProtocol(self, addr):
@@ -1252,6 +1252,14 @@ class FuzzingClientFactory(FuzzingFactory, WebSocketClientFactory):
          ## agent (=server) string for reports
          ##
          self.agent = server.get("agent")
+
+         ## Hostname to send in TLS handshake for SNI support
+         ##
+         hostname = server.get("hostname")
+         if hostname:
+            self.contextFactory = ssl.optionsForClientTLS(hostname)
+         else:
+            self.contextFactory = ssl.ClientContextFactory()
 
          ## WebSocket session parameters
          ##
