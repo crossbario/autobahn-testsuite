@@ -55,6 +55,16 @@ You can provide your own, modified spec file by doing
 
 Reports will be generated as a set of HTML files. To create reports for multiple testee's, DO NOT restart **wstest** in between, since (currently), it will forget everything when stopped.
 
+To enable Server Name Indication for the fuzzing client, you can add optional "hostname" keys for the servers in your spec file, e.g
+
+::
+
+   "servers":  [
+                  {"agent": "ExampleServer",
+                  "url": "wss://socket.example.com",
+                  "options": {"version": 18}},
+                  "hostname": "socket.example.com"
+               ]
 
 Mode testeeserver/testeeclient
 ------------------------------
