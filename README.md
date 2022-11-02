@@ -316,4 +316,4 @@ For more information take a look at the following information
 
 ## Get in Touch
 
-Get in touch on IRC `#autobahn` on `chat.freenode.net` or join the [mailing list](http://groups.google.com/group/autobahnws).
+Get in touch on IRC `#autobahn` on `chat.freenode.net` or join an Autobahn [user forum](https://crossbar.discourse.group/).
