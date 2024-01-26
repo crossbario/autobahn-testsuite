@@ -104,7 +104,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
       <li><a href="https://github.com/DamnedFacts/RSWebSocket" target="_blank">RSWebSocket</a></li>
       <li><a href="http://faye.jcoglan.com/" target="_blank">Faye</a></li>
       <li><a href="https://bitbucket.org/Jeffrey/gevent-websocket/overview" target="_blank">gevent-websocket</a></li>
-      <li><a href="https://github.com/extend/cowboy" target="_blank">Cowboy</a></li>
+      <li><a href="https://github.com/ninenines/cowboy" target="_blank">Cowboy</a></li>
       <li><a href="http://caucho.com/resin-4.0/index.xtp" target="_blank">Resin</a></li>
       <li><a href="http://yaws.hyber.org/" target="_blank">Erlang Yaws</a></li>
       <li><a href="http://wasd.vsm.com.au/wasd/" target="_blank">WASD OpenVMS</a></li>
