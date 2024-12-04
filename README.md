@@ -3,7 +3,7 @@
 The **Autobahn**|Testsuite provides a fully automated test suite to verify client and server implementations of [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455) for specification conformance and implementation robustness.
 
 **Autobahn**|Testsuite also provides a couple of other tools useful for WebSocket
-(and [WAMP](http://wamp.ws)) implementors and developers.
+(and [WAMP](https://wamp-proto.org/)) implementors and developers.
 
 **What users are saying:**
 
