@@ -122,7 +122,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
 
 ## Installation
 
-### Using the testsuite Docker image
+### Using the testsuite Docker image (Recommended)
 
 The testsuite is available as a [Docker image](https://hub.docker.com/r/crossbario/autobahn-testsuite/tags/) which allows
 easy and repeatable use both for testing WebSocket clients and WebSocket servers.
@@ -172,7 +172,7 @@ wget https://raw.githubusercontent.com/crossbario/autobahn-python/master/wstest/
 python testee_client_aio.py
 ```
 
-####
+### Using the testsuite Python package (Not Recommended)
 
 **The following recipe still works, but the new, recommended way is using a Docker toolchain image we provide. Please checkout [this](https://github.com/crossbario/crossbar-docker/tree/master/autobahn-testsuite#usage) - much easier and repeatable.**
 
