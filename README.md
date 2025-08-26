@@ -54,7 +54,7 @@ also includes a number of other handy modes:
 
 * WebSocket echo server and client
 * WebSocket broadcast server (and client driver)
-* Testee modes to test [AutobahnPython](http://autobahn.ws/python) against the test suite
+* Testee modes to test [AutobahnPython](https://github.com/crossbario/autobahn-python) against the test suite
 * **wsperf** controller and master (see below for more)
 * WAMP server and client, for developing WAMP implementations
 * WebSocket Mass-Connect
@@ -66,7 +66,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
 
 <div class="testsuite_users_table">
   <ul style="float: left; width: 190px">
-      <li><a href="http://autobahn.ws">Autobahn</a></li>
+      <li><a href="https://web.archive.org/web/20170330234715/https://autobahn.ws/">Autobahn</a></li>
       <li><a href="http://www.mozilla.org/" target="_blank">Mozilla Firefox</a></li>
       <li><a href="http://www.chromium.org/Home" target="_blank">Google Chrome / WebKit</a></li>
       <li><a href="http://windows.microsoft.com/en-us/internet-explorer/products/ie/home" target="_blank">Microsoft Internet Explorer</a></li>
@@ -317,3 +317,4 @@ For more information take a look at the following information
 ## Get in Touch
 
 Get in touch on IRC `#autobahn` on `chat.freenode.net` or join an Autobahn [user forum](https://crossbar.discourse.group/).
+
