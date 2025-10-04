@@ -70,7 +70,7 @@ install: create-venv
     set -e
     echo "Installing AutobahnTestsuite dependencies..."
     cd {{PACKAGE_DIR}}
-    {{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
 
 # Build package
 build: install
@@ -79,7 +79,7 @@ build: install
     echo "Building AutobahnTestsuite package..."
     cd {{PACKAGE_DIR}}
     rm -rf build/ dist/ *.egg-info/
-    {{VENV_DIR}}/{{VENV_NAME}}/bin/python setup.py sdist bdist_wheel
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python setup.py sdist bdist_wheel
 
 # Clean build artifacts
 clean:
@@ -99,7 +99,7 @@ test-install: build
     set -e
     echo "Testing AutobahnTestsuite installation..."
     cd {{PACKAGE_DIR}}
-    {{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --help
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --help
 
 # Build Docker image
 docker-build:
@@ -128,8 +128,8 @@ publish-pypi: build
     set -e
     echo "Publishing AutobahnTestsuite to PyPI..."
     cd {{PACKAGE_DIR}}
-    {{VENV_DIR}}/{{VENV_NAME}}/bin/pip install twine
-    {{VENV_DIR}}/{{VENV_NAME}}/bin/twine upload dist/*
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install twine
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/twine upload dist/*
 
 # Publish Docker image (requires credentials)
 publish-docker: docker-build
@@ -144,12 +144,12 @@ info:
     #!/usr/bin/env bash
     set -e
     cd {{PACKAGE_DIR}}
-    if [ -f "{{VENV_DIR}}/{{VENV_NAME}}/bin/python" ]; then
+    if [ -f "../{{VENV_DIR}}/{{VENV_NAME}}/bin/python" ]; then
         echo "Python version:"
-        {{VENV_DIR}}/{{VENV_NAME}}/bin/python --version
+        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python --version
         echo ""
         echo "AutobahnTestsuite version:"
-        {{VENV_DIR}}/{{VENV_NAME}}/bin/python -c "import autobahntestsuite; print(autobahntestsuite.version)"
+        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python -c "import autobahntestsuite; print(autobahntestsuite.version)"
     else
         echo "Virtual environment not found. Run 'just install' first."
     fi
