@@ -34,12 +34,21 @@ jobs:
       - name: Create virtualenv and build package
         run: |
           just build
-          ls -la dist/
+
+      - name: List package artifacts
+        run: |
+          ls -la autobahntestsuite/dist/
 
       - name: Test installation
         run: |
           just test-version
           just test-install
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: autobahntestsuite/dist/
 
       # - name: Build Docker image
       #   run: |
@@ -53,12 +62,6 @@ jobs:
 
       #     # Test Docker image
       #     docker run --rm crossbario/autobahn-testsuite:latest wstest --help
-
-      # - name: Upload build artifacts
-      #   uses: actions/upload-artifact@v4
-      #   with:
-      #     name: dist
-      #     path: autobahntestsuite/dist/
 
       # - name: Create GitHub release (on tag push)
       #   if: startsWith(github.ref, 'refs/tags/v')
