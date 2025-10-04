@@ -10,115 +10,103 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04 # Use Ubuntu 20.04 for python2-dev availability
+    runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Install system dependencies for Python 2.7
-        run: |
-          sudo apt update
-          sudo apt install -y python2 python2-dev python-setuptools build-essential
-
-          # Install pip2 for Python 2.7
-          curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-          python2 get-pip.py --user
-          python2 -m pip install --user virtualenv
-
-          # Verify installation
-          python2 --version
-          python2 -m pip --version
-          python2 -c "import virtualenv; print('virtualenv:', virtualenv.__version__)"
-
-      - name: Build package
-        run: |
-          # Create virtual environment
-          python2 -m virtualenv .venvs/py27
-
-          # Install package in development mode
-          cd autobahntestsuite
-          ../.venvs/py27/bin/pip install -e .
-
-          # Build source distribution and wheel
-          rm -rf build/ dist/ *.egg-info/
-          ../.venvs/py27/bin/python setup.py sdist bdist_wheel
-
-          # Verify build artifacts
-          ls -la dist/
-
-          # Test installation
-          ../.venvs/py27/bin/wstest --help
-          ../.venvs/py27/bin/wstest --autobahnversion
-
-      - name: Build Docker image
-        run: |
-          cd docker
-          docker build \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            --build-arg AUTOBAHN_TESTSUITE_VERSION=25.10.1 \
-            --build-arg AUTOBAHN_TESTSUITE_VCS_REF=${{ github.sha }} \
-            -t crossbario/autobahn-testsuite:latest \
-            .
-
-          # Test Docker image
-          docker run --rm crossbario/autobahn-testsuite:latest wstest --help
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: dist
-          path: autobahntestsuite/dist/
-
-      - name: Create GitHub release (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: autobahntestsuite/dist/*
-          generate_release_notes: true
-          draft: false
-          prerelease: false
+      - name: Install Just
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to PyPI (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
         run: |
-          cd autobahntestsuite
-          ../.venvs/py27/bin/pip install twine
-          ../.venvs/py27/bin/twine upload dist/*
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/bin
+          echo "$HOME/bin" >> $GITHUB_PATH
+          just --version
 
-      - name: Login to Docker Hub (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      - name: Extract version from tag
-        if: startsWith(github.ref, 'refs/tags/v')
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-      - name: Build and push Docker image (on tag push)
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Install system dependencies & Python 2.7
         run: |
-          cd docker
+          just install-system-deps
 
-          # Build with proper tags
-          docker build \
-            --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-            --build-arg AUTOBAHN_TESTSUITE_VERSION=${{ steps.get_version.outputs.VERSION }} \
-            --build-arg AUTOBAHN_TESTSUITE_VCS_REF=${{ github.sha }} \
-            -t crossbario/autobahn-testsuite:${{ steps.get_version.outputs.VERSION }} \
-            -t crossbario/autobahn-testsuite:latest \
-            .
+      - name: Create virtualenv and build package
+        run: |
+          just build
+          ls -la dist/
 
-          # Push both tags
-          docker push crossbario/autobahn-testsuite:${{ steps.get_version.outputs.VERSION }}
-          docker push crossbario/autobahn-testsuite:latest
+      - name: Test installation
+        run: |
+          just test-version
+          just test-install
+
+      # - name: Build Docker image
+      #   run: |
+      #     cd docker
+      #     docker build \
+      #       --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+      #       --build-arg AUTOBAHN_TESTSUITE_VERSION=25.10.1 \
+      #       --build-arg AUTOBAHN_TESTSUITE_VCS_REF=${{ github.sha }} \
+      #       -t crossbario/autobahn-testsuite:latest \
+      #       .
+
+      #     # Test Docker image
+      #     docker run --rm crossbario/autobahn-testsuite:latest wstest --help
+
+      # - name: Upload build artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: dist
+      #     path: autobahntestsuite/dist/
+
+      # - name: Create GitHub release (on tag push)
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   uses: softprops/action-gh-release@v2
+      #   with:
+      #     files: autobahntestsuite/dist/*
+      #     generate_release_notes: true
+      #     draft: false
+      #     prerelease: false
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Publish to PyPI (on tag push)
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   env:
+      #     TWINE_USERNAME: __token__
+      #     TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+      #   run: |
+      #     cd autobahntestsuite
+      #     ../.venvs/py27/bin/pip install twine
+      #     ../.venvs/py27/bin/twine upload dist/*
+
+      # - name: Login to Docker Hub (on tag push)
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   uses: docker/login-action@v3
+      #   with:
+      #     username: ${{ secrets.DOCKERHUB_USERNAME }}
+      #     password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # - name: Extract version from tag
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   id: get_version
+      #   run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      # - name: Build and push Docker image (on tag push)
+      #   if: startsWith(github.ref, 'refs/tags/v')
+      #   run: |
+      #     cd docker
+
+      #     # Build with proper tags
+      #     docker build \
+      #       --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+      #       --build-arg AUTOBAHN_TESTSUITE_VERSION=${{ steps.get_version.outputs.VERSION }} \
+      #       --build-arg AUTOBAHN_TESTSUITE_VCS_REF=${{ github.sha }} \
+      #       -t crossbario/autobahn-testsuite:${{ steps.get_version.outputs.VERSION }} \
+      #       -t crossbario/autobahn-testsuite:latest \
+      #       .
+
+      #     # Push both tags
+      #     docker push crossbario/autobahn-testsuite:${{ steps.get_version.outputs.VERSION }}
+      #     docker push crossbario/autobahn-testsuite:latest
 
   docs:
     runs-on: ubuntu-latest
