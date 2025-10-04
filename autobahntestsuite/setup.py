@@ -113,6 +113,8 @@ setup (
                   "Intended Audience :: Developers",
                   "Operating System :: OS Independent",
                   "Programming Language :: Python",
+                  "Programming Language :: Python :: 2",
+                  "Programming Language :: Python :: 2.7",
                   "Topic :: Internet",
                   "Topic :: Software Development :: Testing"],
    keywords = 'autobahn websocket wamp realtime test testsuite rfc6455 wstest wsperf'

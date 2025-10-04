@@ -13,14 +13,43 @@ PACKAGE_DIR := "autobahntestsuite"
 default:
     @just --list
 
-# Check Python 2.7 availability
+# Install system dependencies
+install-system-deps:
+    #!/usr/bin/env bash
+    echo "Installing system dependencies for Python 2.7..."
+    sudo apt update
+    sudo apt install -y python2 python2-dev python-setuptools
+    echo "Downloading get-pip.py for Python 2.7..."
+    if [ ! -f get-pip.py ]; then
+        curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
+    fi
+    echo "Installing pip2..."
+    python2 get-pip.py --user
+    echo "Installing virtualenv..."
+    python2 -m pip install --user virtualenv
+    echo "System dependencies installed successfully!"
+    echo "Note: You may need to add ~/.local/bin to your PATH"
+
+# Check Python 2.7 and pip2 availability
 check-python2:
     #!/usr/bin/env bash
     if ! command -v python2 &> /dev/null; then
-        echo "Error: python2 not found. Install with: sudo apt install -y python2"
+        echo "Error: python2 not found. Run 'just install-system-deps' first."
         exit 1
     fi
     echo "Found Python 2.7: $(python2 --version 2>&1)"
+    
+    if ! python2 -m pip --version &> /dev/null; then
+        echo "Error: pip2 not found. Run 'just install-system-deps' first."
+        exit 1
+    fi
+    echo "Found pip2: $(python2 -m pip --version)"
+    
+    if ! python2 -c "import virtualenv" &> /dev/null; then
+        echo "Error: virtualenv not found. Run 'just install-system-deps' first."
+        exit 1
+    fi
+    echo "Found virtualenv: OK"
 
 # Create Python 2.7 virtual environment
 create-venv: check-python2
@@ -28,14 +57,9 @@ create-venv: check-python2
     set -e
     if [ ! -d "{{VENV_DIR}}/{{VENV_NAME}}" ]; then
         echo "Creating Python 2.7 virtual environment..."
-        # Check if virtualenv is available
-        if command -v virtualenv &> /dev/null; then
-            virtualenv -p python2 "{{VENV_DIR}}/{{VENV_NAME}}"
-        else
-            echo "Installing virtualenv for Python 2.7..."
-            python2 -m pip install --user virtualenv
-            python2 -m virtualenv "{{VENV_DIR}}/{{VENV_NAME}}"
-        fi
+        mkdir -p "{{VENV_DIR}}"
+        python2 -m virtualenv "{{VENV_DIR}}/{{VENV_NAME}}"
+        echo "Virtual environment created at {{VENV_DIR}}/{{VENV_NAME}}"
     else
         echo "Virtual environment {{VENV_DIR}}/{{VENV_NAME}} already exists"
     fi
@@ -65,6 +89,7 @@ clean:
     rm -rf {{PACKAGE_DIR}}/dist/
     rm -rf {{PACKAGE_DIR}}/*.egg-info/
     rm -rf {{VENV_DIR}}/
+    rm -f get-pip.py
     find . -name "*.pyc" -delete
     find . -name "__pycache__" -delete
 
