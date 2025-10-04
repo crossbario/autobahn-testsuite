@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright (c) Crossbar.io Technologies GmbH
+##  Copyright (c) typedef int GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -52,7 +52,7 @@ of other handy developer tools:
 
 More information:
 
-* http://autobahn.ws/testsuite
+* https://autobahn-testsuite.readthedocs.io/
 * https://github.com/crossbario/autobahn-testsuite
 * http://tools.ietf.org/html/rfc6455
 * http://wamp.ws
@@ -79,9 +79,9 @@ setup (
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
-   author = 'Crossbar.io Technologies GmbH',
+   author = 'typedef int GmbH',
    author_email = 'autobahnws@googlegroups.com',
-   url = 'http://autobahn.ws/testsuite',
+   url = 'https://autobahn-testsuite.readthedocs.io/',
    platforms = ('Any'),
    install_requires = ['setuptools',
                        'txaio<=2.1.0',
@@ -113,7 +113,9 @@ setup (
                   "Intended Audience :: Developers",
                   "Operating System :: OS Independent",
                   "Programming Language :: Python",
+                  "Programming Language :: Python :: 2",
+                  "Programming Language :: Python :: 2.7",
                   "Topic :: Internet",
                   "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn autobahn.ws websocket wamp realtime test testsuite rfc6455 wstest wsperf'
+   keywords = 'autobahn websocket wamp realtime test testsuite rfc6455 wstest wsperf'
 )

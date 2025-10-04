@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright (c) Crossbar.io Technologies GmbH
+##  Copyright (c) typedef int GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -565,13 +565,13 @@ class FuzzingFactory:
       f.write('      <br/>\n')
 
       ## top logos
-      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSocket Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
-      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSocket">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
+      f.write('      <center><a href="https://autobahn-testsuite.readthedocs.io/" title="Autobahn WebSocket Testsuite"><img src="https://autobahn-testsuite.readthedocs.io/en/latest/_static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
+      f.write('      <center><a href="https://autobahn-testsuite.readthedocs.io/"           title="Autobahn WebSocket">          <img src="https://autobahn-testsuite.readthedocs.io/en/latest/_static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
 
       ## write report header
       ##
       f.write('      <div id="master_report_header" class="block">\n')
-      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSocket Testsuite</a> v%s/v%s.</p>\n' % (utcnow(), "http://autobahn.ws/testsuite", autobahntestsuite.version, autobahn.version))
+      f.write('         <p id="intro">Summary report generated on %s (UTC) by <a href="%s">Autobahn WebSocket Testsuite</a> v%s/v%s.</p>\n' % (utcnow(), "https://autobahn-testsuite.readthedocs.io/", autobahntestsuite.version, autobahn.version))
       f.write("""
       <table id="case_outcome_desc">
          <tr>
@@ -828,8 +828,8 @@ class FuzzingFactory:
       f.write('      <br/>\n')
 
       ## top logos
-      f.write('      <center><a href="http://autobahn.ws/testsuite" title="Autobahn WebSocket Testsuite"><img src="http://autobahn.ws/static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
-      f.write('      <center><a href="http://autobahn.ws"           title="Autobahn WebSocket">          <img src="http://autobahn.ws/static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
+      f.write('      <center><a href="https://autobahn-testsuite.readthedocs.io/" title="Autobahn WebSocket Testsuite"><img src="https://autobahn-testsuite.readthedocs.io/en/latest/_static/img/ws_protocol_test_report.png"          border="0" width="820" height="46" alt="Autobahn WebSocket Testsuite Report"></img></a></center>\n')
+      f.write('      <center><a href="https://autobahn-testsuite.readthedocs.io/"           title="Autobahn WebSocket">          <img src="https://autobahn-testsuite.readthedocs.io/en/latest/_static/img/ws_protocol_test_report_autobahn.png" border="0" width="300" height="68" alt="Autobahn WebSocket">                 </img></a></center>\n')
       f.write('      <br/>\n')
 
 
