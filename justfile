@@ -18,7 +18,7 @@ install-system-deps:
     #!/usr/bin/env bash
     echo "Installing system dependencies for Python 2.7..."
     sudo apt update
-    
+
     # Try to install python2-dev, fallback to building from source if not available
     if ! sudo apt install -y python2 python2-dev python-setuptools 2>/dev/null; then
         echo "python2-dev not available in this Ubuntu version (likely 24.04+)"
@@ -27,15 +27,17 @@ install-system-deps:
     else
         echo "System python2 with headers installed successfully"
     fi
-    
+
     echo "Downloading get-pip.py for Python 2.7..."
     if [ ! -f get-pip.py ]; then
         curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
     fi
     echo "Installing pip2..."
-    python2 get-pip.py --user
+    python2 get-pip.py
     echo "Installing virtualenv..."
-    python2 -m pip install --user virtualenv
+    pip -V
+    python2 -m pip install virtualenv
+    virtualenv --version
     echo "System dependencies installed successfully!"
     echo "Note: You may need to add ~/.local/bin to your PATH"
 
@@ -44,51 +46,51 @@ build-python2-from-source:
     #!/usr/bin/env bash
     set -e
     echo "Building Python 2.7.18 from source..."
-    
+
     # Install build dependencies
     sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
         libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
-    
+
     # Create build directory
     mkdir -p /tmp/python2-build
     cd /tmp/python2-build
-    
+
     # Download Python 2.7.18 source if not already present
     if [ ! -f Python-2.7.18.tgz ]; then
         echo "Downloading Python 2.7.18 source..."
         wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
     fi
-    
+
     # Extract and build
     if [ ! -d Python-2.7.18 ]; then
         tar xf Python-2.7.18.tgz
     fi
-    
+
     cd Python-2.7.18
-    
+
     # Configure with optimizations
     echo "Configuring Python 2.7.18..."
     ./configure --prefix=/opt/python2.7 --enable-optimizations --enable-shared
-    
+
     # Build and install
     echo "Building Python 2.7.18 (this may take a while)..."
     make -j$(nproc)
     sudo make install
-    
+
     # Create symlinks for system-wide access
     sudo ln -sf /opt/python2.7/bin/python2.7 /usr/local/bin/python2
     sudo ln -sf /opt/python2.7/bin/python2.7 /usr/local/bin/python2.7
-    
+
     # Update library path
     echo '/opt/python2.7/lib' | sudo tee /etc/ld.so.conf.d/python2.7.conf
     sudo ldconfig
-    
+
     echo "Python 2.7.18 built and installed to /opt/python2.7"
     echo "Symlinks created: /usr/local/bin/python2 -> /opt/python2.7/bin/python2.7"
-    
+
     # Verify installation
     /opt/python2.7/bin/python2.7 --version
-    
+
     # Clean up build directory (optional)
     read -p "Clean up build directory /tmp/python2-build? (y/N): " -n 1 -r
     echo
@@ -105,13 +107,13 @@ check-python2:
         exit 1
     fi
     echo "Found Python 2.7: $(python2 --version 2>&1)"
-    
+
     if ! python2 -m pip --version &> /dev/null; then
         echo "Error: pip2 not found. Run 'just install-system-deps' first."
         exit 1
     fi
     echo "Found pip2: $(python2 -m pip --version)"
-    
+
     if ! python2 -c "import virtualenv" &> /dev/null; then
         echo "Error: virtualenv not found. Run 'just install-system-deps' first."
         exit 1
@@ -164,7 +166,7 @@ clean:
 clean-all: clean
     #!/usr/bin/env bash
     echo "Cleaning all artifacts including custom Python 2.7..."
-    
+
     # Remove custom Python 2.7 installation
     if [ -d "/opt/python2.7" ]; then
         echo "Removing custom Python 2.7 installation..."
@@ -174,7 +176,7 @@ clean-all: clean
         sudo ldconfig
         echo "Custom Python 2.7 installation removed"
     fi
-    
+
     # Clean up build directory if it exists
     if [ -d "/tmp/python2-build" ]; then
         echo "Removing Python 2.7 build directory..."
@@ -182,13 +184,20 @@ clean-all: clean
         echo "Build directory removed"
     fi
 
+test-version: install
+    #!/usr/bin/env bash
+    set -e
+    echo "Testing AutobahnTestsuite version..."
+    {{VENV_DIR}}/{{VENV_NAME}}/bin/python -c "from autobahntestsuite import __version__; print(__version__)"
+
 # Test installation
-test-install: build
+test-install: install
     #!/usr/bin/env bash
     set -e
     echo "Testing AutobahnTestsuite installation..."
     cd {{PACKAGE_DIR}}
     ../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --help
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --autobahnversion
 
 # Build Docker image
 docker-build:
