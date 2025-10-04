@@ -69,7 +69,7 @@ To enable Server Name Indication for the fuzzing client, you can add optional "h
 Mode testeeserver/testeeclient
 ------------------------------
 
-These modes are for testing `AutobahnPython <http://autobahn.ws/python>`__ against the test suite.
+These modes are for testing `AutobahnPython <https://autobahn-testsuite.readthedocs.io/>`__ against the test suite.
 
 The ``testeeserver`` can be tested using a 2nd instance of **wstest** running in ``fuzzingclient`` mode.
 

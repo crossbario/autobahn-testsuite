@@ -48,7 +48,7 @@ class TestDb:
    from the database. This allows to decouple application parts.
    """
 
-   URI = "http://api.testsuite.autobahn.ws/testdb/"
+   URI = "https://autobahn-testsuite.readthedocs.io/testdb/"
 
 
    def __init__(self, caseSets, dbfile = None, debug = False):

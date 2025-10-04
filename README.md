@@ -54,7 +54,7 @@ also includes a number of other handy modes:
 
 * WebSocket echo server and client
 * WebSocket broadcast server (and client driver)
-* Testee modes to test [AutobahnPython](http://autobahn.ws/python) against the test suite
+* Testee modes to test [AutobahnPython](https://autobahn-testsuite.readthedocs.io/) against the test suite
 * **wsperf** controller and master (see below for more)
 * WAMP server and client, for developing WAMP implementations
 * WebSocket Mass-Connect
@@ -66,7 +66,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
 
 <div class="testsuite_users_table">
   <ul style="float: left; width: 190px">
-      <li><a href="http://autobahn.ws">Autobahn</a></li>
+      <li><a href="https://autobahn-testsuite.readthedocs.io/">Autobahn</a></li>
       <li><a href="http://www.mozilla.org/" target="_blank">Mozilla Firefox</a></li>
       <li><a href="http://www.chromium.org/Home" target="_blank">Google Chrome / WebKit</a></li>
       <li><a href="http://windows.microsoft.com/en-us/internet-explorer/products/ie/home" target="_blank">Microsoft Internet Explorer</a></li>

@@ -52,7 +52,7 @@ of other handy developer tools:
 
 More information:
 
-* http://autobahn.ws/testsuite
+* https://autobahn-testsuite.readthedocs.io/
 * https://github.com/crossbario/autobahn-testsuite
 * http://tools.ietf.org/html/rfc6455
 * http://wamp.ws
@@ -81,7 +81,7 @@ setup (
    license = 'Apache License 2.0',
    author = 'Crossbar.io Technologies GmbH',
    author_email = 'autobahnws@googlegroups.com',
-   url = 'http://autobahn.ws/testsuite',
+   url = 'https://autobahn-testsuite.readthedocs.io/',
    platforms = ('Any'),
    install_requires = ['setuptools',
                        'txaio<=2.1.0',
@@ -115,5 +115,5 @@ setup (
                   "Programming Language :: Python",
                   "Topic :: Internet",
                   "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn autobahn.ws websocket wamp realtime test testsuite rfc6455 wstest wsperf'
+   keywords = 'autobahn websocket wamp realtime test testsuite rfc6455 wstest wsperf'
 )

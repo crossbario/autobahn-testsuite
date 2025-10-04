@@ -1,10 +1,6 @@
 # Public Testsuite Reports
 
-This document describes how we create the reports [published](http://autobahn.ws/testsuite) on the Autobahn website:
-
-  * [Servers](http://autobahn.ws/testsuite/reports/servers/index.html)
-  * [Browsers](http://autobahn.ws/testsuite/reports/clients/index.html)
-  * [Mobile](http://autobahn.ws/testsuite/reports/mobileclients/index.html)
+This document describes how we create the reports published on the Autobahn website. See the official documentation at https://autobahn-testsuite.readthedocs.io/ for current information.
 
 
 ## Test Setup

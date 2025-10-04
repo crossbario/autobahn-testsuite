@@ -1,6 +1,6 @@
-FROM pypy:2
+FROM pypy:2-7-bookworm
 
-MAINTAINER The Crossbar.io Project <support@crossbario.com>
+LABEL maintainer="The WAMP/Autobahn/Crossbar.io OSS Project"
 
 # Metadata
 ARG BUILD_DATE

@@ -1,0 +1,62 @@
+[build-system]
+requires = ["setuptools>=40.8.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "autobahntestsuite"
+dynamic = ["version"]
+description = "AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite."
+readme = {file = "README.md", content-type = "text/markdown"}
+license = {text = "Apache License 2.0"}
+authors = [
+    {name = "Crossbar.io Technologies GmbH", email = "autobahnws@googlegroups.com"},
+]
+maintainers = [
+    {name = "Crossbar.io Technologies GmbH", email = "autobahnws@googlegroups.com"},
+]
+keywords = ["autobahn", "websocket", "wamp", "realtime", "test", "testsuite", "rfc6455", "wstest", "wsperf"]
+classifiers = [
+    "License :: OSI Approved :: Apache Software License",
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Framework :: Twisted",
+    "Intended Audience :: Developers",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 2",
+    "Programming Language :: Python :: 2.7",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Testing",
+]
+dependencies = [
+    "setuptools",
+    "txaio<=2.1.0",
+    "autobahn[twisted,accelerate]==0.10.9",
+    "jinja2>=2.6",
+    "markupsafe>=0.19",
+    "Werkzeug>=0.9.4",
+    "klein>=0.2.1",
+    "pyopenssl>=0.14",
+    "service_identity>=14.0.0",
+    "unittest2>=1.1.0",
+]
+requires-python = ">=2.7, <3"
+
+[project.urls]
+Homepage = "https://autobahn-testsuite.readthedocs.io/"
+Documentation = "https://autobahn-testsuite.readthedocs.io/"
+Repository = "https://github.com/crossbario/autobahn-testsuite"
+"Bug Tracker" = "https://github.com/crossbario/autobahn-testsuite/issues"
+
+[project.scripts]
+wstest = "autobahntestsuite.wstest:run"
+
+[tool.setuptools.dynamic]
+version = {attr = "autobahntestsuite._version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["autobahntestsuite*"]
+
+[tool.setuptools.package-data]
+"*" = ["templates/*.html"]
