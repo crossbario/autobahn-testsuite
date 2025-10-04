@@ -158,6 +158,7 @@ clean:
     rm -rf {{PACKAGE_DIR}}/dist/
     rm -rf {{PACKAGE_DIR}}/*.egg-info/
     rm -rf {{VENV_DIR}}/
+    rm -rf docs/_build/
     rm -f get-pip.py
     find . -name "*.pyc" -delete
     find . -name "__pycache__" -delete
@@ -236,6 +237,47 @@ publish-docker: docker-build
     echo "Publishing AutobahnTestsuite Docker image..."
     docker push crossbario/autobahn-testsuite:25.10.1
     docker push crossbario/autobahn-testsuite:latest
+
+# Build documentation
+docs:
+    #!/usr/bin/env bash
+    set -e
+    echo "Building documentation..."
+    
+    # Check if docs directory exists, create basic structure if not
+    if [ ! -d "docs" ]; then
+        echo "Creating docs directory structure..."
+        mkdir -p docs/_static docs/_templates
+    fi
+    
+    # Install documentation dependencies
+    pip3 install sphinx sphinx-rtd-theme
+    
+    # Build HTML documentation
+    cd docs
+    sphinx-build -b html . _build/html
+    echo "Documentation built in docs/_build/html/"
+
+# Clean documentation
+docs-clean:
+    #!/usr/bin/env bash
+    echo "Cleaning documentation build artifacts..."
+    rm -rf docs/_build/
+
+# Live documentation server
+docs-serve: docs
+    #!/usr/bin/env bash
+    set -e
+    echo "Starting documentation server..."
+    cd docs/_build/html
+    python3 -m http.server 8080
+
+# Update copyright headers (replace Crossbar.io Technologies GmbH with typedef int GmbH)
+update-copyright:
+    #!/usr/bin/env bash
+    echo "Updating copyright headers..."
+    find . -name "*.py" -type f -exec sed -i 's/Crossbar\.io Technologies GmbH/typedef int GmbH/g' {} +
+    echo "Copyright headers updated in all Python files"
 
 # Show package info
 info:

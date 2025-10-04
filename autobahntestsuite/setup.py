@@ -1,6 +1,6 @@
 ###############################################################################
 ##
-##  Copyright (c) Crossbar.io Technologies GmbH
+##  Copyright (c) typedef int GmbH
 ##
 ##  Licensed under the Apache License, Version 2.0 (the "License");
 ##  you may not use this file except in compliance with the License.
@@ -79,7 +79,7 @@ setup (
    description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
    long_description = LONGSDESC,
    license = 'Apache License 2.0',
-   author = 'Crossbar.io Technologies GmbH',
+   author = 'typedef int GmbH',
    author_email = 'autobahnws@googlegroups.com',
    url = 'https://autobahn-testsuite.readthedocs.io/',
    platforms = ('Any'),
