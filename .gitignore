@@ -8,3 +8,4 @@
 *~
 autobahntestsuite/reports
 get-pip.py
+docker/*.whl
