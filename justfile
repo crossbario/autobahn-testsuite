@@ -22,6 +22,8 @@ VENV_NAME := "py27"
 
 # Package directory
 PACKAGE_DIR := "autobahntestsuite"
+PACKAGE_VERSION := "25.10.1"
+PACKAGE_VCS_REF := "`git rev-parse --short HEAD`"
 
 # Default recipe - show available commands
 default:
@@ -31,6 +33,10 @@ default:
     @echo ""
     @echo "          WebSocket Protocol Implementation Conformance Testsuite              "
     @echo ""
+    @echo "   Python Package:         {{PACKAGE_DIR}}                                     "
+    @echo "   Python Package Version: {{PACKAGE_VERSION}}                                 "
+    @echo "   Git Version:            {{PACKAGE_VCS_REF}}                                 "
+    @echo "   Docker Image:           crossbario/autobahn-testsuite:{{PACKAGE_VERSION}}   "
     @echo "   Protocol Specification: https://datatracker.ietf.org/doc/html/rfc6455       "
     @echo "   Documentation:          https://autobahntestsuite.readthedocs.io            "
     @echo "   Package Releases:       https://pypi.org/project/autobahntestsuite/         "
@@ -91,6 +97,7 @@ clean:
     rm -rf {{PACKAGE_DIR}}/build/
     rm -rf {{PACKAGE_DIR}}/dist/
     rm -rf {{PACKAGE_DIR}}/*.egg-info/
+    rm -f docker/autobahntestsuite-$AUTOBAHN_TESTSUITE_VERSION-py2-none-any.whl
     rm -rf docs/_build/
     find . -name "*.pyc" -delete
     find . -name "__pycache__" -delete
@@ -277,7 +284,8 @@ install: create-venv
     echo "==============================================================================="
     echo "Checking for AutobahnTestsuite installed package ..."
     echo ""
-    if ! python2 -m pip show autobahntestsuite &> /dev/null; then
+    # if ! python2 -m pip show autobahntestsuite &> /dev/null; then
+    if true; then
         echo "Installing AutobahnTestsuite ..."
         cd {{PACKAGE_DIR}}
         ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
@@ -292,7 +300,8 @@ build: install
     echo "==============================================================================="
     echo "Checking for AutobahnTestsuite built package ..."
     echo ""
-    if [ ! "{{PACKAGE_DIR}}/dist/" ]; then
+    # if [ ! "{{PACKAGE_DIR}}/dist/" ]; then
+    if true; then
         echo "Building AutobahnTestsuite package..."
         cd {{PACKAGE_DIR}}
         rm -rf build/ dist/ *.egg-info/
@@ -343,25 +352,30 @@ test-wstest:
 # -----------------------------------------------------------------------------
 
 # Build Docker image
-docker-build:
+docker-build: build
     #!/usr/bin/env bash
     set -e
     echo "Building AutobahnTestsuite Docker image..."
+    cp {{PACKAGE_DIR}}/dist/autobahntestsuite-{{PACKAGE_VERSION}}-py2-none-any.whl docker/autobahntestsuite-latest-py2-none-any.whl
     cd docker
     docker build \
         --build-arg BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
-        --build-arg AUTOBAHN_TESTSUITE_VERSION=25.10.1 \
-        --build-arg AUTOBAHN_TESTSUITE_VCS_REF=$(git rev-parse --short HEAD) \
-        -t crossbario/autobahn-testsuite:25.10.1 \
+        --build-arg AUTOBAHN_TESTSUITE_VERSION={{PACKAGE_VERSION}} \
+        --build-arg AUTOBAHN_TESTSUITE_VCS_REF={{PACKAGE_VCS_REF}} \
+        -t crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} \
         -t crossbario/autobahn-testsuite:latest \
         .
 
 # Test Docker image
-docker-test: docker-build
+docker-wstest:
     #!/usr/bin/env bash
     set -e
-    echo "Testing AutobahnTestsuite Docker image..."
-    docker run --rm crossbario/autobahn-testsuite:25.10.1 wstest --help
+    echo "Testing AutobahnTestsuite Docker image {{PACKAGE_VERSION}}/{{PACKAGE_VCS_REF}}..."
+    echo ""
+    docker run --rm crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} wstest --autobahnversion
+    echo ""
+    docker run --rm crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} wstest --help
+    echo ""
 
 # -----------------------------------------------------------------------------
 # -- Publish recipes

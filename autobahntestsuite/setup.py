@@ -85,17 +85,24 @@ setup(
     author="typedef int GmbH",
     url="https://github.com/crossbario/autobahn-testsuite",
     platforms=("Any"),
+    # pinned dependency set for Python 2.7 / Autobahn 0.10.9
     install_requires=[
-        "setuptools",
-        "txaio<=2.1.0",
+        "setuptools==44.0.0",  # pip/setuptools from pre-2020 era
+        "txaio==2.1.0",
+        "incremental==16.10.1",  # must pin because of use of typing
+        "pyOpenSSL==19.1.0",
+        "cryptography==3.3.2",  # last version supporting Python 2 and OpenSSL 1.1
+        "Twisted==19.10.0",  # pin Twisted 19.10.0., 20.3.0 is technically Python 2.7-compatible, but its packaging metadata triggers installation of newer incremental eggs.
+        "zope.interface==4.6.0",  # Twisted dependency compatible with 2.7
+        "jinja2==2.11.3",
+        "markupsafe==1.1.1",
+        "Werkzeug==1.0.1",
+        "klein==17.10.0",  # last pre-Python3-only Klein
+        "pyopenssl==19.1.0",
+        "service_identity==18.1.0",
+        "unittest2==1.1.0",
+        "six==1.16.0",
         "autobahn[twisted,accelerate]==0.10.9",
-        "jinja2>=2.6",
-        "markupsafe>=0.19",
-        "Werkzeug>=0.9.4",
-        "klein>=0.2.1",
-        "pyopenssl>=0.14",
-        "service_identity>=14.0.0",
-        "unittest2>=1.1.0",
     ],
     packages=find_packages(),
     # packages = ['autobahntestsuite'],
