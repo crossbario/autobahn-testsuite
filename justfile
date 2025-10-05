@@ -1,7 +1,21 @@
-# AutobahnTestsuite build automation
-# https://github.com/casey/just
+# Copyright (c) typedef int GmbH, Germany, 2025. All rights reserved.
+#
 
-# Default Python 2.7 environment for AutobahnTestsuite
+# -----------------------------------------------------------------------------
+# -- just global configuration
+# -----------------------------------------------------------------------------
+
+set unstable := true
+set positional-arguments := true
+set script-interpreter := ['uv', 'run', '--script']
+
+# uv env vars
+# see: https://docs.astral.sh/uv/reference/environment/
+
+# project base directory = directory of this justfile
+PROJECT_DIR := justfile_directory()
+
+# Default Python 2.7 environment for AutobahnTestsuite packaging
 PYTHON := "python2"
 VENV_DIR := ".venvs"
 VENV_NAME := "py27"
@@ -13,16 +27,18 @@ PACKAGE_DIR := "autobahntestsuite"
 default:
     @echo ""
     @echo "==============================================================================="
-    @echo "       Autobahn|Testsuite - WebSocket IETF RF6455 Protocol Testsuite           "
+    @echo "                             Autobahn|Testsuite                                "
+    @echo ""
+    @echo "          WebSocket Protocol Implementation Conformance Testsuite              "
+    @echo ""
+    @echo "   Protocol Specification: https://datatracker.ietf.org/doc/html/rfc6455       "
+    @echo "   Documentation:          https://autobahntestsuite.readthedocs.io            "
+    @echo "   Package Releases:       https://pypi.org/project/autobahntestsuite/         "
+    @echo "   Source Code:            https://github.com/crossbario/autobahn-testsuite    "
+    @echo "   Copyright:              typedef int GmbH (Germany/EU)                       "
+    @echo "   License:                Apache License 2.0                                  "
     @echo ""
     @echo "      >>>   Created by The WAMP/Autobahn/Crossbar.io OSS Project   <<<         "
-    @echo ""
-    @echo " Protocol Spec:    https://datatracker.ietf.org/doc/html/rfc6455               "
-    @echo " Source Code:      https://github.com/crossbario/autobahn-testsuite            "
-    @echo " Release Packages: https://pypi.org/project/autobahntestsuite/                 "
-    @echo " Documentation:    https://autobahntestsuite.readthedocs.io                    "
-    @echo " Copyright:        typedef int GmbH (Germany/EU)                               "
-    @echo " License:          Apache License 2.0                                          "
     @echo "==============================================================================="
     @echo ""
     @just --list
@@ -70,37 +86,30 @@ setup-completion:
 # Clean build artifacts
 clean:
     #!/usr/bin/env bash
+    set -e
     echo "Cleaning build artifacts..."
     rm -rf {{PACKAGE_DIR}}/build/
     rm -rf {{PACKAGE_DIR}}/dist/
     rm -rf {{PACKAGE_DIR}}/*.egg-info/
-    rm -rf {{VENV_DIR}}/
     rm -rf docs/_build/
-    rm -f get-pip.py
     find . -name "*.pyc" -delete
     find . -name "__pycache__" -delete
 
 # Clean everything including custom Python 2.7 installation
 distclean: clean
     #!/usr/bin/env bash
+    set -e
     echo "Cleaning all artifacts including custom Python 2.7..."
 
-    # Remove custom Python 2.7 installation
-    if [ -d "/opt/python2.7" ]; then
-        echo "Removing custom Python 2.7 installation..."
-        sudo rm -rf /opt/python2.7
-        sudo rm -f /usr/local/bin/python2 /usr/local/bin/python2.7
-        sudo rm -f /etc/ld.so.conf.d/python2.7.conf
-        sudo ldconfig
-        echo "Custom Python 2.7 installation removed"
-    fi
+    rm -rf {{VENV_DIR}}/
 
-    # Clean up build directory if it exists
     if [ -d "/tmp/python2-build" ]; then
         echo "Removing Python 2.7 build directory..."
         rm -rf /tmp/python2-build
         echo "Build directory removed"
     fi
+
+    rm -f /tmp/get-pip.py
 
     if [ -d "docker/reports/" ]; then
         echo "Removing reports directory for Docker image baking ..."
@@ -115,116 +124,117 @@ distclean: clean
 # -- General/global helper recipes
 # -----------------------------------------------------------------------------
 
-# Install Python 2.7
+# Install Python 2.7 (development), either from distro package or build from source.
 install-python2:
     #!/usr/bin/env bash
-    echo "Installing Python 2.7 ..."
+    set -e
 
-    # Try to install python2-dev, fallback to building from source if not available
-    if ! sudo apt install -y python2 python2-dev python-setuptools 2>/dev/null; then
-        echo "python2-dev not available on this distro! Will instead build Python 2.7 from source with headers..."
-        just install-python2-from-source
-    else
-        echo "python2 with development headers installed successfully from distro package."
+    echo "Checking for Python 2.7 ..."
+    if ! command -v python2 >/dev/null 2>&1; then
+        echo "python2 not found!"
+
+        echo "Checking for python2-dev package availability..."
+        if ! apt-cache show python2-dev >/dev/null 2>&1; then
+            echo "python2-dev not available on this distro, will instead build Python 2.7 from upstream source ..."
+            just install-python2-from-source
+        else
+            echo "Installing python2 and development packages from distro ..."
+            sudo apt install -y python2 python2-dev python-setuptools
+            echo "python2 development package installed successfully from distro package."
+        fi
     fi
+    echo "python2 found at $(command -v python2) with version $$(python2 -V 2>&1)"
 
-# Build Python 2.7 from source
+# Build Python 2.7 from upstream source into `~/.local/python2.7`
 install-python2-from-source:
     #!/usr/bin/env bash
     set -e
-    echo "Building Python 2.7.18 from source..."
+    set -o pipefail
 
-    # Install build dependencies
-    sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev \
-        libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+    PREFIX="${HOME}/.local/python2.7"
+    SRC_DIR="/tmp/python2-build"
+    VERSION="2.7.18"
 
-    # Create build directory
-    mkdir -p /tmp/python2-build
-    cd /tmp/python2-build
+    echo "🔧 Building CPython ${VERSION} into ${PREFIX}"
 
-    # Download Python 2.7.18 source if not already present
-    if [ ! -f Python-2.7.18.tgz ]; then
-        echo "Downloading Python 2.7.18 source..."
-        wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz
+    # --- Install build dependencies ---------------------------------------------------------
+    echo "Installing build dependencies (requires sudo)..."
+    sudo apt-get update -qq
+    sudo apt-get install -y \
+        build-essential wget curl \
+        zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev \
+        libreadline-dev libffi-dev libsqlite3-dev libbz2-dev liblzma-dev tk-dev uuid-dev
+
+    # --- Prepare source --------------------------------------------------------------------
+    mkdir -p "${SRC_DIR}"
+    cd "${SRC_DIR}"
+
+    if [ ! -f Python-${VERSION}.tgz ]; then
+        echo "Downloading Python ${VERSION} source..."
+        wget -q https://www.python.org/ftp/python/${VERSION}/Python-${VERSION}.tgz
     fi
 
-    # Extract and build
-    if [ ! -d Python-2.7.18 ]; then
-        tar xf Python-2.7.18.tgz
+    if [ ! -d Python-${VERSION} ]; then
+        tar xf Python-${VERSION}.tgz
     fi
+    cd Python-${VERSION}
 
-    cd Python-2.7.18
+    # --- Configure & build -----------------------------------------------------------------
+    echo "Configuring build..."
+    ./configure \
+        --prefix="${PREFIX}" \
+        --enable-optimizations \
+        --enable-shared \
+        CFLAGS="-fPIC"
 
-    # Configure with optimizations
-    echo "Configuring Python 2.7.18..."
-    ./configure --prefix=~/.local/python2.7 --enable-optimizations --enable-shared
+    echo "Building (this may take a few minutes)..."
+    make -j"$(nproc)"
 
-    # Build and install
-    echo "Building Python 2.7.18 (this may take a while)..."
-    make -j$(nproc)
-    sudo make install
+    echo "Installing to ${PREFIX}..."
+    make install
 
-    # Create symlinks for system-wide access
-    sudo ln -sf /opt/python2.7/bin/python2.7 /usr/local/bin/python2
-    sudo ln -sf /opt/python2.7/bin/python2.7 /usr/local/bin/python2.7
-
-    # Update library path
-    echo '/opt/python2.7/lib' | sudo tee /etc/ld.so.conf.d/python2.7.conf
+    # --- Post-install ----------------------------------------------------------------------
+    echo "Updating runtime linker path..."
+    mkdir -p "${PREFIX}/lib"
+    echo "${PREFIX}/lib" > "${PREFIX}/lib/python2.7.conf"
+    sudo sh -c "echo '${PREFIX}/lib' > /etc/ld.so.conf.d/python2.7-local.conf"
     sudo ldconfig
 
-    echo "Python 2.7.18 built and installed to /opt/python2.7"
-    echo "Symlinks created: /usr/local/bin/python2 -> /opt/python2.7/bin/python2.7"
-
-    # Verify installation
-    /opt/python2.7/bin/python2.7 --version
-
-    # Clean up build directory (optional)
-    read -p "Clean up build directory /tmp/python2-build? (y/N): " -n 1 -r
-    echo
-    if [[ $REPLY =~ ^[Yy]$ ]]; then
-        rm -rf /tmp/python2-build
-        echo "Build directory cleaned up"
+    # --- Environment integration -----------------------------------------------------------
+    if ! grep -q "${PREFIX}/bin" "${HOME}/.bashrc" 2>/dev/null; then
+        echo "export PATH=\"${PREFIX}/bin:\$PATH\"" >> "${HOME}/.bashrc"
+        echo "PATH updated in ~/.bashrc"
     fi
+
+    echo
+    echo "✅ Python ${VERSION} built successfully!"
+    echo "   Installed at: ${PREFIX}"
+    echo "   Binary:       ${PREFIX}/bin/python2.7"
+    echo "   To activate immediately:  export PATH=\"${PREFIX}/bin:\$PATH\""
+    echo
+
+    # Create a convenient symlink so "python2" works
+    ln -sf "${PREFIX}/bin/python2.7" "${PREFIX}/bin/python2"
+    echo "Created symlink: ${PREFIX}/bin/python2 -> python2.7"
+
+    "${PREFIX}/bin/python2" --version
+    echo "Note: You may need to add ~/${PREFIX}/bin to your PATH"
 
 # Install Python 2.7 package dependencies (pip2 & virtualenv)
-install-python2-deps:
+install-python2-deps: install-python2
     #!/usr/bin/env bash
-    echo "Installing Python 2.7 package dependencies ..."
-    echo "Downloading get-pip.py for Python 2.7..."
-    if [ ! -f get-pip.py ]; then
-        curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o get-pip.py
-    fi
-
-    echo "Installing pip2..."
-    python2 get-pip.py
-    echo "Installing virtualenv..."
-    pip -V
-
-    echo "Installing virtualenv..."
-    python2 -m pip install virtualenv
-    virtualenv --version
-
-    echo "System dependencies installed successfully!"
-    echo "Note: You may need to add ~/.local/bin to your PATH"
-
-# Check Python 2.7, pip2 & virtualenv availability
-check-python2:
-    #!/usr/bin/env bash
-    if ! command -v python2 &> /dev/null; then
-        echo "Error: python2 not found. Run 'just install-python2' first."
-        exit 1
-    fi
-    echo "Found Python 2.7: $(which python2) $(python2 --version 2>&1)"
+    echo "Checking for Python 2.7 package dependencies ..."
 
     if ! python2 -m pip --version &> /dev/null; then
-        echo "Error: pip2 not found. Run 'just install-python2-deps' first."
-        exit 1
+        echo "Error: pip2 not found. Downloading get-pip.py for Python 2.7..."
+        curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o /tmp/get-pip.py
+        python2 /tmp/get-pip.py
     fi
     echo "Found pip2: $(python2 -m pip --version 2>&1)"
 
     if ! python2 -m virtualenv --version &> /dev/null; then
-        echo "Error: virtualenv not found. Run 'just install-python2-deps' first."
-        exit 1
+        echo "Error: virtualenv not found. Installing via pip2 ..."
+        python2 -m pip install virtualenv
     fi
     echo "Found virtualenv: $(python2 -m virtualenv --version 2>&1)"
 
@@ -233,7 +243,7 @@ check-python2:
 # -----------------------------------------------------------------------------
 
 # Create Python 2.7 virtual environment
-create-venv: check-python2
+create-venv: install-python2-deps
     #!/usr/bin/env bash
     set -e
     if [ ! -d "{{VENV_DIR}}/{{VENV_NAME}}" ]; then
@@ -244,6 +254,7 @@ create-venv: check-python2
     else
         echo "Virtual environment {{VENV_DIR}}/{{VENV_NAME}} already exists"
     fi
+    echo "To active, run: source {{VENV_DIR}}/{{VENV_NAME}}/bin/activate"
 
 # Install package dependencies
 install: create-venv
@@ -261,6 +272,7 @@ build: install
     cd {{PACKAGE_DIR}}
     rm -rf build/ dist/ *.egg-info/
     ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python setup.py sdist bdist_wheel
+    ls -la dist/
 
 # -----------------------------------------------------------------------------
 # -- Test recipes
@@ -280,15 +292,17 @@ test-version:
         echo "Virtual environment not found. Run 'just install' first."
     fi
 
-# Test: AutobahnTestsuite package installed scripts (`wstest`)
+# Test AutobahnTestsuite package installed scripts (`wstest`)
 test-wstest:
+    #!/usr/bin/env bash
+    set -e
     if [ -f "{{VENV_DIR}}/{{VENV_NAME}}/bin/python" ]; then
-        {{VENV_DIR}}/{{VENV_NAME}}/bin/python --version
+        "{{VENV_DIR}}/{{VENV_NAME}}"/bin/python --version
         echo ""
         echo "AutobahnTestsuite package installed scripts (wstest):"
         cd {{PACKAGE_DIR}}
-        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --help
-        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest --autobahnversion
+        "../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest" --help
+        "../{{VENV_DIR}}/{{VENV_NAME}}/bin/wstest" --autobahnversion
     else
         echo "Virtual environment not found. Run 'just install' first."
     fi
