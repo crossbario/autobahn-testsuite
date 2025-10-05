@@ -75,7 +75,7 @@ class NumberService(object):
 
 
 # Template for creating an URI used for registering a method
-URI_CASE_TEMPLATE = "http://api.testsuite.wamp.ws/case/%s"
+URI_CASE_TEMPLATE = "http://api.testsuite.wamp-proto.org/case/%s"
 
 
 def setupUri(case, ref=None):
@@ -183,8 +183,8 @@ class TesteeWampServerProtocol(wamp.WampServerProtocol):
         """
         Initialize the services and register the RPC methods.
         """
-        #self.registerForRpc("http://api.testsuite.wamp.ws/testee/control#", self)
-        self.registerMethodForRpc("http://api.testsuite.wamp.ws/testee/control#dispatch", self, TesteeWampServerProtocol.testDispatch)
+        #self.registerForRpc("http://api.testsuite.wamp-proto.org/testee/control#", self)
+        self.registerMethodForRpc("http://api.testsuite.wamp-proto.org/testee/control#dispatch", self, TesteeWampServerProtocol.testDispatch)
 
         self.echo_service = EchoService()
         self.string_service = StringService()

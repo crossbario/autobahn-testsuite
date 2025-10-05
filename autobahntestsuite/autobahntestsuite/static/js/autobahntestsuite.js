@@ -32,10 +32,10 @@ function start() {
 
 
 function main() {
-   session.prefix("testdb", "http://api.testsuite.wamp.ws/testdb/");
-   session.prefix("testrunner", "http://api.testsuite.wamp.ws/testrunner/");
+   session.prefix("testdb", "http://api.testsuite.wamp-proto.org/testdb/");
+   session.prefix("testrunner", "http://api.testsuite.wamp-proto.org/testrunner/");
 
-   session.subscribe("http://api.testsuite.wamp.ws/testrun#onResult", test_onTestRunResult);
+   session.subscribe("http://api.testsuite.wamp-proto.org/testrun#onResult", test_onTestRunResult);
 }
 
 

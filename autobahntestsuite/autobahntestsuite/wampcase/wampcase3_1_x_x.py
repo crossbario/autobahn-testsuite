@@ -138,13 +138,13 @@ class WampCase3_1_x_x_Base:
 
 
       def test(proto):
-         #res = yield self.call("http://api.testsuite.wamp.ws/case/3.1.1#1", 23)
+         #res = yield self.call("http://api.testsuite.wamp-proto.org/case/3.1.1#1", 23)
          ## after having published everything the test had specified,
          ## we need to _wait_ for events on all our WAMP sessions to
          ## compare with our expectation. by default, we wait 3x the
          ## specified/default RTT
          def perform(i, p):
-            d = proto.call("http://api.testsuite.wamp.ws/case/3.1.1#1", float(p))
+            d = proto.call("http://api.testsuite.wamp-proto.org/case/3.1.1#1", float(p))
             def got(res):
                self.result.received[i] = float(res)
             d.addCallback(got)

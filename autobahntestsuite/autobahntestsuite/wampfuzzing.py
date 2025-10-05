@@ -84,13 +84,13 @@ class FuzzingWampClient(object):
                'passed': result.passed,
                'remaining': remaining
             }
-            topic = "http://api.testsuite.wamp.ws/testrun#onResult"
+            topic = "http://api.testsuite.wamp-proto.org/testrun#onResult"
          else:
             evt = {
                'testee': testRun.testee.name,
                'runId': runId
             }
-            topic = "http://api.testsuite.wamp.ws/testrun#onComplete"
+            topic = "http://api.testsuite.wamp-proto.org/testrun#onComplete"
 
          self.dispatch(topic, evt)
          #if result and not result.passed:
@@ -209,9 +209,9 @@ class FuzzingWampClient(object):
 class WsTestWampProtocol(WampServerProtocol):
 
    def onSessionOpen(self):
-      self.registerForPubSub("http://api.testsuite.wamp.ws", True)
-      self.registerForRpc(self.factory._testDb, "http://api.testsuite.wamp.ws/testdb/")
-      self.registerForRpc(self.factory._testRunner, "http://api.testsuite.wamp.ws/testrunner/")
+      self.registerForPubSub("http://api.testsuite.wamp-proto.org", True)
+      self.registerForRpc(self.factory._testDb, "http://api.testsuite.wamp-proto.org/testdb/")
+      self.registerForRpc(self.factory._testRunner, "http://api.testsuite.wamp-proto.org/testrunner/")
 
 
 class WsTestWampFactory(WampServerFactory):
