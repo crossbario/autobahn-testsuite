@@ -239,6 +239,13 @@ distclean: clean
         echo "Build directory removed"
     fi
 
+    if [ -d "docker/reports/" ]; then
+        echo "Removing reports directory for Docker image baking ..."
+        rm -rf docker/reports/
+        mkdir docker/reports/
+        echo "Reports directory for Docker image baking removed"
+    fi
+
     echo "==> Distclean complete. The project is now pristine."
 
 test-version: install
