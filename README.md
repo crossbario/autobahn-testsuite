@@ -1,5 +1,13 @@
 # Autobahn|Testsuite
 
+WebSocket protocol implementation conformance test suite.
+
+[![Version](https://img.shields.io/pypi/v/autobahntestsuite.svg)](https://pypi.python.org/pypi/autobahntestsuite)
+[![Test](https://github.com/crossbario/autobahn-testsuite/workflows/main/badge.svg)](https://github.com/crossbario/autobahn-testsuite/actions?query=workflow%3Amain)
+[![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://autobahntestsuite.readthedocs.io/en/latest/)
+
+---
+
 The **Autobahn**|Testsuite provides a fully automated test suite to verify client and server implementations of [The WebSocket Protocol](http://tools.ietf.org/html/rfc6455) for specification conformance and implementation robustness.
 
 **Autobahn**|Testsuite also provides a couple of other tools useful for WebSocket

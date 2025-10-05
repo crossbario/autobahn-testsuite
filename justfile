@@ -11,7 +11,61 @@ PACKAGE_DIR := "autobahntestsuite"
 
 # Default recipe - show available commands
 default:
+    @echo ""
+    @echo "==============================================================================="
+    @echo "       Autobahn|Testsuite - WebSocket IETF RF6455 Protocol Testsuite           "
+    @echo ""
+    @echo "      >>>   Created by The WAMP/Autobahn/Crossbar.io OSS Project   <<<         "
+    @echo ""
+    @echo " Protocol Spec:    https://datatracker.ietf.org/doc/html/rfc6455               "
+    @echo " Source Code:      https://github.com/crossbario/autobahn-testsuite            "
+    @echo " Release Packages: https://pypi.org/project/autobahntestsuite/                 "
+    @echo " Documentation:    https://autobahntestsuite.readthedocs.io                    "
+    @echo " Copyright:        typedef int GmbH (Germany/EU)                               "
+    @echo " License:          Apache License 2.0                                          "
+    @echo "==============================================================================="
+    @echo ""
     @just --list
+    @echo ""
+
+# -----------------------------------------------------------------------------
+# -- General/global helper recipes
+# -----------------------------------------------------------------------------
+
+# Setup bash tab completion for the current user (to activate: `source ~/.config/bash_completion`).
+setup-completion:
+    #!/usr/bin/env bash
+    set -e
+
+    COMPLETION_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/bash_completion"
+    MARKER="# --- Just completion ---"
+
+    echo "==> Setting up bash tab completion for 'just'..."
+
+    # Check if we have already configured it.
+    if [ -f "${COMPLETION_FILE}" ] && grep -q "${MARKER}" "${COMPLETION_FILE}"; then
+        echo "--> 'just' completion is already configured."
+        exit 0
+    fi
+
+    echo "--> Configuration not found. Adding it now..."
+
+    # 1. Ensure the directory exists.
+    mkdir -p "$(dirname "${COMPLETION_FILE}")"
+
+    # 2. Add our marker comment to the file.
+    echo "" >> "${COMPLETION_FILE}"
+    echo "${MARKER}" >> "${COMPLETION_FILE}"
+
+    # 3. CRITICAL: Run `just` and append its raw output directly to the file.
+    #    No `echo`, no `eval`, no quoting hell. Just run and redirect.
+    just --completions bash >> "${COMPLETION_FILE}"
+
+    echo "--> Successfully added completion logic to ${COMPLETION_FILE}."
+
+    echo ""
+    echo "==> Setup complete. Please restart your shell or run the following command:"
+    echo "    source \"${COMPLETION_FILE}\""
 
 # Install system dependencies
 install-system-deps:
@@ -164,7 +218,7 @@ clean:
     find . -name "__pycache__" -delete
 
 # Clean everything including custom Python 2.7 installation
-clean-all: clean
+distclean: clean
     #!/usr/bin/env bash
     echo "Cleaning all artifacts including custom Python 2.7..."
 
@@ -184,6 +238,8 @@ clean-all: clean
         rm -rf /tmp/python2-build
         echo "Build directory removed"
     fi
+
+    echo "==> Distclean complete. The project is now pristine."
 
 test-version: install
     #!/usr/bin/env bash
@@ -243,16 +299,16 @@ docs:
     #!/usr/bin/env bash
     set -e
     echo "Building documentation..."
-    
+
     # Check if docs directory exists, create basic structure if not
     if [ ! -d "docs" ]; then
         echo "Creating docs directory structure..."
         mkdir -p docs/_static docs/_templates
     fi
-    
+
     # Install documentation dependencies
     pip3 install sphinx sphinx-rtd-theme
-    
+
     # Build HTML documentation
     cd docs
     sphinx-build -b html . _build/html
@@ -271,13 +327,6 @@ docs-serve: docs
     echo "Starting documentation server..."
     cd docs/_build/html
     python3 -m http.server 8080
-
-# Update copyright headers (replace Crossbar.io Technologies GmbH with typedef int GmbH)
-update-copyright:
-    #!/usr/bin/env bash
-    echo "Updating copyright headers..."
-    find . -name "*.py" -type f -exec sed -i 's/Crossbar\.io Technologies GmbH/typedef int GmbH/g' {} +
-    echo "Copyright headers updated in all Python files"
 
 # Show package info
 info:

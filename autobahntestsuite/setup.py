@@ -19,7 +19,7 @@
 from setuptools import setup, find_packages
 
 LONGSDESC = """
-Twisted-based WebSocket/WAMP protocol implementation test suite.
+WebSocket protocol implementation conformance test suite.
 
 Autobahn|Testsuite provides a fully automated test suite to verify client and
 server implementations of the WebSocket protocol.
@@ -52,10 +52,12 @@ of other handy developer tools:
 
 More information:
 
-* https://autobahn-testsuite.readthedocs.io/
-* https://github.com/crossbario/autobahn-testsuite
-* http://tools.ietf.org/html/rfc6455
-* http://wamp.ws
+Protocol Spec:    https://datatracker.ietf.org/doc/html/rfc6455
+Source Code:      https://github.com/crossbario/autobahn-testsuite
+Release Packages: https://pypi.org/project/autobahntestsuite
+Documentation:    https://autobahntestsuite.readthedocs.io
+Copyright:        typedef int GmbH (Germany/EU)
+License:          Apache License 2.0
 """
 
 
@@ -63,59 +65,60 @@ More information:
 ## See: http://stackoverflow.com/a/7071358/884770
 ##
 import re
-VERSIONFILE="autobahntestsuite/_version.py"
+
+VERSIONFILE = "autobahntestsuite/_version.py"
 verstrline = open(VERSIONFILE, "rt").read()
 VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
 mo = re.search(VSRE, verstrline, re.M)
 if mo:
-   verstr = mo.group(1)
+    verstr = mo.group(1)
 else:
-   raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+    raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
 
 
-setup (
-   name = 'autobahntestsuite',
-   version = verstr,
-   description = 'AutobahnTestSuite - WebSocket/WAMP protocol implementation test suite.',
-   long_description = LONGSDESC,
-   license = 'Apache License 2.0',
-   author = 'typedef int GmbH',
-   author_email = 'autobahnws@googlegroups.com',
-   url = 'https://autobahn-testsuite.readthedocs.io/',
-   platforms = ('Any'),
-   install_requires = ['setuptools',
-                       'txaio<=2.1.0',
-                       'autobahn[twisted,accelerate]==0.10.9',
-                       'jinja2>=2.6',
-                       'markupsafe>=0.19',
-                       'Werkzeug>=0.9.4',
-                       'klein>=0.2.1',
-                       'pyopenssl>=0.14',
-                       'service_identity>=14.0.0',
-                       'unittest2>=1.1.0'],
-   packages = find_packages(),
-   #packages = ['autobahntestsuite'],
-   include_package_data = True,
-   package_data = {
-        '': ['templates/*.html'],
+setup(
+    name="autobahntestsuite",
+    version=verstr,
+    description="AutobahnTestSuite - WebSocket protocol implementation conformance test suite.",
+    long_description=LONGSDESC,
+    license="Apache License 2.0",
+    author="typedef int GmbH",
+    url="https://github.com/crossbario/autobahn-testsuite",
+    platforms=("Any"),
+    install_requires=[
+        "setuptools",
+        "txaio<=2.1.0",
+        "autobahn[twisted,accelerate]==0.10.9",
+        "jinja2>=2.6",
+        "markupsafe>=0.19",
+        "Werkzeug>=0.9.4",
+        "klein>=0.2.1",
+        "pyopenssl>=0.14",
+        "service_identity>=14.0.0",
+        "unittest2>=1.1.0",
+    ],
+    packages=find_packages(),
+    # packages = ['autobahntestsuite'],
+    include_package_data=True,
+    package_data={
+        "": ["templates/*.html"],
     },
-   zip_safe = False,
-   entry_points = {
-      'console_scripts': [
-         'wstest = autobahntestsuite.wstest:run'
-      ]},
-   ## http://pypi.python.org/pypi?%3Aaction=list_classifiers
-   ##
-   classifiers = ["License :: OSI Approved :: Apache Software License",
-                  "Development Status :: 5 - Production/Stable",
-                  "Environment :: Console",
-                  "Framework :: Twisted",
-                  "Intended Audience :: Developers",
-                  "Operating System :: OS Independent",
-                  "Programming Language :: Python",
-                  "Programming Language :: Python :: 2",
-                  "Programming Language :: Python :: 2.7",
-                  "Topic :: Internet",
-                  "Topic :: Software Development :: Testing"],
-   keywords = 'autobahn websocket wamp realtime test testsuite rfc6455 wstest wsperf'
+    zip_safe=False,
+    entry_points={"console_scripts": ["wstest = autobahntestsuite.wstest:run"]},
+    ## http://pypi.python.org/pypi?%3Aaction=list_classifiers
+    ##
+    classifiers=[
+        "License :: OSI Approved :: Apache Software License",
+        "Development Status :: 5 - Production/Stable",
+        "Environment :: Console",
+        "Framework :: Twisted",
+        "Intended Audience :: Developers",
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 2",
+        "Programming Language :: Python :: 2.7",
+        "Topic :: Internet",
+        "Topic :: Software Development :: Testing",
+    ],
+    keywords="autobahn websocket wamp realtime test testsuite rfc6455 wstest wsperf",
 )
