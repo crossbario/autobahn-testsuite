@@ -99,6 +99,7 @@ clean:
 distclean: clean
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
     echo "Cleaning all artifacts including custom Python 2.7..."
 
     rm -rf {{VENV_DIR}}/
@@ -128,7 +129,7 @@ distclean: clean
 install-python2:
     #!/usr/bin/env bash
     set -e
-
+    echo "==============================================================================="
     echo "Checking for Python 2.7 ..."
     if ! command -v python2 >/dev/null 2>&1; then
         echo "python2 not found!"
@@ -143,6 +144,7 @@ install-python2:
             echo "python2 development package installed successfully from distro package."
         fi
     fi
+    echo ""
     echo "python2 found at $(command -v python2) with version $$(python2 -V 2>&1)"
 
 # Build Python 2.7 from upstream source into `~/.local/python2.7`
@@ -155,6 +157,7 @@ install-python2-from-source:
     SRC_DIR="/tmp/python2-build"
     VERSION="2.7.18"
 
+    echo "==============================================================================="
     echo "🔧 Building CPython ${VERSION} into ${PREFIX}"
 
     # --- Install build dependencies ---------------------------------------------------------
@@ -223,19 +226,26 @@ install-python2-from-source:
 # Install Python 2.7 package dependencies (pip2 & virtualenv)
 install-python2-deps: install-python2
     #!/usr/bin/env bash
+    echo "==============================================================================="
     echo "Checking for Python 2.7 package dependencies ..."
-
+    echo ""
     if ! python2 -m pip --version &> /dev/null; then
         echo "Error: pip2 not found. Downloading get-pip.py for Python 2.7..."
         curl https://bootstrap.pypa.io/pip/2.7/get-pip.py -o /tmp/get-pip.py
         python2 /tmp/get-pip.py
+    else
+        echo "pip2 already installed."
     fi
+    echo ""
     echo "Found pip2: $(python2 -m pip --version 2>&1)"
 
     if ! python2 -m virtualenv --version &> /dev/null; then
         echo "Error: virtualenv not found. Installing via pip2 ..."
         python2 -m pip install virtualenv
+    else
+        echo "virtualenv already installed."
     fi
+    echo ""
     echo "Found virtualenv: $(python2 -m virtualenv --version 2>&1)"
 
 # -----------------------------------------------------------------------------
@@ -246,33 +256,54 @@ install-python2-deps: install-python2
 create-venv: install-python2-deps
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
+    echo "Checking for Python 2.7 virtual environment ..."
+    echo ""
     if [ ! -d "{{VENV_DIR}}/{{VENV_NAME}}" ]; then
         echo "Creating Python 2.7 virtual environment..."
         mkdir -p "{{VENV_DIR}}"
         python2 -m virtualenv "{{VENV_DIR}}/{{VENV_NAME}}"
         echo "Virtual environment created at {{VENV_DIR}}/{{VENV_NAME}}"
     else
-        echo "Virtual environment {{VENV_DIR}}/{{VENV_NAME}} already exists"
+        echo "Virtual environment {{VENV_DIR}}/{{VENV_NAME}} already exists."
     fi
-    echo "To active, run: source {{VENV_DIR}}/{{VENV_NAME}}/bin/activate"
+    echo ""
+    echo "To activate, run: source {{VENV_DIR}}/{{VENV_NAME}}/bin/activate"
 
-# Install package dependencies
+# Install package with dependencies
 install: create-venv
     #!/usr/bin/env bash
     set -e
-    echo "Installing AutobahnTestsuite dependencies..."
-    cd {{PACKAGE_DIR}}
-    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
+    echo "==============================================================================="
+    echo "Checking for AutobahnTestsuite installed package ..."
+    echo ""
+    if ! python2 -m pip show autobahntestsuite &> /dev/null; then
+        echo "Installing AutobahnTestsuite ..."
+        cd {{PACKAGE_DIR}}
+        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
+    else
+        echo "AutobahnTestsuite already installed."
+    fi
 
 # Build package
 build: install
     #!/usr/bin/env bash
     set -e
-    echo "Building AutobahnTestsuite package..."
-    cd {{PACKAGE_DIR}}
-    rm -rf build/ dist/ *.egg-info/
-    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python setup.py sdist bdist_wheel
-    ls -la dist/
+    echo "==============================================================================="
+    echo "Checking for AutobahnTestsuite built package ..."
+    echo ""
+    if [ ! "{{PACKAGE_DIR}}/dist/" ]; then
+        echo "Building AutobahnTestsuite package..."
+        cd {{PACKAGE_DIR}}
+        rm -rf build/ dist/ *.egg-info/
+        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/python setup.py sdist bdist_wheel
+        cd ..
+    else
+        echo "AutobahnTestsuite package already built."
+    fi
+    echo ""
+    echo "{{PACKAGE_DIR}}/dist/:"
+    ls -la {{PACKAGE_DIR}}/dist/
 
 # -----------------------------------------------------------------------------
 # -- Test recipes
