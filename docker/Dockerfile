@@ -1,3 +1,21 @@
+# =====================================================================
+# Copyright (c) typedef int GmbH, Germany, 2025. All rights reserved.
+# Licensed under Apache 2.0.
+#
+# Autobahn|Testsuite "Frozen Image"
+#
+# This image is pinned to the last viable combination of
+# Python 2.7, PyPy, and OpenSSL 1.1 — preserving full
+# interoperability with historic WebSocket protocol test tooling.
+#
+# Base:
+#   PyPy 7.3.11 (Python 2.7.18) on Debian Bullseye
+#
+# DO NOT UPGRADE THIS IMAGE to "bookworm" or newer:
+#   → OpenSSL 3.x breaks cryptography<3.4 on PyPy 2.7
+#   → No PyPy2 binary wheels are built against OpenSSL 3
+# =====================================================================
+
 FROM pypy:2-7-bullseye
 
 # The base image (Debian 11 / pypy:2-7-bullseye) bundles:
@@ -31,7 +49,7 @@ LABEL org.label-schema.build-date=$BUILD_DATE \
       org.label-schema.url="http://crossbar.io" \
       org.label-schema.vcs-ref=$AUTOBAHN_TESTSUITE_VCS_REF \
       org.label-schema.vcs-url="https://github.com/crossbario/autobahn-testsuite" \
-      org.label-schema.vendor="The Crossbar.io Project" \
+      org.label-schema.vendor="The WAMP/Autobahn/Crossbar.io OSS Project" \
       org.label-schema.version=$AUTOBAHN_TESTSUITE_VERSION \
       org.label-schema.schema-version="1.0"
 

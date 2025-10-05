@@ -15,10 +15,15 @@ set script-interpreter := ['uv', 'run', '--script']
 # project base directory = directory of this justfile
 PROJECT_DIR := justfile_directory()
 
-# Default Python 2.7 environment for AutobahnTestsuite packaging
-PYTHON := "python2"
+# Python venvs base dir
 VENV_DIR := ".venvs"
-VENV_NAME := "py27"
+
+# Default Python - CPython 2.7 environment for AutobahnTestsuite packaging
+VENV_NAME := "cpy27"
+
+# CPython 3.14 environment for AutobahnTestsuite Docs (Sphinx) building
+VENV_DOCS_NAME := "cpy314"
+VENV_DOCS_PYTHON := "cpython-3.14"
 
 # Package directory
 PACKAGE_DIR := "autobahntestsuite"
@@ -393,38 +398,60 @@ publish-pypi: build
 # Publish Docker image (requires credentials)
 publish-docker: docker-build
     #!/usr/bin/env bash
-    set -e
+    set -euxo pipefail
     echo "Publishing AutobahnTestsuite Docker image..."
-    docker push crossbario/autobahn-testsuite:25.10.1
+    docker push crossbario/autobahn-testsuite:{{PACKAGE_VERSION}}
     docker push crossbario/autobahn-testsuite:latest
 
 # -----------------------------------------------------------------------------
 # -- Documentation recipes
 # -----------------------------------------------------------------------------
 
-# Build AutobahnTestsuite documentation
-docs:
+# Create Python venv for AutobahnTestsuite docs (Sphinx) building
+docs-venv:
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
+    echo "Checking for docs venv ..."
+
+    mkdir -p "{{ VENV_DIR }}"
+    VENV_PATH="{{ VENV_DIR }}/{{ VENV_DOCS_NAME }}"
+    if [ ! -d ${VENV_PATH} ]; then
+        echo "Creating docs (Sphinx) building venv in ${VENV_PATH}"
+        uv venv --seed --python {{VENV_DOCS_PYTHON}} "${VENV_PATH}"
+        "${VENV_PATH}/bin/pip" install -r requirements-dev.txt
+    else
+        echo "Virtual environment ${VENV_PATH} already exists."
+    fi
+    echo ""
+    echo "To activate, run: source ${VENV_PATH}/bin/activate"
+    echo ""
+
+# Build AutobahnTestsuite documentation
+docs: docs-venv
+    #!/usr/bin/env bash
+    set -e
+    echo "==============================================================================="
     echo "Building documentation..."
 
-    # Check if docs directory exists, create basic structure if not
-    if [ ! -d "docs" ]; then
-        echo "Creating docs directory structure..."
-        mkdir -p docs/_static docs/_templates
-    fi
+    VENV_PATH="{{ VENV_DIR }}/{{ VENV_DOCS_NAME }}"
 
-    # Install documentation dependencies
-    pip3 install sphinx sphinx-rtd-theme
+    # Ensure docs static & template dirs exist
+    mkdir -p docs/_static docs/_templates
 
     # Build HTML documentation
     cd docs
-    sphinx-build -b html . _build/html
+    "../${VENV_PATH}/bin/sphinx-build" -b html . _build/html/
+    cd ..
+    echo ""
     echo "Documentation built in docs/_build/html/"
+    echo ""
 
 # Clean documentation
 docs-clean:
     #!/usr/bin/env bash
+    set -e
+    echo "==============================================================================="
     echo "Cleaning documentation build artifacts..."
     rm -rf docs/_build/
 
@@ -432,6 +459,7 @@ docs-clean:
 docs-serve: docs
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
     echo "Starting documentation server..."
     cd docs/_build/html
     python3 -m http.server 8080

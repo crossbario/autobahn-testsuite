@@ -1,0 +1,4 @@
+sphinx==8.2.3
+sphinxcontrib-images==1.0.1
+sphinx-rtd-theme==3.0.2
+twine==6.2.0

@@ -130,6 +130,20 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
 
 ## Installation
 
+🧊 Legacy Compatibility Note
+
+The Autobahn|Testsuite Docker image is frozen intentionally on
+pypy:2-7-bullseye (PyPy 7.3.11 / Python 2.7.18 / OpenSSL 1.1.1w).
+This combination is the last working environment for the original
+WebSocket conformance suite before the Python 3 transition.
+
+Newer base images (e.g. Debian bookworm, OpenSSL 3.x) are incompatible
+with the pinned PyPy2-era cryptography and Twisted dependencies.
+
+**Purpose: preserve a stable, reproducible reference testbed
+against which WebSocket implementations can validate conformance
+— even as the main Autobahn project evolves.**
+
 ### Using the testsuite Docker image (Recommended)
 
 The testsuite is available as a [Docker image](https://hub.docker.com/r/crossbario/autobahn-testsuite/tags/) which allows
@@ -145,7 +159,7 @@ docker run -it --rm \
     -v "${PWD}/reports:/reports" \
     -p 9001:9001 \
     --name fuzzingserver \
-    crossbario/autobahn-testsuite
+    crossbario/autobahn-testsuite:25.10.1
 ```
 
 Above will mount an (included) test configuration from the [docker/config](config) folder, which must include a server test configuration file [docker/config/fuzzingserver.json](docker/config/fuzzingserver.json) like this:
@@ -313,15 +327,3 @@ On first run, the tool will auto-generated a test configuration file:
 ```
 
 You can tweak that file to run only some tests, e.g. `"cases: ["1.*", "2.1.*"]"` will run only the tests under section 1.* and subsection 2.1.*.
-
-
-## More Information
-
-For more information take a look at the following information
-
-* [usage instructions](/doc/usage.rst)
-
-
-## Get in Touch
-
-Get in touch on IRC `#autobahn` on `chat.freenode.net` or join an Autobahn [user forum](https://crossbar.discourse.group/).
