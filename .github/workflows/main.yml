@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
 
 env:
-  DOT_LOCAL: ${{ env.HOME }}/.local
+  DOT_LOCAL: $HOME/.local
   UV_CACHE_DIR: ${{ github.workspace }}/.uv-cache
-  PY27_PREFIX: ${{ env.HOME }}/.local/python2.7
+  PY27_PREFIX: $HOME/.local/python2.7
   PY27_VENV: ${{ github.workspace }}/.venvs/cpy27
   TOOLS_VENV: ${{ github.workspace }}/.venvs/cpy314
 
