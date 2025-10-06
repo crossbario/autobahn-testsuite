@@ -41,9 +41,10 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ${{ env.PY27_PREFIX }}
-          key: cpy27-${{ runner.os }}-${{ hashFiles('justfile') }}
+          key: cpy27-${{ runner.os }}
+          # key: cpy27-${{ runner.os }}-${{ hashFiles('justfile') }}
           restore-keys: |
-            cpy27-${{ runner.os }}-
+            cpy27-${{ runner.os }}
 
       # 🧩 Build only if cache was missed
       - name: Build CPython 2.7 from source
@@ -60,11 +61,13 @@ jobs:
           python2 --version
 
       # 🧩 Restore venv with (only) dependencies
-      - name: Restore CPython 2.7 venv with (only) dependencies
+      - name: Restore CPython 2.7 venv + uv cache with (only) dependencies
         id: cache-venv
         uses: actions/cache@v4
         with:
-          path: ${{ env.PY27_VENV }}
+          path: |
+            ${{ env.PY27_VENV }}
+            ${{ env.UV_CACHE_DIR }}
           key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
           restore-keys: |
             cpy27-venv-${{ runner.os }}-
@@ -148,12 +151,14 @@ jobs:
           uv --version
 
       # 🧩 Restore cached Python 3 tools venv if available
-      - name: Cache tools virtualenv
+      - name: Cache tools environment (venv + uv cache => cache both directories together!)
         id: cache-tools-venv
         uses: actions/cache@v4
         with:
-          path: ${{ env.TOOLS_VENV }}
-          key: tools-venv-${{ runner.os }}-${{ hashFiles('justfile', 'requirements-dev.txt') }}
+          path: |
+            ${{ env.TOOLS_VENV }}
+            ${{ env.UV_CACHE_DIR }}
+          key: tools-venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
           restore-keys: |
             tools-venv-${{ runner.os }}-
 
