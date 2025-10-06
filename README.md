@@ -327,3 +327,36 @@ On first run, the tool will auto-generated a test configuration file:
 ```
 
 You can tweak that file to run only some tests, e.g. `"cases: ["1.*", "2.1.*"]"` will run only the tests under section 1.* and subsection 2.1.*.
+
+
+## Release Instructions (for maintainers)
+
+To manually publish releases from your development machine, you need to set up credentials and use the justfile recipes:
+
+### 1. Setup RTD Token
+```bash
+# Get your API token from https://readthedocs.org/accounts/tokens/
+export RTD_TOKEN=your_rtd_token_here
+```
+
+### 2. Setup PyPI Token 
+```bash
+# Configure ~/.pypirc with your PyPI token, or set environment variable
+export TWINE_PASSWORD=your_pypi_token_here
+```
+
+### 3. Setup Docker Hub
+```bash
+# Login to Docker Hub first
+docker login
+```
+
+### 4. Manual Publishing
+```bash
+# Build and publish to all platforms
+just publish-to-pypi      # Uploads source distribution + wheel to PyPI
+just publish-to-dockerhub # Pushes Docker images to Docker Hub  
+just publish-to-rtd       # Uploads documentation to Read the Docs
+```
+
+The justfile handles building dependencies automatically - each publish recipe will build what it needs before uploading.

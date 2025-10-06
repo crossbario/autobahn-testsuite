@@ -444,7 +444,40 @@ publish-to-rtd: docs
     set -euxo pipefail
     echo "==============================================================================="
     echo "Publishing AutobahnTestsuite docs to RTD..."
-    echo "FIXME!! upload: docs/_build/html/"
+    echo ""
+    
+    # Check if RTD_TOKEN environment variable is set
+    if [ -z "${RTD_TOKEN:-}" ]; then
+        echo "❌ Error: RTD_TOKEN environment variable not set"
+        echo "   Get your token from: https://readthedocs.org/accounts/tokens/"
+        echo "   Then export RTD_TOKEN=your_token_here"
+        exit 1
+    fi
+    
+    # Upload documentation using RTD API
+    PROJECT_SLUG="autobahn-testsuite"
+    VERSION_SLUG="latest"
+    
+    echo "📤 Uploading documentation to RTD project: ${PROJECT_SLUG}"
+    echo "📁 Source: docs/_build/html/"
+    
+    # Create a tar.gz archive of the documentation
+    cd docs/_build
+    tar -czf html-docs.tar.gz html/
+    
+    # Upload using RTD API v3
+    curl -X POST \
+        -H "Authorization: Token ${RTD_TOKEN}" \
+        -F "file=@html-docs.tar.gz" \
+        "https://readthedocs.org/api/v3/projects/${PROJECT_SLUG}/versions/${VERSION_SLUG}/artifacts/"
+    
+    # Clean up
+    rm html-docs.tar.gz
+    cd ../..
+    
+    echo ""
+    echo "✅ Documentation uploaded successfully!"
+    echo "🔗 View at: https://autobahn-testsuite.readthedocs.io/"
     echo ""
 
 # -----------------------------------------------------------------------------
