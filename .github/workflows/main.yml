@@ -9,9 +9,12 @@ on:
   workflow_dispatch:
 
 env:
-  DOT_LOCAL: $HOME/.local
+  # hard-code /home/runner as neither $HOME nor ${{ env.HOME }} works!! hard-coding is "not recommended",
+  # and is not portable to self-hosted runners or non-Linux. I give a shit? ;)
+  # /home/runner is stable, official, and guaranteed on all GitHub-hosted Linux runners.
+  DOT_LOCAL: /home/runner/.local
   UV_CACHE_DIR: ${{ github.workspace }}/.uv-cache
-  PY27_PREFIX: $HOME/.local/python2.7
+  PY27_PREFIX: /home/runner/.local/python2.7
   PY27_VENV: ${{ github.workspace }}/.venvs/cpy27
   TOOLS_VENV: ${{ github.workspace }}/.venvs/cpy314
 
@@ -35,8 +38,8 @@ jobs:
           which just
           just --version
 
-      # 🧩 Restore cached Python 2.7 install if available
-      - name: Cache local CPython 2.7 install
+      # 🧩 Restore cached Python 2.7 build if available
+      - name: Cache local CPython 2.7 build
         id: cache-python2
         uses: actions/cache@v4
         with:
@@ -55,13 +58,13 @@ jobs:
           echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
 
       # 🧩 Verify it works (both cached and fresh builds)
-      - name: Test Python 2.7 binary
+      - name: Test CPython 2.7 binary
         run: |
           which python2
           python2 --version
 
       # 🧩 Save Python 2.7 cache after base deps installed
-      - name: Save local CPython 2.7 cache (with base dependencies only)
+      - name: Save local CPython 2.7 build (with base dependencies only)
         if: steps.cache-python2.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
         with:
