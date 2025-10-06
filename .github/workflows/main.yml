@@ -115,8 +115,8 @@ jobs:
       - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
-          name: autobahn-testsuite-dist
-          path: autobahn-testsuite/dist/
+          name: autobahntestsuite-dist
+          path: autobahntestsuite/dist/
 
   docs:
     runs-on: ubuntu-latest
