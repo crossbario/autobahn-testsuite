@@ -60,40 +60,59 @@ jobs:
           which python2
           python2 --version
 
-      # 🧩 Restore venv with (only) dependencies
-      - name: Restore CPython 2.7 venv + uv cache with (only) dependencies
-        id: cache-venv
-        uses: actions/cache@v4
+      # 🧩 Save Python 2.7 cache after base deps installed
+      - name: Save local CPython 2.7 cache (with base dependencies only)
+        if: steps.cache-python2.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
         with:
-          path: |
-            ${{ env.PY27_VENV }}
-            ${{ env.UV_CACHE_DIR }}
-          key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
-          restore-keys: |
-            cpy27-venv-${{ runner.os }}-
+          path: ${{ env.PY27_PREFIX }}
+          key: cpy27-${{ runner.os }}
+          # key: cpy27-venv-${{ runner.os }}-${{ hashFiles('justfile') }}
 
-      # 🧩 Create venv if missing
+      # # 🧩 Restore venv with (only) dependencies
+      # - name: Restore CPython 2.7 venv + uv cache with (only) dependencies
+      #   id: cache-venv
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ${{ env.PY27_VENV }}
+      #       ${{ env.UV_CACHE_DIR }}
+      #     key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
+      #     restore-keys: |
+      #       cpy27-venv-${{ runner.os }}-
+
+      # # 🧩 Create venv if missing
+      # - name: Create venv
+      #   if: steps.cache-venv.outputs.cache-hit != 'true'
+      #   run: |
+      #     just create-venv
+
+      # # 🧩 Install package dependencies (only)
+      # # You may need to adjust your justfile slightly to have a "install-deps" target
+      # - name: Install dependencies into venv
+      #   if: steps.cache-venv.outputs.cache-hit != 'true'
+      #   run: |
+      #     just install-deps
+
+      # # 🧩 Save venv cache after deps installed
+      # - name: Save venv cache (dependencies only)
+      #   if: steps.cache-venv.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: ${{ env.PY27_VENV }}
+      #     key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
+
+      # 🧩 Create venv
       - name: Create venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           just create-venv
 
       # 🧩 Install package dependencies (only)
-      # You may need to adjust your justfile slightly to have a "install-deps" target
       - name: Install dependencies into venv
-        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           just install-deps
 
-      # Save venv cache after deps installed
-      - name: Save venv cache (dependencies only)
-        if: steps.cache-venv.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ${{ env.PY27_VENV }}
-          key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
-
-      # 🧩 Install your package into the venv
+      # 🧩 Install package into the venv
       - name: Install package
         run: |
           just install
@@ -150,21 +169,34 @@ jobs:
           which uv
           uv --version
 
-      # 🧩 Restore cached Python 3 tools venv if available
-      - name: Cache tools environment (venv + uv cache => cache both directories together!)
-        id: cache-tools-venv
-        uses: actions/cache@v4
-        with:
-          path: |
-            ${{ env.TOOLS_VENV }}
-            ${{ env.UV_CACHE_DIR }}
-          key: tools-venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
-          restore-keys: |
-            tools-venv-${{ runner.os }}-
+      # # 🧩 Restore cached Python 3 tools venv if available
+      # - name: Cache tools environment (venv + uv cache => cache both directories together!)
+      #   id: cache-tools-venv
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       ${{ env.TOOLS_VENV }}
+      #       ${{ env.UV_CACHE_DIR }}
+      #     key: tools-venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+      #     restore-keys: |
+      #       tools-venv-${{ runner.os }}-
 
-      # 🧱 Create the tools venv only if cache is missing
+      # # 🧱 Create the tools venv only if cache is missing
+      # - name: Cache tools environment (using uv) with AutobahnTestsuite tools
+      #   if: steps.cache-tools-venv.outputs.cache-hit != 'true'
+      #   run: just tools-venv
+
+      # # 🧩 Save tools venv cache after deps installed
+      # - name: Save tools environment cache
+      #   if: steps.cache-tools-venv.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: |
+      #       ${{ env.TOOLS_VENV }}
+      #       ${{ env.UV_CACHE_DIR }}
+      #     key: tools-venv-${{ runner.os }}-${{ hashFiles('requirements-dev.txt') }}
+
       - name: Create Python 3 venv (using uv) with AutobahnTestsuite tools
-        if: steps.cache-tools-venv.outputs.cache-hit != 'true'
         run: just tools-venv
 
       - name: Build documentation (using Sphinx)
