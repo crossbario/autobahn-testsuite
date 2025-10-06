@@ -56,14 +56,20 @@ jobs:
         run: |
           just install-python2-deps
 
-      # 🧩 Add CPython 2.7 to PATH (both cached and fresh builds)
+      # 🧩 Add CPython 2.7 to PATH & LD_LIBRARY_PATH (both cached and fresh builds)
       - name: Add CPython 2.7 to PATH
         run: |
           echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=${{ env.PY27_PREFIX }}/lib" >> $GITHUB_ENV
+          echo "Added CPython shared libs to LD_LIBRARY_PATH"
 
       # 🧩 Verify it works (both cached and fresh builds)
       - name: Test CPython 2.7 binary
         run: |
+          echo $PATH
+          echo $LD_LIBRARY_PATH
+          ldd ${{ env.PY27_PREFIX }}/bin/python2.7
+          ${{ env.PY27_PREFIX }}/bin/python2.7 --version
           which python2
           python2 --version
 
