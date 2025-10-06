@@ -79,7 +79,6 @@ COPY autobahntestsuite-latest-py2-none-any.whl /wheels
 
 # install Autobahn|Testsuite from wheel
 RUN pip install --no-build-isolation /wheels/autobahntestsuite-latest-py2-none-any.whl
-RUN wstest --version
 
 # make volumes for input configuration and output reports
 VOLUME /config

@@ -21,9 +21,9 @@ VENV_DIR := ".venvs"
 # Default Python - CPython 2.7 environment for AutobahnTestsuite packaging
 VENV_NAME := "cpy27"
 
-# CPython 3.14 environment for AutobahnTestsuite Docs (Sphinx) building
-VENV_DOCS_NAME := "cpy314"
-VENV_DOCS_PYTHON := "cpython-3.14"
+# CPython 3.14 environment for AutobahnTestsuite Tools (Sphinx, Twine, ..)
+VENV_TOOLS_NAME := "cpy314"
+VENV_TOOLS_PYTHON := "cpython-3.14"
 
 # Package directory
 PACKAGE_DIR := "autobahntestsuite"
@@ -49,7 +49,7 @@ default:
     @echo "   Copyright:              typedef int GmbH (Germany/EU)                       "
     @echo "   License:                Apache License 2.0                                  "
     @echo ""
-    @echo "      >>>   Created by The WAMP/Autobahn/Crossbar.io OSS Project   <<<         "
+    @echo "       >>>   Created by The WAMP/Autobahn/Crossbar.io OSS Project   <<<        "
     @echo "==============================================================================="
     @echo ""
     @just --list
@@ -98,6 +98,7 @@ setup-completion:
 clean:
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
     echo "Cleaning build artifacts..."
     rm -rf {{PACKAGE_DIR}}/build/
     rm -rf {{PACKAGE_DIR}}/dist/
@@ -106,6 +107,7 @@ clean:
     rm -rf docs/_build/
     find . -name "*.pyc" -delete
     find . -name "__pycache__" -delete
+    echo ""
 
 # Clean everything including custom Python 2.7 installation
 distclean: clean
@@ -132,6 +134,7 @@ distclean: clean
     fi
 
     echo "==> Distclean complete. The project is now pristine."
+    echo ""
 
 # -----------------------------------------------------------------------------
 # -- General/global helper recipes
@@ -158,6 +161,7 @@ install-python2:
     fi
     echo ""
     echo "python2 found at $(command -v python2) with version $$(python2 -V 2>&1)"
+    echo ""
 
 # Build Python 2.7 from upstream source into `~/.local/python2.7`
 install-python2-from-source:
@@ -234,6 +238,7 @@ install-python2-from-source:
 
     "${PREFIX}/bin/python2" --version
     echo "Note: You may need to add ~/${PREFIX}/bin to your PATH"
+    echo ""
 
 # Install Python 2.7 package dependencies (pip2 & virtualenv)
 install-python2-deps: install-python2
@@ -259,6 +264,7 @@ install-python2-deps: install-python2
     fi
     echo ""
     echo "Found virtualenv: $(python2 -m virtualenv --version 2>&1)"
+    echo ""
 
 # -----------------------------------------------------------------------------
 # -- General/global helper recipes
@@ -282,21 +288,26 @@ create-venv: install-python2-deps
     echo ""
     echo "To activate, run: source {{VENV_DIR}}/{{VENV_NAME}}/bin/activate"
 
-# Install package with dependencies
-install: create-venv
+# Install package dependencies
+install-deps: create-venv
     #!/usr/bin/env bash
     set -e
     echo "==============================================================================="
-    echo "Checking for AutobahnTestsuite installed package ..."
+    echo "Installing AutobahnTestsuite package dependencies ..."
     echo ""
-    # if ! python2 -m pip show autobahntestsuite &> /dev/null; then
-    if true; then
-        echo "Installing AutobahnTestsuite ..."
-        cd {{PACKAGE_DIR}}
-        ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -e .
-    else
-        echo "AutobahnTestsuite already installed."
-    fi
+    cd {{PACKAGE_DIR}}
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install -r requirements.txt
+    echo ""
+
+# Install package
+install: install-deps
+    #!/usr/bin/env bash
+    set -e
+    echo "==============================================================================="
+    echo "Installing AutobahnTestsuite ..."
+    cd {{PACKAGE_DIR}}
+    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install .
+    echo ""
 
 # Build package
 build: install
@@ -318,6 +329,7 @@ build: install
     echo ""
     echo "{{PACKAGE_DIR}}/dist/:"
     ls -la {{PACKAGE_DIR}}/dist/
+    echo ""
 
 # -----------------------------------------------------------------------------
 # -- Test recipes
@@ -360,6 +372,7 @@ test-wstest:
 docker-build: build
     #!/usr/bin/env bash
     set -e
+    echo "==============================================================================="
     echo "Building AutobahnTestsuite Docker image..."
     cp {{PACKAGE_DIR}}/dist/autobahntestsuite-{{PACKAGE_VERSION}}-py2-none-any.whl docker/autobahntestsuite-latest-py2-none-any.whl
     cd docker
@@ -370,55 +383,34 @@ docker-build: build
         -t crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} \
         -t crossbario/autobahn-testsuite:latest \
         .
+    echo ""
 
 # Test Docker image
-docker-wstest:
-    #!/usr/bin/env bash
-    set -e
-    echo "Testing AutobahnTestsuite Docker image {{PACKAGE_VERSION}}/{{PACKAGE_VCS_REF}}..."
-    echo ""
-    docker run --rm crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} wstest --autobahnversion
-    echo ""
-    docker run --rm crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} wstest --help
-    echo ""
-
-# -----------------------------------------------------------------------------
-# -- Publish recipes
-# -----------------------------------------------------------------------------
-
-# Publish to PyPI (requires credentials)
-publish-pypi: build
-    #!/usr/bin/env bash
-    set -e
-    echo "Publishing AutobahnTestsuite to PyPI..."
-    cd {{PACKAGE_DIR}}
-    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/pip install twine
-    ../{{VENV_DIR}}/{{VENV_NAME}}/bin/twine upload dist/*
-
-# Publish Docker image (requires credentials)
-publish-docker: docker-build
-    #!/usr/bin/env bash
-    set -euxo pipefail
-    echo "Publishing AutobahnTestsuite Docker image..."
-    docker push crossbario/autobahn-testsuite:{{PACKAGE_VERSION}}
-    docker push crossbario/autobahn-testsuite:latest
-
-# -----------------------------------------------------------------------------
-# -- Documentation recipes
-# -----------------------------------------------------------------------------
-
-# Create Python venv for AutobahnTestsuite docs (Sphinx) building
-docs-venv:
+docker-test:
     #!/usr/bin/env bash
     set -e
     echo "==============================================================================="
-    echo "Checking for docs venv ..."
+    echo "Testing AutobahnTestsuite Docker image {{PACKAGE_VERSION}}/{{PACKAGE_VCS_REF}}..."
+    echo ""
+    docker run --rm crossbario/autobahn-testsuite:{{PACKAGE_VERSION}} bash -c "pypy -V && echo && wstest --autobahnversion && echo && wstest --help"
+    echo ""
+
+# -----------------------------------------------------------------------------
+# -- Tools & Publish recipes
+# -----------------------------------------------------------------------------
+
+# Create Python 3 venv (using uv) with AutobahnTestsuite tools (Sphinx, Twine, ..)
+tools-venv:
+    #!/usr/bin/env bash
+    set -e
+    echo "==============================================================================="
+    echo "Checking for tools venv ..."
 
     mkdir -p "{{ VENV_DIR }}"
-    VENV_PATH="{{ VENV_DIR }}/{{ VENV_DOCS_NAME }}"
+    VENV_PATH="{{ VENV_DIR }}/{{ VENV_TOOLS_NAME }}"
     if [ ! -d ${VENV_PATH} ]; then
-        echo "Creating docs (Sphinx) building venv in ${VENV_PATH}"
-        uv venv --seed --python {{VENV_DOCS_PYTHON}} "${VENV_PATH}"
+        echo "Creating tools (Sphinx, Twine, ..) venv in ${VENV_PATH}"
+        uv venv --seed --python {{VENV_TOOLS_PYTHON}} "${VENV_PATH}"
         "${VENV_PATH}/bin/pip" install -r requirements-dev.txt
     else
         echo "Virtual environment ${VENV_PATH} already exists."
@@ -427,21 +419,51 @@ docs-venv:
     echo "To activate, run: source ${VENV_PATH}/bin/activate"
     echo ""
 
+# Publish package sourcedist & wheel to PyPI (requires credentials)
+publish-to-pypi: build
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    echo "==============================================================================="
+    echo "Publishing AutobahnTestsuite package to PyPI..."
+    {{VENV_DIR}}/{{VENV_TOOLS_NAME}}/bin/twine upload {{PACKAGE_DIR}}/dist/*
+    echo ""
+
+# Publish Docker image to DuckerHub (requires credentials)
+publish-to-dockerhub: docker-build
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    echo "==============================================================================="
+    echo "Publishing AutobahnTestsuite Docker image to DockerHub..."
+    docker push crossbario/autobahn-testsuite:{{PACKAGE_VERSION}}
+    docker push crossbario/autobahn-testsuite:latest
+    echo ""
+
+# Publish package docs to RTD (requires credentials)
+publish-to-rtd: docs
+    #!/usr/bin/env bash
+    set -euxo pipefail
+    echo "==============================================================================="
+    echo "Publishing AutobahnTestsuite docs to RTD..."
+    echo "FIXME!! upload: docs/_build/html/"
+    echo ""
+
+# -----------------------------------------------------------------------------
+# -- Documentation recipes
+# -----------------------------------------------------------------------------
+
 # Build AutobahnTestsuite documentation
-docs: docs-venv
+docs: tools-venv
     #!/usr/bin/env bash
     set -e
     echo "==============================================================================="
     echo "Building documentation..."
-
-    VENV_PATH="{{ VENV_DIR }}/{{ VENV_DOCS_NAME }}"
 
     # Ensure docs static & template dirs exist
     mkdir -p docs/_static docs/_templates
 
     # Build HTML documentation
     cd docs
-    "../${VENV_PATH}/bin/sphinx-build" -b html . _build/html/
+    "../{{ VENV_DIR }}/{{ VENV_TOOLS_NAME }}/bin/sphinx-build" -b html . _build/html/
     cd ..
     echo ""
     echo "Documentation built in docs/_build/html/"
@@ -462,4 +484,4 @@ docs-serve: docs
     echo "==============================================================================="
     echo "Starting documentation server..."
     cd docs/_build/html
-    python3 -m http.server 8080
+    "{{ VENV_DIR }}/{{ VENV_TOOLS_NAME }}/bin/python3" -m http.server 8080

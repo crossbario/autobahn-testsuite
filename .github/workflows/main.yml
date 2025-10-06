@@ -8,6 +8,13 @@ on:
     branches: [master]
   workflow_dispatch:
 
+env:
+  DOT_LOCAL: ${{ env.HOME }}/.local
+  UV_CACHE_DIR: ${{ github.workspace }}/.uv-cache
+  PY27_PREFIX: ${{ env.HOME }}/.local/python2.7
+  PY27_VENV: ${{ github.workspace }}/.venvs/cpy27
+  TOOLS_VENV: ${{ github.workspace }}/.venvs/cpy314
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,74 +27,146 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ~/bin
-          echo "$HOME/bin" >> $GITHUB_PATH
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ${HOME}/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
 
       - name: Verify Just
         run: |
+          which just
           just --version
 
-      - name: Install or build Python 2.7
-        run: |
-          just install-python2
+      # 🧩 Restore cached Python 2.7 install if available
+      - name: Cache local CPython 2.7 install
+        id: cache-python2
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PY27_PREFIX }}
+          key: cpy27-${{ runner.os }}-${{ hashFiles('justfile') }}
+          restore-keys: |
+            cpy27-${{ runner.os }}-
 
-      - name: Install Python 2.7 package dependencies
+      # 🧩 Build only if cache was missed
+      - name: Build CPython 2.7 from source
+        if: steps.cache-python2.outputs.cache-hit != 'true'
+        # Build & install Python 2.7 and package dependencies (pip2 & virtualenv)
         run: |
           just install-python2-deps
+          echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
 
-      - name: Create Python 2.7 virtual environment
+      # 🧩 Verify it works (both cached and fresh builds)
+      - name: Test Python 2.7 binary
+        run: |
+          which python2
+          python2 --version
+
+      # 🧩 Restore venv with (only) dependencies
+      - name: Restore CPython 2.7 venv with (only) dependencies
+        id: cache-venv
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PY27_VENV }}
+          key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
+          restore-keys: |
+            cpy27-venv-${{ runner.os }}-
+
+      # 🧩 Create venv if missing
+      - name: Create venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
         run: |
           just create-venv
 
-      - name: Install package with dependencies
+      # 🧩 Install package dependencies (only)
+      # You may need to adjust your justfile slightly to have a "install-deps" target
+      - name: Install dependencies into venv
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        run: |
+          just install-deps
+
+      # Save venv cache after deps installed
+      - name: Save venv cache (dependencies only)
+        if: steps.cache-venv.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          path: ${{ env.PY27_VENV }}
+          key: cpy27-venv-${{ runner.os }}-${{ hashFiles('autobahntestsuite/requirements.txt') }}
+
+      # 🧩 Install your package into the venv
+      - name: Install package
         run: |
           just install
 
-      - name: Build package
+      # 🧩 Build the package
+      - name: Build distribution
         run: |
           just build
 
-      - name: List package artifacts
-        run: |
-          ls -la autobahntestsuite/dist/
-
+      # 🧩 Test installation
       - name: Test installation
         run: |
           just test-version
           just test-wstest
 
-      - name: Upload build artifacts
+      # 🧩 List package artifacts
+      - name: List package artifacts
+        run: |
+          ls -la autobahntestsuite/dist/
+
+      # 🧩 Upload build artifact
+      - name: Upload built package
         uses: actions/upload-artifact@v4
         with:
-          name: dist
-          path: autobahntestsuite/dist/
+          name: autobahn-testsuite-dist
+          path: autobahn-testsuite/dist/
 
   docs:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v')
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout codeq
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Install Just
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to ${HOME}/.local/bin
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install uv
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          source $HOME/.cargo/env
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Verify toolchain installation
+        run: |
+          which just
+          just --version
+          which uv
+          uv --version
+
+      # 🧩 Restore cached Python 3 tools venv if available
+      - name: Cache tools virtualenv
+        id: cache-tools-venv
+        uses: actions/cache@v4
         with:
-          python-version: "3.x"
+          path: ${{ env.TOOLS_VENV }}
+          key: tools-venv-${{ runner.os }}-${{ hashFiles('justfile', 'requirements-dev.txt') }}
+          restore-keys: |
+            tools-venv-${{ runner.os }}-
 
-      - name: Install just
-        uses: extractions/setup-just@v2
+      # 🧱 Create the tools venv only if cache is missing
+      - name: Create Python 3 venv (using uv) with AutobahnTestsuite tools
+        if: steps.cache-tools-venv.outputs.cache-hit != 'true'
+        run: just tools-venv
 
-      - name: Build documentation
+      - name: Build documentation (using Sphinx)
         run: just docs
 
       - name: Upload documentation artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: documentation
+          name: autobahn-testsuite-docs
           path: docs/_build/html/
-
-      - name: Deploy to Read the Docs
-        if: startsWith(github.ref, 'refs/tags/v')
-        run: |
-          echo "Documentation built. RTD will auto-deploy on tag push."
-          echo "Make sure RTD webhook is configured for this repository."

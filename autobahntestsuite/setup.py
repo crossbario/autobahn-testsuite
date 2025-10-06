@@ -16,6 +16,9 @@
 ##
 ###############################################################################
 
+import io
+import os
+import re
 from setuptools import setup, find_packages
 
 LONGSDESC = """
@@ -64,8 +67,6 @@ License:          Apache License 2.0
 ## get version string from "autobahntestsuite/_version.py"
 ## See: http://stackoverflow.com/a/7071358/884770
 ##
-import re
-
 VERSIONFILE = "autobahntestsuite/_version.py"
 verstrline = open(VERSIONFILE, "rt").read()
 VSRE = r"^__version__ = ['\"]([^'\"]*)['\"]"
@@ -74,6 +75,45 @@ if mo:
     verstr = mo.group(1)
 else:
     raise RuntimeError("Unable to find version string in %s." % (VERSIONFILE,))
+
+
+def read_requirements(filename):
+    """
+    Read requirements.txt from source or from inside a built package.
+    Compatible with Python 2.7 (uses pkg_resources fallback).
+    """
+    import os
+    import io
+
+    here = os.path.abspath(os.path.dirname(__file__))
+    candidates = [
+        os.path.join(here, filename),
+        os.path.join(here, "autobahntestsuite", filename),
+    ]
+
+    for path in candidates:
+        if os.path.exists(path):
+            with io.open(path, encoding="utf-8") as f:
+                return [
+                    line.strip()
+                    for line in f
+                    if line.strip() and not line.startswith("#")
+                ]
+
+    # --- Fallback: load via pkg_resources (when running from wheel / installed dist) ---
+    try:
+        import pkg_resources
+
+        data = pkg_resources.resource_string("autobahntestsuite", filename)
+        text = data.decode("utf-8")
+        return [
+            line.strip()
+            for line in text.splitlines()
+            if line.strip() and not line.startswith("#")
+        ]
+    except Exception as e:
+        print("Warning: requirements file not found ({}) => {}".format(filename, e))
+        return []
 
 
 setup(
@@ -86,29 +126,12 @@ setup(
     url="https://github.com/crossbario/autobahn-testsuite",
     platforms=("Any"),
     # pinned dependency set for Python 2.7 / Autobahn 0.10.9
-    install_requires=[
-        "setuptools==44.0.0",  # pip/setuptools from pre-2020 era
-        "txaio==2.1.0",
-        "incremental==16.10.1",  # must pin because of use of typing
-        "pyOpenSSL==19.1.0",
-        "cryptography==3.3.2",  # last version supporting Python 2 and OpenSSL 1.1
-        "Twisted==19.10.0",  # pin Twisted 19.10.0., 20.3.0 is technically Python 2.7-compatible, but its packaging metadata triggers installation of newer incremental eggs.
-        "zope.interface==4.6.0",  # Twisted dependency compatible with 2.7
-        "jinja2==2.11.3",
-        "markupsafe==1.1.1",
-        "Werkzeug==1.0.1",
-        "klein==17.10.0",  # last pre-Python3-only Klein
-        "pyopenssl==19.1.0",
-        "service_identity==18.1.0",
-        "unittest2==1.1.0",
-        "six==1.16.0",
-        "autobahn[twisted,accelerate]==0.10.9",
-    ],
+    install_requires=read_requirements("requirements.txt"),
     packages=find_packages(),
     # packages = ['autobahntestsuite'],
     include_package_data=True,
     package_data={
-        "": ["templates/*.html"],
+        "autobahntestsuite": ["requirements.txt", "templates/*.html"],
     },
     zip_safe=False,
     entry_points={"console_scripts": ["wstest = autobahntestsuite.wstest:run"]},
