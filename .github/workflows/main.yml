@@ -55,6 +55,10 @@ jobs:
         # Build & install Python 2.7 and package dependencies (pip2 & virtualenv)
         run: |
           just install-python2-deps
+
+      # 🧩 Add CPython 2.7 to PATH (both cached and fresh builds)
+      - name: Add CPython 2.7 to PATH
+        run: |
           echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
 
       # 🧩 Verify it works (both cached and fresh builds)
