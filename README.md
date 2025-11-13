@@ -122,6 +122,7 @@ Autobahn|Testsuite is used by numerous projects and companies across the industr
       <li><a href="https://github.com/boostorg/beast" target="_blank">Boost/Beast</a></li>
       <li><a href="https://github.com/IBM-Swift/Kitura-WebSocket-NIO" target="_blank">Kitura-WebSocket-NIO</a></li>
       <li><a href="https://github.com/machinezone/IXWebSocket" target="_blank">IXWebSocket</a></li>
+      <li><a href="https://github.com/status-im/nim-websock" target="_blank">nim-websock</a></li>
       <li>... and more (can't keep up)</li>
   </ul>
 </div>
@@ -360,3 +361,4 @@ just publish-to-rtd       # Uploads documentation to Read the Docs
 ```
 
 The justfile handles building dependencies automatically - each publish recipe will build what it needs before uploading.
+
