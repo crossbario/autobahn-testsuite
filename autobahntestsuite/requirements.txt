@@ -9,7 +9,7 @@ Twisted==19.10.0             # pin Twisted 19.10.0; 20.3.0 triggers bad incremen
 zope.interface==4.6.0        # Twisted dependency compatible with 2.7
 jinja2==2.11.3
 markupsafe==1.1.1
-Werkzeug==1.0.1
+Werkzeug==3.1.6
 klein==17.10.0               # last pre-Python3-only Klein
 pyopenssl==19.1.0
 service_identity==18.1.0
