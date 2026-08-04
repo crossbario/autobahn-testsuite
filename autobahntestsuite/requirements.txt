@@ -4,7 +4,7 @@ setuptools==44.0.0           # pip/setuptools from pre-2020 era
 txaio==2.1.0
 incremental==16.10.1         # must pin because of use of typing
 pyOpenSSL==19.1.0
-cryptography==3.3.2          # last version supporting Python 2 and OpenSSL 1.1
+cryptography==50.0.0          # last version supporting Python 2 and OpenSSL 1.1
 Twisted==19.10.0             # pin Twisted 19.10.0; 20.3.0 triggers bad incremental
 zope.interface==4.6.0        # Twisted dependency compatible with 2.7
 jinja2==2.11.3
