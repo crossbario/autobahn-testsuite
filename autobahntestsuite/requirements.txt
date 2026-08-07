@@ -1,6 +1,6 @@
 # AutobahnTestSuite dependencies for Python 2.7 / Autobahn 0.10.9
 
-setuptools==44.0.0           # pip/setuptools from pre-2020 era
+setuptools==83.0.0           # pip/setuptools from pre-2020 era
 txaio==2.1.0
 incremental==16.10.1         # must pin because of use of typing
 pyOpenSSL==19.1.0
