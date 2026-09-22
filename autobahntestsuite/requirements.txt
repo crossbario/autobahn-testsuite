@@ -15,4 +15,4 @@ pyopenssl==19.1.0
 service_identity==18.1.0
 unittest2==1.1.0
 six==1.16.0
-autobahn[twisted,accelerate]==0.10.9
+autobahn[twisted,accelerate]==26.7.1
