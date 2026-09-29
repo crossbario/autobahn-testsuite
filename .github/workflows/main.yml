@@ -166,6 +166,10 @@ jobs:
     steps:
       - name: Checkout codeq
         uses: actions/checkout@v4
+        with:
+          # The justfile imports .cicd/workflow.just: without the submodule, `just` refuses
+          # to run at all ("could not find source file for import").
+          submodules: recursive
 
       - name: Install Just
         env:
