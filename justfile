@@ -9,6 +9,16 @@ set unstable := true
 set positional-arguments := true
 set script-interpreter := ['uv', 'run', '--script']
 
+# -----------------------------------------------------------------------------
+# -- Way-A shared workflow recipes (wamp-cicd / .cicd/workflow.just)
+# -----------------------------------------------------------------------------
+# This repo's default branch is `master` (not `main`). Override WORKFLOW_MAIN
+# BEFORE the import so the main-justfile definition wins over workflow.just's
+# default of 'main'. Do NOT also `set allow-duplicate-variables` here —
+# workflow.just owns that setting (setting it twice is a hard `just` error).
+WORKFLOW_MAIN := 'master'
+import '.cicd/workflow.just'
+
 # uv env vars
 # see: https://docs.astral.sh/uv/reference/environment/
 
