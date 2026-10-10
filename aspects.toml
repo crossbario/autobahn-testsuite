@@ -1,0 +1,7 @@
+# Materialized aspect membership for this repository.
+# Rendered from the apex inventory (all.yml); NOT a source of truth.
+aspects = ["way-a"]
+
+[provider.way-a]
+repo = "wamp-proto/wamp-ai"
+path = ".ai"
