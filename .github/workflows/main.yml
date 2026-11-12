@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           submodules: recursive
 
@@ -48,7 +48,7 @@ jobs:
       # 🧩 Restore cached Python 2.7 build if available
       - name: Cache local CPython 2.7 build
         id: cache-python2
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ env.PY27_PREFIX }}
           key: cpy27-${{ runner.os }}
@@ -83,7 +83,7 @@ jobs:
       # 🧩 Save Python 2.7 cache after base deps installed
       - name: Save local CPython 2.7 build (with base dependencies only)
         if: steps.cache-python2.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ env.PY27_PREFIX }}
           key: cpy27-${{ runner.os }}
@@ -155,7 +155,7 @@ jobs:
 
       # 🧩 Upload build artifact
       - name: Upload built package
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: autobahntestsuite-dist
           path: autobahntestsuite/dist/
@@ -165,7 +165,7 @@ jobs:
 
     steps:
       - name: Checkout codeq
-        uses: actions/checkout@v4
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # The justfile imports .cicd/workflow.just: without the submodule, `just` refuses
           # to run at all ("could not find source file for import").
@@ -227,7 +227,7 @@ jobs:
         run: just docs
 
       - name: Upload documentation artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: autobahn-testsuite-docs
           path: docs/_build/html/
