@@ -210,11 +210,13 @@ install-python2-from-source:
 
     # --- Configure & build -----------------------------------------------------------------
     echo "Configuring build..."
+    # -std=gnu11: GCC 15 (Ubuntu 26.04) compiles C23 by default, where bool/true/false
+    # are keywords; CPython 2.7's Include/asdl.h defines them itself (#174).
     ./configure \
         --prefix="${PREFIX}" \
         --enable-optimizations \
         --enable-shared \
-        CFLAGS="-fPIC"
+        CFLAGS="-fPIC -std=gnu11"
 
     echo "Building (this may take a few minutes)..."
     make -j"$(nproc)"
