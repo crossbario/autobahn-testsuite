@@ -1,0 +1,49 @@
+name: fuzzingclient-memory
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  fuzzingclient-memory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      IMAGE: crossbario/autobahn-testsuite:25.10.1
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Pull image
+        run: docker pull "$IMAGE"
+
+      - name: Start echo server
+        run: |
+          docker run -d --name echo-server --network host \
+            -v "$PWD/test/fuzzingclient_memory:/test:ro" \
+            "$IMAGE" python /test/echo_server.py ws://127.0.0.1:9001
+          for i in $(seq 30); do
+            (echo > /dev/tcp/127.0.0.1/9001) 2>/dev/null && exit 0
+            sleep 1
+          done
+          docker logs echo-server
+          exit 1
+
+      - name: Run fuzzingclient (all cases, 8 GiB memory limit)
+        run: |
+          mkdir -p reports
+          docker run --name fuzzingclient --network host \
+            --memory=8g --memory-swap=8g \
+            -e PYTHONUNBUFFERED=1 \
+            -v "$PWD/test/fuzzingclient_memory:/config:ro" \
+            -v "$PWD/reports:/reports" \
+            "$IMAGE" wstest --mode fuzzingclient --spec /config/fuzzingclient.json
+
+      - name: Container state
+        if: always()
+        run: |
+          docker inspect fuzzingclient \
+            --format 'fuzzingclient: OOMKilled={{.State.OOMKilled}} ExitCode={{.State.ExitCode}}' || true
+          docker stats --no-stream echo-server || true
