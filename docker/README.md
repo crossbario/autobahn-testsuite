@@ -45,6 +45,24 @@ Finally, the config will make the fuzzing server run on port 9001 - and expose t
 > To test multiple clients and generate one big report containing all clients, do NOT stop the testsuite container, but run all your clients, and then stop the container. The generated reports will include all clients.
 
 
+## Memory usage
+
+`wstest` runs on PyPy, whose garbage collector sizes its nursery from the CPU cache size reported in `/proc/cpuinfo`: when that is over 8MB, the nursery is half of it. On CPUs that report a large cache (for example 480MB on Intel Xeon 6, giving a 240MB nursery), the GC runs rarely. The WebSocket compression test cases (12.* and 13.*) create many zlib streams whose memory the GC cannot see, so in "fuzzingclient" mode `wstest` can grow past 14GB and be killed by the OOM killer (`docker run` then exits with code 137).
+
+To avoid this, pin the nursery size with the `PYPY_GC_NURSERY` environment variable:
+
+```console
+docker run -it --rm --network host \
+    -e PYPY_GC_NURSERY=4MB \
+    -v ${PWD}/config:/config \
+    -v ${PWD}/reports:/reports \
+    crossbario/autobahn-testsuite \
+    wstest --mode fuzzingclient --spec /config/fuzzingclient.json
+```
+
+With a 4MB nursery, a full "fuzzingclient" run uses about 1.2GB.
+
+
 ## Example
 
 Here is how to test the Python 3 / asyncio flavor of [AutobahnPython](https://github.com/crossbario/autobahn-python):

@@ -15,8 +15,17 @@ env:
 
 jobs:
   fuzzingclient-memory:
+    name: fuzzingclient (PYPY_GC_NURSERY=${{ matrix.nursery }})
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # PyPy sizes its GC nursery as half the CPU cache size it reads from
+        # /proc/cpuinfo, e.g. 240MB on Intel Xeon 6 runners, or 4MB when the
+        # reported cache is 8MB or less. Pin both so the result does not
+        # depend on the runner's CPU.
+        nursery: [4MB, 240MB]
 
     steps:
       - name: Checkout code
@@ -58,9 +67,11 @@ jobs:
       - name: Build Docker image from this checkout
         run: just docker-build
 
+      # The echo server is not under test: keep its memory small regardless.
       - name: Start echo server
         run: |
           docker run -d --pull never --name echo-server --network host \
+            -e PYPY_GC_NURSERY=4MB \
             -v "$PWD/test/fuzzingclient_memory:/test:ro" \
             "$IMAGE" python /test/echo_server.py ws://127.0.0.1:9001
           for i in $(seq 30); do
@@ -75,6 +86,7 @@ jobs:
           mkdir -p reports
           docker run --pull never --name fuzzingclient --network host \
             --memory=8g --memory-swap=8g \
+            -e PYPY_GC_NURSERY=${{ matrix.nursery }} \
             -e PYTHONUNBUFFERED=1 \
             -v "$PWD/test/fuzzingclient_memory:/config:ro" \
             -v "$PWD/reports:/reports" \
