@@ -71,6 +71,29 @@ Usage
        -p 9001:9001 \
        crossbario/autobahn-testsuite
 
+Memory Usage
+------------
+
+`wstest` runs on PyPy, whose garbage collector sizes its nursery from the
+CPU cache size. On CPUs that report a large cache (for example 480MB on
+Intel Xeon 6, giving a 240MB nursery), the GC runs rarely, if ever,
+resulting in substantial memory growth.
+
+To avoid this, pin the nursery size with the ``PYPY_GC_NURSERY`` environment
+variable:
+
+.. code-block:: bash
+
+   docker run -it --rm --network host \
+       -e PYPY_GC_NURSERY=4MB \
+       -v "${PWD}/config:/config" \
+       -v "${PWD}/reports:/reports" \
+       crossbario/autobahn-testsuite \
+       wstest --mode fuzzingclient --spec /config/fuzzingclient.json
+
+When running the Python package under PyPy, set the variable in the
+environment of ``wstest`` in the same way.
+
 Test Reports
 ------------
 
