@@ -21,10 +21,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # PyPy sizes its GC nursery as half the CPU cache size it reads from
-        # /proc/cpuinfo, e.g. 240MB on Intel Xeon 6 runners, or 4MB when the
-        # reported cache is 8MB or less. Pin both so the result does not
-        # depend on the runner's CPU.
         nursery: [4MB, 240MB]
 
     steps:
