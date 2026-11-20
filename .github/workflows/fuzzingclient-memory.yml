@@ -8,23 +8,59 @@ on:
     branches: [master]
   workflow_dispatch:
 
+env:
+  PY27_PREFIX: /home/runner/.local/python2.7
+  # Tag produced by `just docker-build` from this checkout (see justfile).
+  IMAGE: crossbario/autobahn-testsuite:25.10.1
+
 jobs:
   fuzzingclient-memory:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
-    env:
-      IMAGE: crossbario/autobahn-testsuite:25.10.1
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
 
-      - name: Pull image
-        run: docker pull "$IMAGE"
+      - name: Install Just
+        env:
+          JUST_VERSION: 1.59.0
+          JUST_SHA256: 409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e
+        run: |
+          tarball="just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          curl --proto '=https' --tlsv1.2 -sSfL -o "$RUNNER_TEMP/$tarball" \
+            "https://github.com/casey/just/releases/download/${JUST_VERSION}/${tarball}"
+          echo "${JUST_SHA256}  $RUNNER_TEMP/$tarball" | sha256sum --check --strict
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$HOME/.local/bin" just
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Cache local CPython 2.7 build
+        id: cache-python2
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ env.PY27_PREFIX }}
+          key: cpy27-${{ runner.os }}
+          restore-keys: |
+            cpy27-${{ runner.os }}
+
+      - name: Build CPython 2.7 from source
+        if: steps.cache-python2.outputs.cache-hit != 'true'
+        run: just install-python2-deps
+
+      - name: Add CPython 2.7 to PATH
+        run: |
+          echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=${{ env.PY27_PREFIX }}/lib" >> $GITHUB_ENV
+
+      - name: Build Docker image from this checkout
+        run: just docker-build
 
       - name: Start echo server
         run: |
-          docker run -d --name echo-server --network host \
+          docker run -d --pull never --name echo-server --network host \
             -v "$PWD/test/fuzzingclient_memory:/test:ro" \
             "$IMAGE" python /test/echo_server.py ws://127.0.0.1:9001
           for i in $(seq 30); do
@@ -37,7 +73,7 @@ jobs:
       - name: Run fuzzingclient (all cases, 8 GiB memory limit)
         run: |
           mkdir -p reports
-          docker run --name fuzzingclient --network host \
+          docker run --pull never --name fuzzingclient --network host \
             --memory=8g --memory-swap=8g \
             -e PYTHONUNBUFFERED=1 \
             -v "$PWD/test/fuzzingclient_memory:/config:ro" \
