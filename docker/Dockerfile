@@ -62,6 +62,10 @@ RUN ln -s /usr/local/bin/pypy /usr/local/bin/python
 # make sure we use old pip & setuptools that don't isolate builds
 RUN pip install 'pip==20.3.4' 'setuptools==44.0.0' 'wheel==0.36.2'
 
+# PyPy 7.3's bundled cffi declares a pycparser dependency, which cryptography's
+# setup_requires cannot fetch by itself; 2.21 is the last release for Python 2.
+RUN pip install 'pycparser==2.21'
+
 # pre-install old incremental before Twisted even tries setup_requires
 RUN pip install 'incremental==16.10.1'
 

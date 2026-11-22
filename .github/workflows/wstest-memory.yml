@@ -1,0 +1,123 @@
+name: wstest-memory
+
+# Memory use of wstest with different PyPy GC nursery sizes (#171).
+#
+# wstest runs on PyPy, which derives the size of its GC nursery from the CPU's
+# cache size. With a large nursery, PyPy collects so rarely that a complete run
+# of the testsuite needs more than 8 GiB. Each job runs all test cases in one
+# wstest mode with a fixed nursery size, under an 8 GiB memory limit:
+#
+#   PYPY_GC_NURSERY=4MB    must complete, with a peak of at most 3 GiB
+#   PYPY_GC_NURSERY=240MB  must be killed for exceeding the limit. This job
+#                          is green when that happens: it shows the cause,
+#                          independent of the runner's CPU. Should it turn
+#                          red, wstest no longer needs the workaround.
+#   unset                  PyPy's default for the runner's CPU; recorded only
+#
+# against the published image (what users run today) and against the image
+# built from this checkout (what a change to the code or the image would
+# alter). Every job uploads its memory samples (test/wstest_memory/run.sh).
+#
+# The jobs take about 12 minutes each, so they do not run on every push.
+
+on:
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  PY27_PREFIX: /home/runner/.local/python2.7
+  # crossbario/autobahn-testsuite:25.10.1 as published on Docker Hub
+  IMAGE_PUBLISHED: crossbario/autobahn-testsuite@sha256:519915fb568b04c9383f70a1c405ae3ff44ab9e35835b085239c258b6fac3074
+  # Tag produced by `just docker-build` from this checkout (see justfile).
+  IMAGE_BUILT: crossbario/autobahn-testsuite:25.10.1
+
+jobs:
+  wstest-memory:
+    name: ${{ matrix.mode }} ${{ matrix.nursery }} (${{ matrix.image }} image, expect ${{ matrix.expect }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: published, mode: fuzzingserver, nursery: 4MB,   expect: pass }
+          - { image: published, mode: fuzzingserver, nursery: 240MB, expect: oom }
+          - { image: published, mode: fuzzingserver, nursery: unset, expect: report }
+          - { image: published, mode: fuzzingclient, nursery: 4MB,   expect: pass }
+          - { image: published, mode: fuzzingclient, nursery: 240MB, expect: oom }
+          - { image: built,     mode: fuzzingserver, nursery: 4MB,   expect: pass }
+          - { image: built,     mode: fuzzingserver, nursery: 240MB, expect: oom }
+          - { image: built,     mode: fuzzingclient, nursery: 4MB,   expect: pass }
+          - { image: built,     mode: fuzzingclient, nursery: 240MB, expect: oom }
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          submodules: recursive
+
+      - name: Pull the published image
+        if: matrix.image == 'published'
+        run: |
+          docker pull "$IMAGE_PUBLISHED"
+          echo "IMAGE=$IMAGE_PUBLISHED" >> $GITHUB_ENV
+
+      - name: Install Just
+        if: matrix.image == 'built'
+        env:
+          JUST_VERSION: 1.59.0
+          JUST_SHA256: 409044617b6f06517c1035e55ca38c8c856ff8b650e41bc2aa1ef82d5903a23e
+        run: |
+          tarball="just-${JUST_VERSION}-x86_64-unknown-linux-musl.tar.gz"
+          curl --proto '=https' --tlsv1.2 -sSfL -o "$RUNNER_TEMP/$tarball" \
+            "https://github.com/casey/just/releases/download/${JUST_VERSION}/${tarball}"
+          echo "${JUST_SHA256}  $RUNNER_TEMP/$tarball" | sha256sum --check --strict
+          mkdir -p "$HOME/.local/bin"
+          tar -xzf "$RUNNER_TEMP/$tarball" -C "$HOME/.local/bin" just
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Cache local CPython 2.7 build
+        if: matrix.image == 'built'
+        id: cache-python2
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+        with:
+          path: ${{ env.PY27_PREFIX }}
+          key: cpy27-${{ runner.os }}
+          restore-keys: |
+            cpy27-${{ runner.os }}
+
+      - name: Build CPython 2.7 from source
+        if: matrix.image == 'built' && steps.cache-python2.outputs.cache-hit != 'true'
+        run: just install-python2-deps
+
+      - name: Add CPython 2.7 to PATH
+        if: matrix.image == 'built'
+        run: |
+          echo "${{ env.PY27_PREFIX }}/bin" >> $GITHUB_PATH
+          echo "LD_LIBRARY_PATH=${{ env.PY27_PREFIX }}/lib" >> $GITHUB_ENV
+
+      - name: Build Docker image from this checkout
+        if: matrix.image == 'built'
+        run: |
+          just docker-build
+          echo "IMAGE=$IMAGE_BUILT" >> $GITHUB_ENV
+
+      - name: Run wstest ${{ matrix.mode }} (all cases, 8 GiB memory limit)
+        env:
+          MODE: ${{ matrix.mode }}
+          NURSERY: ${{ matrix.nursery }}
+          EXPECT: ${{ matrix.expect }}
+          OUT: memory-report
+        run: test/wstest_memory/run.sh
+
+      - name: Upload memory samples
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: wstest-memory-${{ matrix.image }}-${{ matrix.mode }}-${{ matrix.nursery }}
+          path: memory-report/
+          retention-days: 30
