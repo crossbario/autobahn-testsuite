@@ -1,4 +1,4 @@
-name: fuzzingclient-memory
+name: wstest-memory
 
 on:
   push:
@@ -68,7 +68,7 @@ jobs:
         run: |
           docker run -d --pull never --name echo-server --network host \
             -e PYPY_GC_NURSERY=4MB \
-            -v "$PWD/test/fuzzingclient_memory:/test:ro" \
+            -v "$PWD/test/wstest_memory:/test:ro" \
             "$IMAGE" python /test/echo_server.py ws://127.0.0.1:9001
           for i in $(seq 30); do
             (echo > /dev/tcp/127.0.0.1/9001) 2>/dev/null && exit 0
@@ -84,7 +84,7 @@ jobs:
             --memory=8g --memory-swap=8g \
             -e PYPY_GC_NURSERY=${{ matrix.nursery }} \
             -e PYTHONUNBUFFERED=1 \
-            -v "$PWD/test/fuzzingclient_memory:/config:ro" \
+            -v "$PWD/test/wstest_memory:/config:ro" \
             -v "$PWD/reports:/reports" \
             "$IMAGE" wstest --mode fuzzingclient --spec /config/fuzzingclient.json
 
