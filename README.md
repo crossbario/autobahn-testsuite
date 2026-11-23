@@ -4,6 +4,7 @@ WebSocket protocol implementation conformance test suite.
 
 [![Version](https://img.shields.io/pypi/v/autobahntestsuite.svg)](https://pypi.python.org/pypi/autobahntestsuite)
 [![Test](https://github.com/crossbario/autobahn-testsuite/workflows/main/badge.svg)](https://github.com/crossbario/autobahn-testsuite/actions?query=workflow%3Amain)
+[![Memory](https://img.shields.io/github/actions/workflow/status/crossbario/autobahn-testsuite/wstest-memory.yml?branch=master&event=push&label=memory)](https://github.com/crossbario/autobahn-testsuite/actions/workflows/wstest-memory.yml?query=branch%3Amaster)
 [![Docs](https://img.shields.io/badge/docs-latest-brightgreen.svg?style=flat)](https://autobahntestsuite.readthedocs.io/en/latest/)
 
 ---

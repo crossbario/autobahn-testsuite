@@ -18,9 +18,12 @@ name: wstest-memory
 # built from this checkout (what a change to the code or the image would
 # alter). Every job uploads its memory samples (test/wstest_memory/run.sh).
 #
-# The jobs take about 12 minutes each, so they do not run on every push.
+# The jobs take 7 to 27 minutes each. They run for pull requests against
+# master and for every push to master, which also feeds the badge in README.md.
 
 on:
+  push:
+    branches: [master]
   pull_request:
     branches: [master]
   workflow_dispatch:

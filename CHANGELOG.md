@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+* Run the `wstest-memory` workflow on every push to master as well, and show its status as a badge in the README (#182)
 * Document how to stop `wstest` running out of memory on CPUs that report a large cache size (`PYPY_GC_NURSERY`), and test the memory use of `wstest` in CI, as fuzzing client and as fuzzing server, against the published image and the image built from the checkout (#171)
 * Adopt the contribution workflow shared by all WAMP projects: `CONTRIBUTING.md`, the pull request template and `.audit/README.md` are deployed byte-identically from wamp-cicd (GitHub issue first, red → green tests, AI-assistance disclosure) and kept in sync by a CI drift check; project-specific notes moved to a new `DEVELOPMENT.md`. `.cicd` and `.ai` are pinned to the same commits across the WAMP fleet, and the shared workflow recipes (`just where`, `new-branch`, `publish`, `land`) are imported (#163)
 
